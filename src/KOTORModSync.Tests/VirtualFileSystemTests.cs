@@ -528,7 +528,7 @@ namespace KOTORModSync.Tests
                 Assert.That(v.GetValidationIssues(), Is.Not.Null, "Validation issues list should not be null");
                 Assert.That(v.GetValidationIssues(), Is.Empty, "Delete extracted file operation should not produce validation errors");
                 Assert.That(v.GetTrackedFiles(), Is.Not.Null, "Tracked files list should not be null");
-                Assert.That(v.GetTrackedFiles().Any(p => p.EndsWith("del\\rm.txt", StringComparison.OrdinalIgnoreCase)), Is.False, 
+                Assert.That(v.GetTrackedFiles().Any(p => p.EndsWith("del\\rm.txt", StringComparison.OrdinalIgnoreCase)), Is.False,
                     "Deleted file should not be in tracked files");
             });
             AssertFileSystemsMatch(v, r);
@@ -977,7 +977,7 @@ namespace KOTORModSync.Tests
 
             Debug.Assert(_sourceDir != null);
             var exception = Assert.ThrowsAsync<FileNotFoundException>(async () => await RunBothProviders(instructions, _sourceDir).ConfigureAwait(false));
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(instructions, Is.Not.Null, "Instructions list should not be null");
@@ -1021,7 +1021,7 @@ namespace KOTORModSync.Tests
             };
 
             var exception = Assert.ThrowsAsync<FileNotFoundException>(async () => await RunBothProviders(instructions, _sourceDir).ConfigureAwait(false));
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(instructions, Is.Not.Null, "Instructions list should not be null");
@@ -1031,7 +1031,7 @@ namespace KOTORModSync.Tests
                 Assert.That(File.Exists(archivePath), Is.True, "Archive should exist");
                 Assert.That(exception, Is.Not.Null, "Moving deleted file should throw FileNotFoundException");
             });
-            
+
             return Task.CompletedTask;
         }
 
@@ -1144,13 +1144,13 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(virtualFiles, Is.Not.Null, "Tracked files list should not be null");
                 Assert.That(virtualFiles, Is.Not.Empty, "Complex mod installation should track files");
-                Assert.That(virtualFiles.Any(f => f.EndsWith("override\\appearance.2da", StringComparison.OrdinalIgnoreCase)), Is.True, 
+                Assert.That(virtualFiles.Any(f => f.EndsWith("override\\appearance.2da", StringComparison.OrdinalIgnoreCase)), Is.True,
                     "Final appearance.2da should be tracked");
-                Assert.That(virtualFiles.Any(f => f.EndsWith("override\\dialog.dlg", StringComparison.OrdinalIgnoreCase)), Is.True, 
+                Assert.That(virtualFiles.Any(f => f.EndsWith("override\\dialog.dlg", StringComparison.OrdinalIgnoreCase)), Is.True,
                     "Dialog file should be tracked");
-                Assert.That(virtualFiles.Any(f => f.EndsWith("override\\spells.2da", StringComparison.OrdinalIgnoreCase)), Is.True, 
+                Assert.That(virtualFiles.Any(f => f.EndsWith("override\\spells.2da", StringComparison.OrdinalIgnoreCase)), Is.True,
                     "Spells file should be tracked");
-                Assert.That(virtualFiles.Any(f => f.EndsWith("backup\\appearance.2da.mod1\\appearance.2da", StringComparison.OrdinalIgnoreCase)), Is.True, 
+                Assert.That(virtualFiles.Any(f => f.EndsWith("backup\\appearance.2da.mod1\\appearance.2da", StringComparison.OrdinalIgnoreCase)), Is.True,
                     "Backup file should be tracked");
             });
         }

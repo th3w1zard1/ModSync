@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -71,6 +71,7 @@ namespace KOTORModSync.Tests
             // Create archive
             var archivePath = Path.Combine(_modDirectory, "archive.zip");
             CreateTestZip(archivePath, new Dictionary<string, string>
+(StringComparer.Ordinal)
             {
                 { "file.txt", "content" }
             });

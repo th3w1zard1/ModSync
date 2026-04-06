@@ -420,8 +420,8 @@ namespace KOTORModSync.Tests
                 Assert.That(vfsResult, Is.EqualTo(ModComponent.InstallExitCode.Success), "VFS dry-run should succeed");
                 Assert.That(realResult, Is.EqualTo(ModComponent.InstallExitCode.Success), "Real run should succeed");
                 // Verify VFS predicted the final state correctly
-                Assert.That(vfs.FileExists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), 
-                    Is.EqualTo(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt"))), 
+                Assert.That(vfs.FileExists(Path.Combine(_kotorDirectory, "Override", "file1.txt")),
+                    Is.EqualTo(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt"))),
                     "VFS should match real file system state");
             });
         }

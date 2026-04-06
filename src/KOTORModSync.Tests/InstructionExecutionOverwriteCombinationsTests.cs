@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -291,7 +291,7 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(File.Exists(destPath), Is.True, "Destination should exist");
                 // Final content should be from file2 (overwrite=true)
-                Assert.That(File.ReadAllText(destPath), Is.EqualTo("content2"), 
+                Assert.That(File.ReadAllText(destPath), Is.EqualTo("content2"),
                     "Should contain content from overwrite instruction");
             });
         }

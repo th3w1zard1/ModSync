@@ -213,7 +213,7 @@ namespace KOTORModSync.Tests
             {
                 List<ModComponent> loadedComponents = FileLoadingService.LoadFromFile(_filePath).ToList()
                     ?? throw new InvalidDataException();
-                
+
                 Assert.Multiple(() =>
                 {
                     Assert.That(_filePath, Is.Not.Null, "File path should not be null");
@@ -525,7 +525,7 @@ namespace KOTORModSync.Tests
                 Assert.That(loadedComponents, Is.Not.Null, "Loaded components list should not be null");
                 Assert.That(loadedComponents, Has.Count.EqualTo(1), "Should load exactly one component");
             });
-            
+
             ModComponent loadedComponent = loadedComponents[0];
 
             Assert.Multiple(() =>
@@ -536,7 +536,7 @@ namespace KOTORModSync.Tests
                 Assert.That(loadedComponent.Options, Is.Not.Null, "Options list should not be null");
                 Assert.That(loadedComponent.Options.Count, Is.EqualTo(2), "Should have 2 options");
             });
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(loadedComponent.Options[0], Is.Not.Null, "First option should not be null");
@@ -548,7 +548,7 @@ namespace KOTORModSync.Tests
                 Assert.That(loadedComponent.Options[0].Instructions.Count, Is.EqualTo(1), "Option 1 should have 1 instruction");
                 Assert.That(loadedComponent.Options[1].Instructions.Count, Is.EqualTo(1), "Option 2 should have 1 instruction");
             });
-            
+
             Assert.Multiple(() =>
             {
                 // Verify ModLinkFilenames
@@ -562,7 +562,7 @@ namespace KOTORModSync.Tests
                 Assert.That(loadedComponent.ResourceRegistry["https://example.com/mod.zip"].Files["mod_v2.0.zip"], Is.EqualTo(false), "Second filename should be false");
                 Assert.That(loadedComponent.ResourceRegistry["https://example.com/mod.zip"].Files["mod_beta.zip"], Is.EqualTo(null), "Third filename should be null");
             });
-            
+
             Assert.Multiple(() =>
             {
                 // Verify ExcludedDownloads

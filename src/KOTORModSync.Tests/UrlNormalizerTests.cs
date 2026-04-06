@@ -119,7 +119,7 @@ namespace KOTORModSync.Tests
                 Assert.That(normalized, Is.Not.Null, "Normalized URL should not be null");
                 Assert.That(normalized, Is.EqualTo("https://example.com"), "URL with empty path should remain unchanged");
                 // Check for double slashes in path part only (after the protocol separator)
-                string pathPart = normalized.Contains("://") ? normalized.Substring(normalized.IndexOf("://") + 3) : normalized;
+                string pathPart = normalized.Contains("://") ? normalized.Substring(normalized.IndexOf("://", StringComparison.Ordinal) + 3) : normalized;
                 Assert.That(pathPart, Does.Not.Contain("//"), "URL should not have double slashes in path part");
             });
         }

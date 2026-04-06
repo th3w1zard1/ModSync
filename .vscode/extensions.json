@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-dotnettools.csdevkit",
+    "ms-dotnettools.csharp",
+    "AvaloniaTeam.vscode-avalonia",
+    "ms-playwright.playwright",
+    "ms-vscode.remote-wsl"
+  ]
+}

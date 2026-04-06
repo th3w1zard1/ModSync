@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -222,7 +222,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "NewDirectory", "SubDirectory", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "NewDirectory", "SubDirectory", "file.txt")), Is.True,
                     "Directory should be created and file moved");
             });
         }
@@ -303,9 +303,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "Final file should exist");
-                Assert.That(File.ReadAllText(Path.Combine(_kotorDirectory, "Override", "file.txt")), 
+                Assert.That(File.ReadAllText(Path.Combine(_kotorDirectory, "Override", "file.txt")),
                     Is.EqualTo("content3"), "Should contain last file's content");
             });
         }

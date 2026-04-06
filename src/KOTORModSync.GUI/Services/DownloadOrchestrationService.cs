@@ -8,18 +8,15 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-
 using Avalonia.Controls;
 using Avalonia.Threading;
-
+using KOTORModSync;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services;
 using KOTORModSync.Core.Services.Download;
 using KOTORModSync.Core.Utility;
 using KOTORModSync.Dialogs;
-
 using static KOTORModSync.Core.Services.DownloadCacheService;
-using KOTORModSync;
 
 namespace KOTORModSync.Services
 {
@@ -228,7 +225,7 @@ namespace KOTORModSync.Services
                             {
                                 spoilerFreeMode = mainWindow.SpoilerFreeMode;
                             }
-                            
+
                             foreach (ModComponent component in selectedComponents)
                             {
                                 foreach (string url in component.ResourceRegistry.Keys)
@@ -237,7 +234,7 @@ namespace KOTORModSync.Services
                                     string modName = spoilerFreeMode && !string.IsNullOrEmpty(component.NameSpoilerFree)
                                         ? component.NameSpoilerFree
                                         : component.Name;
-                                    
+
                                     var initialProgress = new DownloadProgress
                                     {
                                         ModName = modName,
@@ -344,12 +341,12 @@ namespace KOTORModSync.Services
                 {
                     spoilerFreeMode = mainWindow.SpoilerFreeMode;
                 }
-                
+
                 // Use spoiler-free name if available and mode is enabled
                 string modName = spoilerFreeMode && !string.IsNullOrEmpty(component.NameSpoilerFree)
                     ? component.NameSpoilerFree
                     : component.Name;
-                
+
                 await Logger.LogVerboseAsync($"[DownloadOrchestration] Pre-resolving URLs for: {component.Name}");
                 IReadOnlyDictionary<string, List<string>> urlToFilenames = await _cacheService.PreResolveUrlsAsync(component, downloadManager, sequential: false, progressWindow.CancellationToken);
 

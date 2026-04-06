@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -214,11 +214,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Model mod with options should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "hd.mdl")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "hd.mdl")), Is.True,
                     "Selected option (HD) should be installed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "base.mdl")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "base.mdl")), Is.False,
                     "Unselected option should not be installed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ultra.mdl")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ultra.mdl")), Is.False,
                     "Unselected option should not be installed");
             });
         }
@@ -231,12 +231,12 @@ namespace KOTORModSync.Tests
         public async Task MultiModInstallation_ThreeModsWithDependencies_InstallsInOrder()
         {
             var baseMod = new ModComponent { Name = "Base Mod", Guid = Guid.NewGuid(), IsSelected = true };
-            var extensionMod = new ModComponent 
-            { 
-                Name = "Extension Mod", 
-                Guid = Guid.NewGuid(), 
+            var extensionMod = new ModComponent
+            {
+                Name = "Extension Mod",
+                Guid = Guid.NewGuid(),
                 Dependencies = new List<Guid> { baseMod.Guid },
-                IsSelected = true 
+                IsSelected = true
             };
             var optionalMod = new ModComponent { Name = "Optional Mod", Guid = Guid.NewGuid(), IsSelected = true };
 
@@ -288,13 +288,13 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(executionOrder.IndexOf("Base Mod"), Is.LessThan(executionOrder.IndexOf("Extension Mod")), 
+                Assert.That(executionOrder.IndexOf("Base Mod"), Is.LessThan(executionOrder.IndexOf("Extension Mod")),
                     "Base Mod should install before Extension Mod");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "base.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "base.txt")), Is.True,
                     "All mods should install");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "extension.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "extension.txt")), Is.True,
                     "All mods should install");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "optional.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "optional.txt")), Is.True,
                     "All mods should install");
             });
         }
@@ -304,7 +304,7 @@ namespace KOTORModSync.Tests
         {
             // Create cleanlist
             string csvPath = Path.Combine(_modDirectory, "cleanlist.csv");
-            File.WriteAllText(csvPath, 
+            File.WriteAllText(csvPath,
                 "Mandatory Deletions,old1.tga,old2.tpc\n" +
                 "HD Texture Pack,conflict1.tga,conflict2.tga\n");
 
@@ -346,13 +346,13 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old1.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old1.tga")), Is.False,
                     "Mandatory deletions should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old2.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old2.tpc")), Is.False,
                     "Mandatory deletions should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "conflict1.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "conflict1.tga")), Is.False,
                     "HD Texture Pack conflicts should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "conflict2.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "conflict2.tga")), Is.False,
                     "HD Texture Pack conflicts should be deleted");
             });
         }
@@ -366,17 +366,17 @@ namespace KOTORModSync.Tests
         {
             var component = new ModComponent { Name = "Exclusive Options", Guid = Guid.NewGuid(), IsSelected = true };
 
-            var option1 = new Option 
-            { 
-                Name = "Option 1", 
-                Guid = Guid.NewGuid(), 
+            var option1 = new Option
+            {
+                Name = "Option 1",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { Guid.NewGuid() } // Will be set to option2's GUID
             };
-            var option2 = new Option 
-            { 
-                Name = "Option 2", 
-                Guid = Guid.NewGuid(), 
+            var option2 = new Option
+            {
+                Name = "Option 2",
+                Guid = Guid.NewGuid(),
                 IsSelected = false,
                 Restrictions = new List<Guid> { option1.Guid }
             };
@@ -430,9 +430,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Exclusive options should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Selected option should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False,
                     "Restricted option should not execute");
             });
         }

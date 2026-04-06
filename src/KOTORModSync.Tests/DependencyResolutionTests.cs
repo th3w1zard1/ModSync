@@ -46,7 +46,7 @@ namespace KOTORModSync.Tests
                 Assert.That(ordered[0].Guid, Is.EqualTo(modA.Guid), "Mod A (root dependency) should be first");
                 Assert.That(ordered[1].Guid, Is.EqualTo(modB.Guid), "Mod B (middle dependency) should be second");
                 Assert.That(ordered[2].Guid, Is.EqualTo(modC.Guid), "Mod C (leaf dependent) should be third");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
             });
         }
@@ -65,11 +65,11 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(ordered, Is.Not.Null, "Ordered list should not be null");
                 Assert.That(ordered, Has.Count.EqualTo(3), "Ordered list should contain all three components");
-                Assert.That(ordered.IndexOf(modC), Is.GreaterThan(ordered.IndexOf(modA)), 
+                Assert.That(ordered.IndexOf(modC), Is.GreaterThan(ordered.IndexOf(modA)),
                     "Mod C (dependent) should come after Mod A (dependency)");
-                Assert.That(ordered.IndexOf(modC), Is.GreaterThan(ordered.IndexOf(modB)), 
+                Assert.That(ordered.IndexOf(modC), Is.GreaterThan(ordered.IndexOf(modB)),
                     "Mod C (dependent) should come after Mod B (dependency)");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
             });
         }
@@ -93,7 +93,7 @@ namespace KOTORModSync.Tests
                 Assert.That(ordered, Has.Count.EqualTo(2), "Ordered list should contain both components");
                 Assert.That(ordered[0].Guid, Is.EqualTo(modA.Guid), "Mod A (InstallAfter target) should come before Mod B");
                 Assert.That(ordered[1].Guid, Is.EqualTo(modB.Guid), "Mod B (InstallAfter) should come after Mod A");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
             });
         }
@@ -113,7 +113,7 @@ namespace KOTORModSync.Tests
                 Assert.That(ordered, Has.Count.EqualTo(2), "Ordered list should contain both components");
                 Assert.That(ordered[0].Guid, Is.EqualTo(modA.Guid), "Mod A (InstallBefore) should come before Mod B");
                 Assert.That(ordered[1].Guid, Is.EqualTo(modB.Guid), "Mod B (InstallBefore target) should come after Mod A");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
             });
         }
@@ -133,13 +133,13 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(ordered, Is.Not.Null, "Ordered list should not be null");
                 Assert.That(ordered, Has.Count.EqualTo(4), "Ordered list should contain all four components");
-                Assert.That(ordered.IndexOf(modA), Is.LessThan(ordered.IndexOf(modB)), 
+                Assert.That(ordered.IndexOf(modA), Is.LessThan(ordered.IndexOf(modB)),
                     "Mod A should come before Mod B (dependency relationship)");
-                Assert.That(ordered.IndexOf(modB), Is.LessThan(ordered.IndexOf(modC)), 
+                Assert.That(ordered.IndexOf(modB), Is.LessThan(ordered.IndexOf(modC)),
                     "Mod B should come before Mod C (InstallAfter relationship)");
-                Assert.That(ordered.IndexOf(modD), Is.LessThan(ordered.IndexOf(modC)), 
+                Assert.That(ordered.IndexOf(modD), Is.LessThan(ordered.IndexOf(modC)),
                     "Mod D should come before Mod C (InstallBefore relationship)");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
             });
         }
@@ -214,7 +214,7 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(ordered, Is.Not.Null, "Ordered list should not be null");
                 Assert.That(ordered.Count, Is.EqualTo(2), "Ordered list should contain both components even with circular dependency");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
                 Assert.That(modA.Dependencies, Is.Not.Null, "Mod A dependencies should not be null");
                 Assert.That(modB.Dependencies, Is.Not.Null, "Mod B dependencies should not be null");
@@ -239,7 +239,7 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(ordered, Is.Not.Null, "Ordered list should not be null");
                 Assert.That(ordered.Count, Is.EqualTo(2), "Ordered list should contain both components even with missing dependency");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
                 Assert.That(modA.Dependencies, Is.Not.Null, "Mod A dependencies should not be null");
                 Assert.That(modA.Dependencies, Contains.Item(missingGuid), "Mod A should reference missing dependency");
@@ -265,9 +265,9 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(modA, Is.Not.Null, "Mod A should not be null");
                 Assert.That(modB, Is.Not.Null, "Mod B should not be null");
-                Assert.That(modA.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Failed), 
+                Assert.That(modA.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Failed),
                     "Mod A should be in Failed state");
-                Assert.That(modB.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Blocked), 
+                Assert.That(modB.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Blocked),
                     "Mod B should be blocked when its dependency (Mod A) fails");
                 Assert.That(modB.Dependencies, Is.Not.Null, "Mod B dependencies should not be null");
                 Assert.That(modB.Dependencies, Contains.Item(modA.Guid), "Mod B should depend on Mod A");
@@ -291,11 +291,11 @@ namespace KOTORModSync.Tests
                 Assert.That(modA, Is.Not.Null, "Mod A should not be null");
                 Assert.That(modB, Is.Not.Null, "Mod B should not be null");
                 Assert.That(modC, Is.Not.Null, "Mod C should not be null");
-                Assert.That(modA.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Failed), 
+                Assert.That(modA.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Failed),
                     "Mod A should be in Failed state");
-                Assert.That(modB.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Blocked), 
+                Assert.That(modB.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Blocked),
                     "Mod B should be blocked when its dependency (Mod A) fails");
-                Assert.That(modC.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Blocked), 
+                Assert.That(modC.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Blocked),
                     "Mod C should be blocked when its dependency chain (Mod A -> Mod B) fails");
                 Assert.That(modB.Dependencies, Is.Not.Null, "Mod B dependencies should not be null");
                 Assert.That(modC.Dependencies, Is.Not.Null, "Mod C dependencies should not be null");
@@ -320,9 +320,9 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(modA, Is.Not.Null, "Mod A should not be null");
                 Assert.That(modB, Is.Not.Null, "Mod B should not be null");
-                Assert.That(modA.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Failed), 
+                Assert.That(modA.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Failed),
                     "Mod A should be in Failed state");
-                Assert.That(modB.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Completed), 
+                Assert.That(modB.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Completed),
                     "Mod B should remain Completed even when dependency fails (already completed)");
                 Assert.That(modB.Dependencies, Is.Not.Null, "Mod B dependencies should not be null");
                 Assert.That(modB.Dependencies, Contains.Item(modA.Guid), "Mod B should depend on Mod A");
@@ -428,7 +428,7 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(ordered, Is.Not.Null, "Ordered list should not be null");
                 Assert.That(ordered.Count, Is.EqualTo(3), "Ordered list should contain all three components");
-                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()), 
+                Assert.That(ordered.Select(c => c.Guid).ToHashSet(), Is.EquivalentTo(components.Select(c => c.Guid).ToHashSet()),
                     "Ordered list should contain all components");
                 Assert.That(modA.Dependencies, Is.Null.Or.Empty, "Mod A should have no dependencies");
                 Assert.That(modB.Dependencies, Is.Null.Or.Empty, "Mod B should have no dependencies");

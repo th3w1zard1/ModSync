@@ -249,9 +249,9 @@ namespace KOTORModSync.Tests
                 Guid = Guid.NewGuid()
             };
 
-            var option = new Option 
-            { 
-                Name = "Option", 
+            var option = new Option
+            {
+                Name = "Option",
                 Guid = Guid.NewGuid(),
                 IsSelected = true
             };
@@ -287,9 +287,9 @@ namespace KOTORModSync.Tests
                 Guid = Guid.NewGuid()
             };
 
-            var option = new Option 
-            { 
-                Name = "Option", 
+            var option = new Option
+            {
+                Name = "Option",
                 Guid = Guid.NewGuid(),
                 IsSelected = false
             };
@@ -350,6 +350,7 @@ namespace KOTORModSync.Tests
             component.ResourceRegistry["mod.zip"] = new ResourceRegistryEntry
             {
                 Files = new Dictionary<string, ResourceFileInfo>
+(StringComparer.Ordinal)
                 {
                     { "file1.txt", new ResourceFileInfo { Size = 100 } },
                     { "file2.txt", new ResourceFileInfo { Size = 200 } }

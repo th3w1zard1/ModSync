@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -62,10 +62,10 @@ namespace KOTORModSync.Tests
         public async Task ComponentSelection_SelectedWithUnmetDependency_BlocksInstallation()
         {
             var depComponent = new ModComponent { Name = "Dependency", Guid = Guid.NewGuid(), IsSelected = false };
-            var component = new ModComponent 
-            { 
-                Name = "Dependent Component", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Dependent Component",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { depComponent.Guid }
             };
@@ -92,7 +92,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed (blocked)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "Component should be blocked when dependency not met");
             });
         }
@@ -101,10 +101,10 @@ namespace KOTORModSync.Tests
         public async Task ComponentSelection_SelectedWithActiveRestriction_BlocksInstallation()
         {
             var restrictedComponent = new ModComponent { Name = "Restricted", Guid = Guid.NewGuid(), IsSelected = true };
-            var component = new ModComponent 
-            { 
-                Name = "Restricted Component", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Restricted Component",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { restrictedComponent.Guid }
             };
@@ -131,7 +131,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed (blocked)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "Component should be blocked when restriction is active");
             });
         }
@@ -274,17 +274,17 @@ namespace KOTORModSync.Tests
         {
             var component = new ModComponent { Name = "Exclusive Options", Guid = Guid.NewGuid(), IsSelected = true };
 
-            var option1 = new Option 
-            { 
-                Name = "Option 1", 
-                Guid = Guid.NewGuid(), 
+            var option1 = new Option
+            {
+                Name = "Option 1",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { Guid.NewGuid() } // Will be set to option2
             };
-            var option2 = new Option 
-            { 
-                Name = "Option 2", 
-                Guid = Guid.NewGuid(), 
+            var option2 = new Option
+            {
+                Name = "Option 2",
+                Guid = Guid.NewGuid(),
                 IsSelected = false,
                 Restrictions = new List<Guid> { option1.Guid }
             };
@@ -338,9 +338,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Exclusive options should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Selected option should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False,
                     "Restricted option should not execute");
             });
         }
@@ -351,10 +351,10 @@ namespace KOTORModSync.Tests
             var depComponent = new ModComponent { Name = "Dependency", Guid = Guid.NewGuid(), IsSelected = true };
             var component = new ModComponent { Name = "Option Dependency", Guid = Guid.NewGuid(), IsSelected = true };
 
-            var option1 = new Option 
-            { 
-                Name = "Option 1", 
-                Guid = Guid.NewGuid(), 
+            var option1 = new Option
+            {
+                Name = "Option 1",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { depComponent.Guid }
             };
@@ -397,7 +397,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Option dependency should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Option should execute when dependency is met");
             });
         }
@@ -440,9 +440,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Unselected should succeed (skipped)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.False,
                     "No instructions should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.False,
                     "No instructions should execute");
             });
         }

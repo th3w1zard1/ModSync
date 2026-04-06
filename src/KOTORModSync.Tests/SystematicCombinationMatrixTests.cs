@@ -10,8 +10,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -121,7 +121,7 @@ namespace KOTORModSync.Tests
             Instruction.ActionType actionType, bool overwrite)
         {
             string sourceFile = Path.Combine(_modDirectory, "source.txt");
-            string destFile = Path.Combine(_kotorDirectory, "Override", 
+            string destFile = Path.Combine(_kotorDirectory, "Override",
                 actionType == Instruction.ActionType.Rename ? "source.txt" : "dest.txt");
 
             File.WriteAllText(sourceFile, "new content");
@@ -138,11 +138,11 @@ namespace KOTORModSync.Tests
             var instruction = new Instruction
             {
                 Action = actionType,
-                Source = new List<string> { actionType == Instruction.ActionType.Rename 
+                Source = new List<string> { actionType == Instruction.ActionType.Rename
                     ? destFile.Replace(_kotorDirectory, "<<kotorDirectory>>")
                     : sourceFile.Replace(_modDirectory, "<<modDirectory>>") },
-                Destination = actionType == Instruction.ActionType.Rename 
-                    ? "source.txt" 
+                Destination = actionType == Instruction.ActionType.Rename
+                    ? "source.txt"
                     : "<<kotorDirectory>>/Override",
                 Overwrite = overwrite
             };
@@ -164,17 +164,17 @@ namespace KOTORModSync.Tests
         {
             File.WriteAllText(Path.Combine(_modDirectory, "file.txt"), "content");
 
-            var requiredMod = new ModComponent 
-            { 
-                Name = "Required", 
-                Guid = Guid.NewGuid(), 
-                IsSelected = dependencyMet 
+            var requiredMod = new ModComponent
+            {
+                Name = "Required",
+                Guid = Guid.NewGuid(),
+                IsSelected = dependencyMet
             };
-            var restrictedMod = new ModComponent 
-            { 
-                Name = "Restricted", 
-                Guid = Guid.NewGuid(), 
-                IsSelected = restrictionMet 
+            var restrictedMod = new ModComponent
+            {
+                Name = "Restricted",
+                Guid = Guid.NewGuid(),
+                IsSelected = restrictionMet
             };
             var component = new ModComponent { Name = "Combined", Guid = Guid.NewGuid(), IsSelected = true };
 
@@ -200,7 +200,7 @@ namespace KOTORModSync.Tests
             bool shouldExecute = dependencyMet && !restrictionMet;
             bool fileExists = File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt"));
 
-            Assert.That(fileExists, Is.EqualTo(shouldExecute), 
+            Assert.That(fileExists, Is.EqualTo(shouldExecute),
                 $"File should {(shouldExecute ? "exist" : "not exist")} when dependency={dependencyMet}, restriction={restrictionMet}");
         }
 
@@ -279,19 +279,19 @@ namespace KOTORModSync.Tests
                 {
                     File.WriteAllText(Path.Combine(_modDirectory, $"file_{action}_{overwrite}.txt"), "content");
 
-                    var component = new ModComponent 
-                    { 
-                        Name = $"Matrix {action} {overwrite}", 
-                        Guid = Guid.NewGuid(), 
-                        IsSelected = true 
+                    var component = new ModComponent
+                    {
+                        Name = $"Matrix {action} {overwrite}",
+                        Guid = Guid.NewGuid(),
+                        IsSelected = true
                     };
 
                     var instruction = new Instruction
                     {
                         Action = action,
                         Source = new List<string> { $"<<modDirectory>>/file_{action}_{overwrite}.txt" },
-                        Destination = action == Instruction.ActionType.Rename 
-                            ? "renamed.txt" 
+                        Destination = action == Instruction.ActionType.Rename
+                            ? "renamed.txt"
                             : "<<kotorDirectory>>/Override",
                         Overwrite = overwrite
                     };
@@ -305,7 +305,7 @@ namespace KOTORModSync.Tests
                     var result = await component.ExecuteInstructionsAsync(
                         new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-                    Assert.That(result, Is.Not.Null, 
+                    Assert.That(result, Is.Not.Null,
                         $"Should handle {action} with overwrite={overwrite}");
                 }
             }

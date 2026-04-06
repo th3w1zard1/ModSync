@@ -6559,41 +6559,75 @@ namespace KOTORModSync
 
             try
             {
+                string engine = MainConfig.PatcherEngine ?? PatcherEngines.Holopatcher;
+                if (string.Equals(engine, PatcherEngines.KPatcher, StringComparison.OrdinalIgnoreCase))
+                {
+                    await Logger.LogAsync("[RunHolopatcherButton_Click] Launching KPatcher (--help)...");
+                    (string kPath, bool kFound) = await InstallationService.FindKPatcherExecutableAsync().ConfigureAwait(false);
+                    if (!kFound)
+                    {
+                        await InformationDialog.ShowInformationDialogAsync(
+                            this,
+                            "KPatcher was selected in Settings but no executable was found. Set the path in Settings or add KPatcher to PATH.",
+                            "KPatcher Not Found");
+                        return;
+                    }
+
+                    string prefix = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                        ? string.Empty
+                        : "--console ";
+                    (int exitCode, string stdout, string stderr) = await InstallationService.RunTslPatcherCliAsync(prefix + "--help").ConfigureAwait(false);
+
+                    if (exitCode == 0)
+                    {
+                        await Logger.LogAsync("KPatcher CLI responded successfully.");
+                    }
+                    else
+                    {
+                        await Logger.LogErrorAsync($"KPatcher exited with code {exitCode}");
+                        if (!string.IsNullOrEmpty(stderr))
+                        {
+                            await InformationDialog.ShowInformationDialogAsync(
+                                this,
+                                $"KPatcher failed (exit code: {exitCode})\n\n{stderr}",
+                                "Error Launching KPatcher");
+                        }
+                    }
+
+                    return;
+                }
+
                 await Logger.LogAsync("[RunHolopatcherButton_Click] Launching HoloPatcher with no arguments...");
 
-                // Set preference for Python version over executable (set to true to prefer Python, false to prefer executable)
-                bool preferPythonVersion = false; // Change this to true if you want to prefer Python version
+                bool preferPythonVersion = false;
 
-                // Run holopatcher using whichever version is available
-                (int exitCode, string stdout, string stderr) = await InstallationService.RunHolopatcherAsync(
+                (int exitCode2, string stdout2, string stderr2) = await InstallationService.RunHolopatcherAsync(
                     args: "",
                     preferPythonVersion: preferPythonVersion
                 );
 
-                if (exitCode == 0)
+                if (exitCode2 == 0)
                 {
                     await Logger.LogAsync("HoloPatcher launched successfully.");
                 }
                 else
                 {
-                    await Logger.LogErrorAsync($"HoloPatcher exited with code {exitCode}");
-                    if (!string.IsNullOrEmpty(stderr))
+                    await Logger.LogErrorAsync($"HoloPatcher exited with code {exitCode2}");
+                    if (!string.IsNullOrEmpty(stderr2))
                     {
-                        await Logger.LogErrorAsync($"Error: {stderr}");
+                        await Logger.LogErrorAsync($"Error: {stderr2}");
 
-                        // Show detailed error dialog with full stack trace
                         await InformationDialog.ShowInformationDialogAsync(
                             this,
-                            $"HoloPatcher failed to launch (exit code: {exitCode})\n\nFull Error Details:\n{stderr}",
+                            $"HoloPatcher failed to launch (exit code: {exitCode2})\n\nFull Error Details:\n{stderr2}",
                             "Error Launching HoloPatcher"
                         );
                     }
                     else
                     {
-                        // Show basic error dialog if no detailed error info
                         await InformationDialog.ShowInformationDialogAsync(
                             this,
-                            $"HoloPatcher failed to launch (exit code: {exitCode})\n\nNo additional error details available.",
+                            $"HoloPatcher failed to launch (exit code: {exitCode2})\n\nNo additional error details available.",
                             "Error Launching HoloPatcher"
                         );
                     }

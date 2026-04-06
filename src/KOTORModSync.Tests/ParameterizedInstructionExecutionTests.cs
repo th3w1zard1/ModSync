@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -67,7 +67,7 @@ namespace KOTORModSync.Tests
             Instruction.ActionType actionType, bool overwrite)
         {
             string sourceFile = Path.Combine(_modDirectory, "source.txt");
-            string destFile = Path.Combine(_kotorDirectory, "Override", 
+            string destFile = Path.Combine(_kotorDirectory, "Override",
                 actionType == Instruction.ActionType.Rename ? "source.txt" : "dest.txt");
 
             File.WriteAllText(sourceFile, "new content");
@@ -84,11 +84,11 @@ namespace KOTORModSync.Tests
             var instruction = new Instruction
             {
                 Action = actionType,
-                Source = new List<string> { actionType == Instruction.ActionType.Rename 
+                Source = new List<string> { actionType == Instruction.ActionType.Rename
                     ? destFile.Replace(_kotorDirectory, "<<kotorDirectory>>")
                     : sourceFile.Replace(_modDirectory, "<<modDirectory>>") },
-                Destination = actionType == Instruction.ActionType.Rename 
-                    ? "source.txt" 
+                Destination = actionType == Instruction.ActionType.Rename
+                    ? "source.txt"
                     : "<<kotorDirectory>>/Override",
                 Overwrite = overwrite
             };
@@ -177,7 +177,7 @@ namespace KOTORModSync.Tests
             // For patterns that should match, verify they did
             if (expectedMatches > 0)
             {
-                Assert.That(actualMatches, Is.GreaterThanOrEqualTo(1), 
+                Assert.That(actualMatches, Is.GreaterThanOrEqualTo(1),
                     $"Pattern {pattern} should match at least one file");
             }
         }
@@ -221,7 +221,7 @@ namespace KOTORModSync.Tests
             bool shouldExecute = modSelected && optionSelected;
             bool fileExists = File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt"));
 
-            Assert.That(fileExists, Is.EqualTo(shouldExecute), 
+            Assert.That(fileExists, Is.EqualTo(shouldExecute),
                 $"File should {(shouldExecute ? "exist" : "not exist")} when mod={modSelected}, option={optionSelected}");
         }
 

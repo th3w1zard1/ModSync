@@ -349,7 +349,7 @@ namespace KOTORModSync.Tests
             // Use reflection to access private properties for testing
             var realSourcePathsProperty = typeof(Instruction).GetProperty("RealSourcePaths", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var realDestinationPathProperty = typeof(Instruction).GetProperty("RealDestinationPath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             var realSourcePaths = (List<string>)realSourcePathsProperty?.GetValue(instruction);
             var realDestinationPath = (DirectoryInfo)realDestinationPathProperty?.GetValue(instruction);
 
@@ -396,7 +396,7 @@ namespace KOTORModSync.Tests
             // Use reflection to access private properties for testing
             var realSourcePathsProperty = typeof(Instruction).GetProperty("RealSourcePaths", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var realDestinationPathProperty = typeof(Instruction).GetProperty("RealDestinationPath", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             var realSourcePaths = (List<string>)realSourcePathsProperty?.GetValue(instruction);
             var realDestinationPath = (DirectoryInfo)realDestinationPathProperty?.GetValue(instruction);
 
@@ -433,13 +433,13 @@ namespace KOTORModSync.Tests
             instruction.SetParentComponent(component);
             _config.sourcePath = new DirectoryInfo(_modDirectory);
             _config.destinationPath = new DirectoryInfo(_kotorDirectory);
-            
+
             // This should throw FileNotFoundException because the file doesn't exist and is outside sandbox
             var exception = Assert.Throws<FileNotFoundException>(() =>
             {
                 instruction.SetRealPaths();
             }, "Absolute system path should be rejected");
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(exception, Is.Not.Null, "Exception should not be null");
@@ -453,7 +453,7 @@ namespace KOTORModSync.Tests
                 Assert.That(instruction.Source[0], Does.Not.Contain("C:\\Windows"), "Absolute system path should be rejected or sanitized");
                 Assert.That(instruction.Source[0], Does.Not.Contain("System32"), "System directory should not be accessible");
                 // Path should be sandboxed to allowed directories
-                Assert.That(instruction.Source[0], Does.Contain(_modDirectory).Or.Contain(_kotorDirectory), 
+                Assert.That(instruction.Source[0], Does.Contain(_modDirectory).Or.Contain(_kotorDirectory),
                     "Path should be sandboxed to mod or KOTOR directory");
             });
         }

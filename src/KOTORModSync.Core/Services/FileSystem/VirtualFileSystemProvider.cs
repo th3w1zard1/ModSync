@@ -908,14 +908,26 @@ namespace KOTORModSync.Core.Services.FileSystem
                 }
             }
 
-            string extractFolderName = Path.GetFileNameWithoutExtension(archivePath);
+            string extractRootDirectory = Path.GetFullPath(Path.Combine(destinationPath, Path.GetFileNameWithoutExtension(archivePath)))
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
 
             lock (_lockObject)
             {
                 foreach (string entryPath in contents)
                 {
-                    string normalizedEntry = entryPath.Replace('/', Path.DirectorySeparatorChar);
-                    string fullPath = Path.Combine(destinationPath, extractFolderName, normalizedEntry);
+                    if (!PathHelper.TryGetZipSafeArchiveEntryExtractPath(
+                            extractRootDirectory,
+                            entryPath,
+                            out string fullPath,
+                            out string parentDir))
+                    {
+                        AddIssue(
+                            ValidationSeverity.Warning,
+                            "ExtractArchive",
+                            $"Skipping virtual archive entry with unsafe path: {entryPath}",
+                            archivePath);
+                        continue;
+                    }
 
                     fullPath = fullPath.Replace('/', Path.DirectorySeparatorChar).Replace("\\\\", "\\");
 
@@ -923,7 +935,6 @@ namespace KOTORModSync.Core.Services.FileSystem
                     _ = _removedFiles.Remove(fullPath);
                     extractedFiles.Add(fullPath);
 
-                    string parentDir = Path.GetDirectoryName(fullPath);
                     if (!string.IsNullOrEmpty(parentDir))
                     {
                         _ = _virtualDirectories.Add(parentDir);

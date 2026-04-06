@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -108,7 +108,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.Success), "Should auto-extract nested file");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "Nested file should be extracted and moved");
             });
         }
@@ -148,8 +148,8 @@ namespace KOTORModSync.Tests
             var instruction = new Instruction
             {
                 Action = Instruction.ActionType.Move,
-                Source = new List<string> 
-                { 
+                Source = new List<string>
+                {
                     "<<modDirectory>>/file1.txt",
                     "<<modDirectory>>/file2.txt",
                     "<<modDirectory>>/file3.txt"
@@ -220,7 +220,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.Success), "Should auto-extract for copy");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be copied");
             });
         }
@@ -339,7 +339,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.Success), "Should extract from one of the archives");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be extracted and moved");
             });
         }

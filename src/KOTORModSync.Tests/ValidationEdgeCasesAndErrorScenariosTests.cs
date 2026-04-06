@@ -240,11 +240,11 @@ namespace KOTORModSync.Tests
         [Test]
         public void ShouldRunInstruction_WithDependencyNotSelected_ReturnsFalse()
         {
-            var depComponent = new ModComponent 
-            { 
-                Name = "Dependency", 
-                Guid = Guid.NewGuid(), 
-                IsSelected = false 
+            var depComponent = new ModComponent
+            {
+                Name = "Dependency",
+                Guid = Guid.NewGuid(),
+                IsSelected = false
             };
             var instruction = new Instruction
             {
@@ -264,11 +264,11 @@ namespace KOTORModSync.Tests
         [Test]
         public void ShouldRunInstruction_WithRestrictionSelected_ReturnsFalse()
         {
-            var restrictedComponent = new ModComponent 
-            { 
-                Name = "Restricted", 
-                Guid = Guid.NewGuid(), 
-                IsSelected = true 
+            var restrictedComponent = new ModComponent
+            {
+                Name = "Restricted",
+                Guid = Guid.NewGuid(),
+                IsSelected = true
             };
             var instruction = new Instruction
             {

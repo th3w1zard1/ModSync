@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -80,10 +80,10 @@ namespace KOTORModSync.Tests
             });
 
             // Texture mod with options
-            var textureMod = new ModComponent 
-            { 
-                Name = "Texture Mod", 
-                Guid = Guid.NewGuid(), 
+            var textureMod = new ModComponent
+            {
+                Name = "Texture Mod",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { baseMod.Guid }
             };
@@ -116,15 +116,15 @@ namespace KOTORModSync.Tests
             });
 
             // Compatibility cleanup mod
-            var cleanupMod = new ModComponent 
-            { 
-                Name = "Cleanup Mod", 
-                Guid = Guid.NewGuid(), 
+            var cleanupMod = new ModComponent
+            {
+                Name = "Cleanup Mod",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 InstallAfter = new List<Guid> { textureMod.Guid }
             };
 
-            File.WriteAllText(Path.Combine(_modDirectory, "cleanlist.csv"), 
+            File.WriteAllText(Path.Combine(_modDirectory, "cleanlist.csv"),
                 "Texture Mod,hd_texture.tga\nMandatory Deletions,old_file.tga");
 
             cleanupMod.Instructions.Add(new Instruction
@@ -140,7 +140,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(ordered[0].Guid, Is.EqualTo(baseMod.Guid), "Base mod should be first");
-                Assert.That(ordered.IndexOf(textureMod), Is.LessThan(ordered.IndexOf(cleanupMod)), 
+                Assert.That(ordered.IndexOf(textureMod), Is.LessThan(ordered.IndexOf(cleanupMod)),
                     "Texture mod should come before cleanup mod");
             });
 
@@ -165,17 +165,17 @@ namespace KOTORModSync.Tests
             foreach (var mod in ordered)
             {
                 var result = await mod.ExecuteInstructionsAsync(components, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     $"{mod.Name} should install successfully");
             }
 
             Assert.Multiple(() =>
             {
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "base.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "base.txt")), Is.True,
                     "Base mod should be installed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "hd_texture.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "hd_texture.tga")), Is.True,
                     "HD texture option should be installed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "sd_texture.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "sd_texture.tga")), Is.False,
                     "SD texture option should NOT be installed");
             });
         }
@@ -185,6 +185,7 @@ namespace KOTORModSync.Tests
         {
             // Create archive
             string zipPath = CreateTestZip("mod.zip", new Dictionary<string, string>
+(StringComparer.Ordinal)
             {
                 { "override/texture.tga", "texture content" },
                 { "override/model.mdl", "model content" },
@@ -237,11 +238,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True,
                     "Texture should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "model.mdl")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "model.mdl")), Is.True,
                     "Model should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Modules", "custom.mod")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Modules", "custom.mod")), Is.True,
                     "Module should be copied");
             });
         }

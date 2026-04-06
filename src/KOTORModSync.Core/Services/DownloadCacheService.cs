@@ -22,7 +22,6 @@ namespace KOTORModSync.Core.Services
     {
         public DownloadManager DownloadManager { get; set; }
         private readonly ComponentValidationService _validationService;
-        private readonly ResolutionFilterService _resolutionFilter;
 
         private readonly Dictionary<string, DownloadFailureInfo> _failedDownloads = new Dictionary<string, DownloadFailureInfo>(StringComparer.OrdinalIgnoreCase);
         private readonly object _failureLock = new object();
@@ -37,10 +36,16 @@ namespace KOTORModSync.Core.Services
         public DownloadCacheService()
         {
             _validationService = new ComponentValidationService();
-            _resolutionFilter = new ResolutionFilterService(MainConfig.FilterDownloadsByResolution);
 
             Logger.LogVerbose("[DownloadCacheService] Initialized");
         }
+
+        /// <summary>
+        /// Resolution filtering must reflect current <see cref="MainConfig.FilterDownloadsByResolution"/> on every operation.
+        /// The GUI constructs this service before settings load; caching a single <see cref="ResolutionFilterService"/> would ignore later changes.
+        /// </summary>
+        internal static ResolutionFilterService CreateResolutionFilterFromMainConfig() =>
+            new ResolutionFilterService(MainConfig.FilterDownloadsByResolution);
 
         public void SetDownloadManager(DownloadManager downloadManager = null)
         {
@@ -86,6 +91,7 @@ namespace KOTORModSync.Core.Services
                 throw new InvalidOperationException("DownloadManager is not set. Call SetDownloadManager() first.");
             }
 
+            ResolutionFilterService resolutionFilter = CreateResolutionFilterFromMainConfig();
 
             await Logger.LogVerboseAsync($"[DownloadCacheService] Pre-resolving URLs for component: {component.Name}").ConfigureAwait(false);
             await Logger.LogVerboseAsync($"[DownloadCacheService] Component.ResourceRegistry count: {component.ResourceRegistry?.Count ?? 0} URLs").ConfigureAwait(false);
@@ -170,7 +176,7 @@ namespace KOTORModSync.Core.Services
                 }
             }
 
-            List<string> filteredUrls = _resolutionFilter.FilterByResolution(urls);
+            List<string> filteredUrls = resolutionFilter.FilterByResolution(urls);
             if (filteredUrls.Count < urls.Count)
             {
                 await Logger.LogVerboseAsync($"[DownloadCacheService] Resolution filter reduced URLs from {urls.Count} to {filteredUrls.Count}").ConfigureAwait(false);
@@ -286,7 +292,7 @@ namespace KOTORModSync.Core.Services
                     }
                 }
 
-                Dictionary<string, List<string>> filteredResolvedResults = _resolutionFilter.FilterResolvedUrls(results);
+                Dictionary<string, List<string>> filteredResolvedResults = resolutionFilter.FilterResolvedUrls(results);
                 await Logger.LogVerboseAsync($"[DownloadCacheService] Final filtered results count: {filteredResolvedResults.Count}").ConfigureAwait(false);
                 await Logger.LogVerboseAsync($"[DownloadCacheService] ✓ Pre-resolved {filteredResolvedResults.Count} URL(s) ENTIRELY from cache (0 network requests), all files exist on disk").ConfigureAwait(false);
                 await Logger.LogVerboseAsync("[DownloadCacheService] ===== PreResolveUrlsAsync END =====").ConfigureAwait(false);
@@ -629,20 +635,20 @@ namespace KOTORModSync.Core.Services
                     await Logger.LogVerboseAsync("[DownloadCacheService] Processing resolved URLs sequentially").ConfigureAwait(false);
                     foreach (KeyValuePair<string, List<string>> kvp in resolvedResults)
                     {
-                        await ProcessResolvedUrlForPreResolveAsync(component, kvp, results, modSourceDirectory, missingFiles).ConfigureAwait(false);
+                        await ProcessResolvedUrlForPreResolveAsync(component, kvp, results, modSourceDirectory, missingFiles, resolutionFilter).ConfigureAwait(false);
                     }
                 }
                 else
                 {
                     await Logger.LogVerboseAsync("[DownloadCacheService] Processing resolved URLs in parallel").ConfigureAwait(false);
                     var processingTasks = resolvedResults.Select(kvp =>
-                        ProcessResolvedUrlForPreResolveAsync(component, kvp, results, modSourceDirectory, missingFiles)
+                        ProcessResolvedUrlForPreResolveAsync(component, kvp, results, modSourceDirectory, missingFiles, resolutionFilter)
                     ).ToList();
                     await Task.WhenAll(processingTasks).ConfigureAwait(false);
                 }
             }
 
-            Dictionary<string, List<string>> filteredResults = _resolutionFilter.FilterResolvedUrls(results);
+            Dictionary<string, List<string>> filteredResults = resolutionFilter.FilterResolvedUrls(results);
 
             await Logger.LogVerboseAsync($"[DownloadCacheService] Final filtered results count: {filteredResults.Count}").ConfigureAwait(false);
             foreach (KeyValuePair<string, List<string>> kvp in filteredResults)
@@ -678,13 +684,14 @@ namespace KOTORModSync.Core.Services
             KeyValuePair<string, List<string>> kvp,
             Dictionary<string, List<string>> results,
             string modSourceDirectory,
-            List<(string url, string filename)> missingFiles)
+            List<(string url, string filename)> missingFiles,
+            ResolutionFilterService resolutionFilter)
         {
             results[kvp.Key] = kvp.Value;
 
             if (kvp.Value != null && kvp.Value.Count > 0)
             {
-                List<string> filteredFilenames = _resolutionFilter.FilterByResolution(kvp.Value);
+                List<string> filteredFilenames = resolutionFilter.FilterByResolution(kvp.Value);
 
                 // Always populate ModLinkFilenames with resolved filenames, even if modSourceDirectory is null
                 // This ensures filenames are persisted to serialized component file even when directory isn't configured
@@ -733,7 +740,8 @@ namespace KOTORModSync.Core.Services
             string modSourceDirectory,
             string destinationDirectory,
             IProgress<DownloadProgress> progress,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            ResolutionFilterService resolutionFilter)
         {
             // Ensure ResourceRegistry has an entry for this URL with Files dictionary
             if (!component.ResourceRegistry.TryGetValue(url, out ResourceMetadata resourceMeta))
@@ -844,7 +852,7 @@ namespace KOTORModSync.Core.Services
             Dictionary<string, List<string>> resolved = await DownloadManager.ResolveUrlsToFilenamesAsync(new List<string> { url }, cancellationToken).ConfigureAwait(false);
             if (resolved.TryGetValue(url, out List<string> value) && value.Count > 0)
             {
-                List<string> filteredFilenames = _resolutionFilter.FilterByResolution(value);
+                List<string> filteredFilenames = resolutionFilter.FilterByResolution(value);
 
                 await PopulateModLinkFilenamesWithSimulationAsync(component, url, filteredFilenames, modSourceDirectory).ConfigureAwait(false);
 
@@ -1054,6 +1062,8 @@ namespace KOTORModSync.Core.Services
 
             await Logger.LogVerboseAsync($"[DownloadCacheService] Processing component: {component.Name} ({(component.ResourceRegistry?.Count ?? 0)} URL(s))").ConfigureAwait(false);
 
+            ResolutionFilterService resolutionFilter = CreateResolutionFilterFromMainConfig();
+
             string modSourceDirectory = MainConfig.SourcePath?.FullName;
             if (string.IsNullOrEmpty(modSourceDirectory))
             {
@@ -1069,7 +1079,7 @@ namespace KOTORModSync.Core.Services
             var urlsToProcess = new List<string>();
             foreach (string url in urlsNeedingAnalysis)
             {
-                if (!_resolutionFilter.ShouldDownload(url))
+                if (!resolutionFilter.ShouldDownload(url))
                 {
                     await Logger.LogVerboseAsync($"[DownloadCacheService] Skipping URL due to resolution filter: {url}").ConfigureAwait(false);
                     continue;
@@ -1151,14 +1161,14 @@ namespace KOTORModSync.Core.Services
                 cacheCheckResults = new List<(string, string, bool)>();
                 foreach (string url in urlsToProcess)
                 {
-                    (string url, string fileName, bool needsDownload) result = await CheckCacheAndFileExistenceAsync(url, component, modSourceDirectory, destinationDirectory, progress, cancellationToken).ConfigureAwait(false);
+                    (string url, string fileName, bool needsDownload) result = await CheckCacheAndFileExistenceAsync(url, component, modSourceDirectory, destinationDirectory, progress, cancellationToken, resolutionFilter).ConfigureAwait(false);
                     cacheCheckResults.Add(result);
                 }
             }
             else
             {
                 var cacheCheckTasks = urlsToProcess.Select(url =>
-                    CheckCacheAndFileExistenceAsync(url, component, modSourceDirectory, destinationDirectory, progress, cancellationToken)
+                    CheckCacheAndFileExistenceAsync(url, component, modSourceDirectory, destinationDirectory, progress, cancellationToken, resolutionFilter)
                 ).ToList();
 
                 cacheCheckResults = (await Task.WhenAll(cacheCheckTasks).ConfigureAwait(false)).ToList();
@@ -1228,7 +1238,7 @@ namespace KOTORModSync.Core.Services
                         Dictionary<string, List<string>> resolved = await DownloadManager.ResolveUrlsToFilenamesAsync(new List<string> { url }, cancellationToken).ConfigureAwait(false);
                         if (resolved.TryGetValue(url, out List<string> allFilenames) && allFilenames.Count > 0)
                         {
-                            List<string> filteredFilenames = _resolutionFilter.FilterByResolution(allFilenames);
+                            List<string> filteredFilenames = resolutionFilter.FilterByResolution(allFilenames);
 
                             IReadOnlyList<string> targetFiles = GetFilenamesForDownload(component, url, filteredFilenames);
 

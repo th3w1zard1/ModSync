@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -176,7 +176,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.Not.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.Not.EqualTo(ModComponent.InstallExitCode.Success),
                 "Should fail when archive is invalid");
         }
 
@@ -201,7 +201,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Should handle empty archive gracefully");
         }
 
@@ -278,9 +278,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle empty wildcard match gracefully");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "file1.dat")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "file1.dat")), Is.True,
                     "Non-matching files should remain");
             });
         }
@@ -308,9 +308,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle empty wildcard match gracefully");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.dat")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.dat")), Is.True,
                     "Non-matching files should remain");
             });
         }
@@ -324,13 +324,13 @@ namespace KOTORModSync.Tests
         {
             // Test with various invalid characters (OS-dependent)
             string[] invalidNames = { "file<name>.txt", "file>name.txt", "file:name.txt", "file|name.txt" };
-            
+
             foreach (var invalidName in invalidNames)
             {
                 try
                 {
                     File.WriteAllText(Path.Combine(_modDirectory, invalidName), "content");
-                    
+
                     var component = new ModComponent { Name = "Invalid Chars", Guid = Guid.NewGuid(), IsSelected = true };
                     var instruction = new Instruction
                     {
@@ -346,7 +346,7 @@ namespace KOTORModSync.Tests
                     instruction.SetParentComponent(component);
 
                     var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
-                    
+
                     // Should handle invalid characters (may fail or sanitize)
                     Assert.That(result, Is.Not.Null, $"Should handle invalid filename: {invalidName}");
                 }
@@ -415,9 +415,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle no compatible extensions gracefully");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True,
                     "File should remain when no duplicates found");
             });
         }
@@ -442,7 +442,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Should handle empty directory gracefully");
         }
 
@@ -474,9 +474,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should succeed (component skipped)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "File should not be moved when component is not selected");
             });
         }
@@ -485,10 +485,10 @@ namespace KOTORModSync.Tests
         public async Task ComponentValidation_ComponentWithRestriction_BlocksWhenRestrictedSelected()
         {
             var restrictedComponent = new ModComponent { Name = "Restricted", Guid = Guid.NewGuid(), IsSelected = true };
-            var component = new ModComponent 
-            { 
-                Name = "Blocked Component", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Blocked Component",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { restrictedComponent.Guid }
             };
@@ -514,9 +514,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should succeed (component blocked)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "File should not be moved when component is blocked by restriction");
             });
         }

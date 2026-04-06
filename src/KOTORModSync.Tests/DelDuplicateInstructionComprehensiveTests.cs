@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -84,9 +84,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "DelDuplicate should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True,
                     ".tga should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False,
                     ".tpc should be deleted");
             });
         }
@@ -122,17 +122,17 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.True,
                     "file1.tga should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tpc")), Is.False,
                     "file1.tpc should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.True,
                     "file2.tga should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tpc")), Is.False,
                     "file2.tpc should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.tga")), Is.True,
                     "file3.tga should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.tpc")), Is.False,
                     "file3.tpc should be deleted");
             });
         }
@@ -164,9 +164,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.True,
                     "file1.tga should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tpc")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tpc")), Is.True,
                     "file2.tpc should remain (no duplicate)");
             });
         }
@@ -202,11 +202,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True,
                     ".tga should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False,
                     ".tpc should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.dds")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.dds")), Is.True,
                     ".dds should remain");
             });
         }
@@ -262,7 +262,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Empty directory should be handled gracefully");
         }
 
@@ -293,9 +293,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.True,
                     "file1.tga should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.True,
                     "file2.tga should remain");
             });
         }

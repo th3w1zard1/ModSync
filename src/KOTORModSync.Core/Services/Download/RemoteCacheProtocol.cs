@@ -369,7 +369,7 @@ namespace KOTORModSync.Core.Services.Download
                     httpRequest.Headers.Add("Authorization", $"Basic {session.AuthorizationHeader}");
                 }
 
-                    if (!string.IsNullOrEmpty(sessionId))
+                if (!string.IsNullOrEmpty(sessionId))
                 {
                     httpRequest.Headers.Add("X-Transmission-Session-Id", sessionId);
                 }
@@ -467,7 +467,7 @@ namespace KOTORModSync.Core.Services.Download
 
         private static Uri Combine(Uri baseUri, string relativePath)
         {
-            if (!baseUri.AbsoluteUri.EndsWith("/"))
+            if (!baseUri.AbsoluteUri.EndsWith('/'))
             {
                 return new Uri(baseUri, relativePath);
             }

@@ -105,7 +105,7 @@ jobs:
 
       - name: Restore dependencies
         if: steps.hash.outputs.changed == 'true'
-        run: dotnet restore --framework net9.0
+        run: dotnet restore KOTORModSync.sln /p:TargetFramework=net9.0
 
       - name: Build
         if: steps.hash.outputs.changed == 'true'

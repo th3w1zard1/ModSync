@@ -165,6 +165,15 @@ namespace KOTORModSync.Core.CLI
                             s_config.useCopyForMoveActions = settings.UseCopyForMoveActions;
                             s_config.validateAndReplaceInvalidArchives = settings.ValidateAndReplaceInvalidArchives;
                             s_config.filterDownloadsByResolution = settings.FilterDownloadsByResolution;
+                            if (!string.IsNullOrWhiteSpace(settings.PatcherEngine))
+                            {
+                                s_config.patcherEngine = settings.PatcherEngine;
+                            }
+
+                            if (!string.IsNullOrWhiteSpace(settings.KPatcherExecutablePath))
+                            {
+                                s_config.kpatcherExecutablePath = settings.KPatcherExecutablePath;
+                            }
 
                             Logger.LogVerbose("Settings loaded successfully from settings.json");
                         }
@@ -259,6 +268,8 @@ namespace KOTORModSync.Core.CLI
                 settings.ValidateAndReplaceInvalidArchives = s_config.validateAndReplaceInvalidArchives;
                 settings.FilterDownloadsByResolution = s_config.filterDownloadsByResolution;
                 settings.NexusModsApiKey = s_config.nexusModsApiKey;
+                settings.PatcherEngine = s_config.patcherEngine;
+                settings.KPatcherExecutablePath = s_config.kpatcherExecutablePath;
 
                 string json = JsonConvert.SerializeObject(settings, Formatting.Indented);
                 File.WriteAllText(settingsPath, json);
@@ -310,10 +321,16 @@ namespace KOTORModSync.Core.CLI
             public bool ValidateAndReplaceInvalidArchives { get; set; } = true;
 
             [JsonProperty("filterDownloadsByResolution")]
-            public bool FilterDownloadsByResolution { get; set; } = true;
+            public bool FilterDownloadsByResolution { get; set; } = false;
 
             [JsonProperty("nexusModsApiKey")]
             public string NexusModsApiKey { get; set; }
+
+            [JsonProperty("patcherEngine")]
+            public string PatcherEngine { get; set; }
+
+            [JsonProperty("kpatcherExecutablePath")]
+            public string KPatcherExecutablePath { get; set; }
         }
 
         public class BaseOptions

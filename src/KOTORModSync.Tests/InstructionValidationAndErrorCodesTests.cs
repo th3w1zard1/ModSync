@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -74,10 +74,10 @@ namespace KOTORModSync.Tests
             instruction.SetFileSystemProvider(fileSystemProvider);
             instruction.SetParentComponent(component);
 
-            var result = await component.ExecuteSingleInstructionAsync(instruction, 0, 
+            var result = await component.ExecuteSingleInstructionAsync(instruction, 0,
                 new List<ModComponent> { component }, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.FileNotFoundPost), 
+            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.FileNotFoundPost),
                 "Should return FileNotFoundPost for missing file");
         }
 
@@ -98,11 +98,11 @@ namespace KOTORModSync.Tests
             instruction.SetFileSystemProvider(fileSystemProvider);
             instruction.SetParentComponent(component);
 
-            var result = await component.ExecuteSingleInstructionAsync(instruction, 0, 
+            var result = await component.ExecuteSingleInstructionAsync(instruction, 0,
                 new List<ModComponent> { component }, fileSystemProvider);
 
             // In strict mode, missing file should return error
-            Assert.That(result, Is.Not.EqualTo(Instruction.ActionExitCode.Success), 
+            Assert.That(result, Is.Not.EqualTo(Instruction.ActionExitCode.Success),
                 "Should return error in strict mode for missing file");
         }
 
@@ -123,11 +123,11 @@ namespace KOTORModSync.Tests
             instruction.SetFileSystemProvider(fileSystemProvider);
             instruction.SetParentComponent(component);
 
-            var result = await component.ExecuteSingleInstructionAsync(instruction, 0, 
+            var result = await component.ExecuteSingleInstructionAsync(instruction, 0,
                 new List<ModComponent> { component }, fileSystemProvider);
 
             // In lenient mode, missing file should succeed
-            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.Success), 
+            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.Success),
                 "Should return Success in lenient mode for missing file");
         }
 
@@ -256,9 +256,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 // Component may fail overall, but subsequent instructions should execute
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "Second instruction should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "Third instruction should execute");
             });
         }
@@ -291,7 +291,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.Not.Null, "Should return a result");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "File should not be moved for unselected component");
             });
         }

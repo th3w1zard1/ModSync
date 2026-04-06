@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -66,7 +66,7 @@ namespace KOTORModSync.Tests
         public async Task CleanList_MultipleModsWithFuzzyMatching_DeletesCorrectFiles()
         {
             string csvPath = Path.Combine(_modDirectory, "cleanlist.csv");
-            File.WriteAllText(csvPath, 
+            File.WriteAllText(csvPath,
                 "Mandatory Deletions,old1.tga,old2.tpc\n" +
                 "HD UI Rewrite,ui_old.tga,ui_old.tpc\n" +
                 "Weapon Model Overhaul,w_blaster_01.mdl,w_blaster_01.mdx\n");

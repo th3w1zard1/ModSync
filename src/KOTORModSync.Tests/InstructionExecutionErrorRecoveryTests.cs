@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -100,9 +100,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 // Component may fail overall, but subsequent instructions should still execute
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "Second instruction should execute even if first fails");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "Third instruction should execute even if first fails");
             });
         }
@@ -159,11 +159,11 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "First instruction should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "Third instruction should execute after middle failure");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.txt")), Is.True,
                     "Fourth instruction should execute after middle failure");
             });
         }
@@ -204,7 +204,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 // First instruction may fail, but second should still execute
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "Second instruction should execute even if first has invalid destination");
             });
         }
@@ -237,9 +237,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "Matching file1 should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "Matching file2 should be moved");
             });
         }
@@ -277,7 +277,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(component.Instructions, new List<ModComponent> { component }, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.Not.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.Not.EqualTo(ModComponent.InstallExitCode.Success),
                 "Component with all failed instructions should report failure");
         }
 

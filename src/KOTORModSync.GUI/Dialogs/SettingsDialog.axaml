@@ -398,6 +398,32 @@
                                 Text="🔧 PyKotor/HoloPatcher Version" />
 
                             <TextBlock
+                                Margin="0,0,0,6"
+                                FontWeight="SemiBold"
+                                Text="TSLPatcher install backend" />
+                            <TextBlock
+                                Margin="0,0,0,8"
+                                Opacity="0.8"
+                                Text="Choose whether TSLPatcher/HoloPatcher mod folders are applied with the bundled HoloPatcher (Resources) or an external KPatcher CLI (same arguments as HoloPatcher)."
+                                TextWrapping="Wrap" />
+                            <ComboBox
+                                x:Name="PatcherEngineComboBox"
+                                Margin="0,0,0,10"
+                                HorizontalAlignment="Stretch"
+                                SelectionChanged="PatcherEngineComboBox_SelectionChanged"
+                                ToolTip.Tip="HoloPatcher: app Resources / PyKotor. KPatcher: external executable (PATH or path below)." />
+                            <TextBlock
+                                Margin="0,0,0,4"
+                                FontWeight="SemiBold"
+                                Text="KPatcher executable (optional)" />
+                            <TextBox
+                                x:Name="KPatcherPathTextBox"
+                                Margin="0,0,0,10"
+                                HorizontalAlignment="Stretch"
+                                Watermark="Leave empty to search PATH, app folder, and Resources"
+                                ToolTip.Tip="Full path to KPatcher or KPatcher.dll host. If empty, KOTORModSync searches PATH and common locations." />
+
+                            <TextBlock
                                 Margin="0,0,0,10"
                                 Opacity="0.8"
                                 Text="Select and download different versions of the PyKotor library (which includes HoloPatcher). The bundled version is included with the application, but you can update to newer releases from GitHub."

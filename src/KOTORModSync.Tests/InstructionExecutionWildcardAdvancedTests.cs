@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -87,9 +87,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Multi-wildcard should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "file1.txt should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "file2.txt should be moved");
             });
         }
@@ -120,11 +120,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Question mark wildcard should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "file1.txt should match");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "file2.txt should match");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "file10.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "file10.txt")), Is.True,
                     "file10.txt should NOT match (too many characters)");
             });
         }
@@ -240,9 +240,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Wildcard in source should work");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "file1 should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "file2 should be moved");
             });
         }
@@ -270,7 +270,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Special characters in filenames should work with wildcards");
         }
 
@@ -303,11 +303,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Wildcard copy should succeed");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "file1.txt")), Is.True,
                     "Source file1 should still exist after copy");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "Destination file1 should exist");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "Destination file2 should exist");
             });
         }
@@ -337,11 +337,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Wildcard delete should succeed");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "file1.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "file1.txt")), Is.False,
                     "file1 should be deleted");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "file2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "file2.txt")), Is.False,
                     "file2 should be deleted");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "other.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "other.txt")), Is.True,
                     "other.txt should NOT be deleted");
             });
         }

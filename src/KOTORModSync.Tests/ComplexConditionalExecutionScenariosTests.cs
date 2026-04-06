@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -318,10 +318,10 @@ namespace KOTORModSync.Tests
             var modA = new ModComponent { Name = "A", Guid = Guid.NewGuid(), IsSelected = true };
             var modB = new ModComponent { Name = "B", Guid = Guid.NewGuid(), IsSelected = true, Dependencies = new List<Guid> { modA.Guid } };
             var modC = new ModComponent { Name = "C", Guid = Guid.NewGuid(), IsSelected = true, Dependencies = new List<Guid> { modB.Guid } };
-            var modD = new ModComponent 
-            { 
-                Name = "D", 
-                Guid = Guid.NewGuid(), 
+            var modD = new ModComponent
+            {
+                Name = "D",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { modC.Guid }
             };
@@ -339,10 +339,10 @@ namespace KOTORModSync.Tests
             var modA = new ModComponent { Name = "A", Guid = Guid.NewGuid(), IsSelected = true };
             var modB = new ModComponent { Name = "B", Guid = Guid.NewGuid(), IsSelected = false, Dependencies = new List<Guid> { modA.Guid } };
             var modC = new ModComponent { Name = "C", Guid = Guid.NewGuid(), IsSelected = false, Dependencies = new List<Guid> { modB.Guid } };
-            var modD = new ModComponent 
-            { 
-                Name = "D", 
-                Guid = Guid.NewGuid(), 
+            var modD = new ModComponent
+            {
+                Name = "D",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { modC.Guid }
             };

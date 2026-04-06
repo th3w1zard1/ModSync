@@ -59,7 +59,7 @@ namespace KOTORModSync.Tests
             var exception = Assert.Throws<ArgumentNullException>(
                 () => PathHelper.FindCaseInsensitiveDuplicates(directory)
             );
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(exception, Is.Not.Null, "Null directory should throw ArgumentNullException");
@@ -136,7 +136,7 @@ namespace KOTORModSync.Tests
                 Assert.That(file2, Is.Not.Null, "File2 should not be null");
                 Assert.That(file1.Exists, Is.True, "File1 should exist");
                 Assert.That(file2.Exists, Is.True, "File2 should exist");
-                Assert.That(result, Has.Count.EqualTo(2), 
+                Assert.That(result, Has.Count.EqualTo(2),
                     $"Expected 2 items (case-insensitive duplicates), but found {result.Count}. Output: {failureMessage}");
                 Assert.That(result.All(r => r != null), Is.True, "All result items should not be null");
             });
@@ -215,15 +215,15 @@ namespace KOTORModSync.Tests
                 Assert.That(File.Exists(file2), Is.True, "File2 should exist");
                 Assert.That(Path.GetFileName(file1), Is.EqualTo("file.txt"), "File1 should be named file.txt");
                 Assert.That(Path.GetFileName(file2), Is.EqualTo("FILE.TXT"), "File2 should be named FILE.TXT");
-                
+
                 var (caseSensitivePath1, _) = PathHelper.GetCaseSensitivePath(
                     Path.Combine(Path.GetDirectoryName(file1), Path.GetFileName(file1).ToUpperInvariant())
                 );
-                Assert.That(caseSensitivePath1, Is.EqualTo(file2), 
+                Assert.That(caseSensitivePath1, Is.EqualTo(file2),
                     "GetCaseSensitivePath should return FILE.TXT when given uppercase path");
-                
+
                 var (caseSensitivePath2, _) = PathHelper.GetCaseSensitivePath(file1.ToUpperInvariant());
-                Assert.That(caseSensitivePath2, Is.EqualTo(file2), 
+                Assert.That(caseSensitivePath2, Is.EqualTo(file2),
                     "GetCaseSensitivePath should return FILE.TXT when given uppercase full path");
             });
         }
@@ -424,7 +424,7 @@ namespace KOTORModSync.Tests
             var exception1 = Assert.Throws<ArgumentException>(() => PathHelper.GetCaseSensitivePath(nullPath));
             var exception2 = Assert.Throws<ArgumentException>(() => PathHelper.GetCaseSensitivePath(emptyPath));
             var exception3 = Assert.Throws<ArgumentException>(() => PathHelper.GetCaseSensitivePath(whiteSpacePath));
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(exception1, Is.Not.Null, "Null path should throw ArgumentException");
@@ -445,7 +445,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result.Item1, Is.Not.Null, "Result path should not be null");
-                Assert.That(result.Item1, Is.EqualTo(Path.Combine(s_testDirectory, fileName.ToUpperInvariant())), 
+                Assert.That(result.Item1, Is.EqualTo(Path.Combine(s_testDirectory, fileName.ToUpperInvariant())),
                     "Invalid path should return original uppercase path");
                 Assert.That(result.Item2, Is.Null, "Result should indicate path validity is unknown (null)");
             });
@@ -502,7 +502,7 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(result, Is.Not.Null, "Result should not be null");
                 Assert.That(File.Exists(nonExistentFilePath), Is.False, "Non-existent file should not exist");
-                Assert.That(result, Is.EqualTo(Path.Combine(s_testDirectory, nonExistentFileName.ToUpperInvariant())), 
+                Assert.That(result, Is.EqualTo(Path.Combine(s_testDirectory, nonExistentFileName.ToUpperInvariant())),
                     "Non-existent file should return uppercase path");
             });
         }
@@ -521,9 +521,9 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(result, Is.Not.Null, "Result should not be null");
                 Assert.That(File.Exists(nonExistentFilePath), Is.False, "Non-existent file should not exist");
-                Assert.That(Directory.Exists(Path.GetDirectoryName(nonExistentFilePath)), Is.False, 
+                Assert.That(Directory.Exists(Path.GetDirectoryName(nonExistentFilePath)), Is.False,
                     "Non-existent directory should not exist");
-                Assert.That(result, Is.EqualTo(Path.Combine(s_testDirectory, nonExistentRelFilePath.ToUpperInvariant())), 
+                Assert.That(result, Is.EqualTo(Path.Combine(s_testDirectory, nonExistentRelFilePath.ToUpperInvariant())),
                     "Non-existent dir and file should return uppercase path");
             });
         }
@@ -542,7 +542,7 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(result, Is.Not.Null, "Result should not be null");
                 Assert.That(Directory.Exists(nonExistentDirPath), Is.False, "Non-existent directory should not exist");
-                Assert.That(result, Is.EqualTo(Path.Combine(s_testDirectory, nonExistentRelPath.ToUpperInvariant())), 
+                Assert.That(result, Is.EqualTo(Path.Combine(s_testDirectory, nonExistentRelPath.ToUpperInvariant())),
                     "Non-existent directory should return uppercase path");
             });
         }

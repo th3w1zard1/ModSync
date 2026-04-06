@@ -146,7 +146,7 @@ namespace KOTORModSync.Tests
                     "L_Alien02.mdl",
                     "Twilek_F01.tpc",
                 };
-                
+
                 Assert.Multiple(() =>
                 {
                     Assert.That(shouldBeDeleted, Is.Not.Null, "Files to delete list should not be null");

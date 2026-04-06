@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -78,6 +78,7 @@ namespace KOTORModSync.Tests
 
             // Extract (requires archive)
             string zipPath = CreateTestZip("archive.zip", new Dictionary<string, string>
+(StringComparer.Ordinal)
             {
                 { "extracted.txt", "extracted content" }
             });
@@ -212,6 +213,7 @@ namespace KOTORModSync.Tests
         public async Task InstructionTypeTriplets_ExtractMoveCopy_ExecutesInOrder()
         {
             string zipPath = CreateTestZip("mod.zip", new Dictionary<string, string>
+(StringComparer.Ordinal)
             {
                 { "file.txt", "content" }
             });
@@ -252,9 +254,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "Extracted file should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "File should be copied");
             });
         }
@@ -300,9 +302,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "renamed.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "renamed.txt")), Is.True,
                     "File should be moved then renamed");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "file2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "file2.txt")), Is.False,
                     "File should be deleted");
             });
         }

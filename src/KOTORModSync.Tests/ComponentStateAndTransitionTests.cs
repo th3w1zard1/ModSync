@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -84,7 +84,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.Not.Null, "Should return a result");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "File should not be moved when component is unselected");
             });
         }
@@ -116,7 +116,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved when component is selected");
             });
         }
@@ -131,10 +131,10 @@ namespace KOTORModSync.Tests
             File.WriteAllText(Path.Combine(_modDirectory, "file.txt"), "content");
 
             var requiredMod = new ModComponent { Name = "Required", Guid = Guid.NewGuid(), IsSelected = false };
-            var component = new ModComponent 
-            { 
-                Name = "Dependent", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Dependent",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { requiredMod.Guid }
             };
@@ -166,10 +166,10 @@ namespace KOTORModSync.Tests
             File.WriteAllText(Path.Combine(_modDirectory, "file.txt"), "content");
 
             var requiredMod = new ModComponent { Name = "Required", Guid = Guid.NewGuid(), IsSelected = true };
-            var component = new ModComponent 
-            { 
-                Name = "Dependent", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Dependent",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { requiredMod.Guid }
             };
@@ -194,7 +194,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved when dependency is met");
             });
         }
@@ -209,10 +209,10 @@ namespace KOTORModSync.Tests
             File.WriteAllText(Path.Combine(_modDirectory, "file.txt"), "content");
 
             var restrictedMod = new ModComponent { Name = "Restricted", Guid = Guid.NewGuid(), IsSelected = true };
-            var component = new ModComponent 
-            { 
-                Name = "Restricting", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Restricting",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { restrictedMod.Guid }
             };
@@ -244,10 +244,10 @@ namespace KOTORModSync.Tests
             File.WriteAllText(Path.Combine(_modDirectory, "file.txt"), "content");
 
             var restrictedMod = new ModComponent { Name = "Restricted", Guid = Guid.NewGuid(), IsSelected = false };
-            var component = new ModComponent 
-            { 
-                Name = "Restricting", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Restricting",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { restrictedMod.Guid }
             };
@@ -272,7 +272,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved when restriction is not selected");
             });
         }
@@ -334,9 +334,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Selected option should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False,
                     "Unselected option should not execute");
             });
         }

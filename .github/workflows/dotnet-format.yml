@@ -9,6 +9,6 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
-    - run: dotnet restore --framework net9.0
-    - run: dotnet format --verify-no-changes --verbosity diagnostic
+        dotnet-version: '9.0.x'
+    - run: dotnet restore KOTORModSync.sln /p:TargetFramework=net9.0
+    - run: dotnet format whitespace --verify-no-changes KOTORModSync.sln --verbosity diagnostic

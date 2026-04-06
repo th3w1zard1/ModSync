@@ -49,10 +49,21 @@ namespace KOTORModSync.Converters
                     throw new ArgumentNullException(nameof(url));
                 }
 
-                if (!Uri.TryCreate(url, UriKind.Absolute, out Uri _))
+                if (!Uri.TryCreate(url, UriKind.Absolute, out Uri uri))
                 {
                     throw new ArgumentException("Invalid URL");
                 }
+
+                string scheme = uri.Scheme;
+                if (!string.Equals(scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase)
+                    && !string.Equals(scheme, "mailto", StringComparison.OrdinalIgnoreCase))
+                {
+                    Logger.LogWarning($"Refusing to open link with disallowed scheme '{scheme}'.");
+                    return;
+                }
+
+                string launchUrl = uri.GetComponents(UriComponents.AbsoluteUri, UriFormat.UriEscaped);
 
                 OSPlatform runningOs = UtilityHelper.GetOperatingSystem();
                 if (runningOs == OSPlatform.Windows)
@@ -60,18 +71,18 @@ namespace KOTORModSync.Converters
                     _ = Process.Start(
                         new ProcessStartInfo
                         {
-                            FileName = url,
+                            FileName = launchUrl,
                             UseShellExecute = true,
                         }
                     );
                 }
                 else if (runningOs == OSPlatform.OSX)
                 {
-                    _ = Process.Start(fileName: "open", url);
+                    _ = Process.Start(fileName: "open", launchUrl);
                 }
                 else if (runningOs == OSPlatform.Linux)
                 {
-                    _ = Process.Start(fileName: "xdg-open", url);
+                    _ = Process.Start(fileName: "xdg-open", launchUrl);
                 }
                 else
                 {

@@ -206,7 +206,7 @@ namespace KOTORModSync.Tests
             {
                 for (int i = 0; i < 10; i++)
                 {
-                    Assert.That(provider.FileExists($"concurrent_{i}.txt"), Is.True, 
+                    Assert.That(provider.FileExists($"concurrent_{i}.txt"), Is.True,
                         $"File concurrent_{i}.txt should exist after concurrent write");
                 }
             });

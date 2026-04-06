@@ -335,7 +335,7 @@ Instructions:
             FileLoadingService.SaveToFile(originalComponents, tempFilePath);
 
             var exception = Assert.Throws<InvalidDataException>(() => FileLoadingService.LoadFromFile(tempFilePath));
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(exception, Is.Not.Null, "Empty components list should throw InvalidDataException");

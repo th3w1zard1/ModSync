@@ -10,12 +10,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -83,7 +83,7 @@ namespace KOTORModSync.Tests
             Instruction.ActionType actionType, bool destFileExists, bool overwrite)
         {
             string sourceFile = Path.Combine(_modDirectory, "source.txt");
-            string destFile = Path.Combine(_kotorDirectory, "Override", 
+            string destFile = Path.Combine(_kotorDirectory, "Override",
                 actionType == Instruction.ActionType.Rename ? "old.txt" : "source.txt");
 
             File.WriteAllText(sourceFile, "source content");
@@ -97,10 +97,10 @@ namespace KOTORModSync.Tests
             var instruction = new Instruction
             {
                 Action = actionType,
-                Source = new List<string> { 
-                    actionType == Instruction.ActionType.Rename 
-                        ? "<<kotorDirectory>>/Override/old.txt" 
-                        : "<<modDirectory>>/source.txt" 
+                Source = new List<string> {
+                    actionType == Instruction.ActionType.Rename
+                        ? "<<kotorDirectory>>/Override/old.txt"
+                        : "<<modDirectory>>/source.txt"
                 },
                 Destination = actionType == Instruction.ActionType.Rename ? "source.txt" : "<<kotorDirectory>>/Override",
                 Overwrite = overwrite
@@ -128,7 +128,7 @@ namespace KOTORModSync.Tests
                     Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed when skipping");
                     if (actionType != Instruction.ActionType.Rename || destFileExists)
                     {
-                        Assert.That(File.ReadAllText(destFile), Is.EqualTo("existing content"), 
+                        Assert.That(File.ReadAllText(destFile), Is.EqualTo("existing content"),
                             "Existing file should not be overwritten");
                     }
                 }
@@ -139,7 +139,7 @@ namespace KOTORModSync.Tests
                 else
                 {
                     // File doesn't exist - should succeed
-                    Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                    Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                         "Should succeed when destination doesn't exist");
                 }
             });
@@ -185,7 +185,7 @@ namespace KOTORModSync.Tests
             }
 
             var result = await component.ExecuteInstructionsAsync(
-                new List<ModComponent> { depComponent, restrictedComponent, component }, 
+                new List<ModComponent> { depComponent, restrictedComponent, component },
                 fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
             bool fileExists = File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt"));
@@ -193,7 +193,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should complete successfully");
-                Assert.That(fileExists, Is.EqualTo(shouldExecute), 
+                Assert.That(fileExists, Is.EqualTo(shouldExecute),
                     $"File should {(shouldExecute ? "exist" : "not exist")} based on dependency/restriction");
             });
         }
@@ -209,22 +209,22 @@ namespace KOTORModSync.Tests
                 new[] { Instruction.ActionType.Extract, Instruction.ActionType.Move },
                 "ExtractThenMove"
             ).SetName("Sequence_ExtractThenMove");
-            
+
             yield return new TestCaseData(
                 new[] { Instruction.ActionType.Extract, Instruction.ActionType.Copy },
                 "ExtractThenCopy"
             ).SetName("Sequence_ExtractThenCopy");
-            
+
             yield return new TestCaseData(
                 new[] { Instruction.ActionType.Move, Instruction.ActionType.Rename },
                 "MoveThenRename"
             ).SetName("Sequence_MoveThenRename");
-            
+
             yield return new TestCaseData(
                 new[] { Instruction.ActionType.Copy, Instruction.ActionType.Delete },
                 "CopyThenDelete"
             ).SetName("Sequence_CopyThenDelete");
-            
+
             yield return new TestCaseData(
                 new[] { Instruction.ActionType.Extract, Instruction.ActionType.Move, Instruction.ActionType.Delete },
                 "ExtractMoveDelete"
@@ -301,7 +301,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 $"Sequence {testName} should execute successfully");
         }
 
@@ -317,7 +317,7 @@ namespace KOTORModSync.Tests
                 .SetName("Wildcard_FilePrefixTxt");
             yield return new TestCaseData("test?.txt", new[] { "test1.txt" }, new[] { "test10.txt", "test.txt" })
                 .SetName("Wildcard_SingleChar");
-            yield return new TestCaseData("*.*", new[] { "file1.txt", "file2.dat", "test.txt" }, new string[0])
+            yield return new TestCaseData("*.*", new[] { "file1.txt", "file2.dat", "test.txt" }, Array.Empty<string>())
                 .SetName("Wildcard_AllFiles");
         }
 
@@ -350,16 +350,16 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Wildcard move should succeed");
-                
+
                 foreach (var file in shouldMatch)
                 {
-                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", file)), Is.True, 
+                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", file)), Is.True,
                         $"File {file} should match pattern {pattern} and be moved");
                 }
-                
+
                 foreach (var file in shouldNotMatch)
                 {
-                    Assert.That(File.Exists(Path.Combine(_modDirectory, file)), Is.True, 
+                    Assert.That(File.Exists(Path.Combine(_modDirectory, file)), Is.True,
                         $"File {file} should NOT match pattern {pattern} and remain in source");
                 }
             });

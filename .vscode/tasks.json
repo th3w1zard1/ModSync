@@ -1,0 +1,90 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "agent: create template install",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/agents/create_template_kotor_install.sh",
+      "args": [
+        "${workspaceFolder}/tmp/kotor_template",
+        "${workspaceFolder}/tmp/mod_downloads"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "agent: ensure linux holopatcher",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/agents/ensure_linux_holopatcher.sh",
+      "args": [
+        "${workspaceFolder}/src/KOTORModSync.GUI/bin/Debug/net9.0"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "agent: launch gui desktop (k1 full)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/agents/launch_gui_desktop.sh",
+      "args": [
+        "--instruction-file",
+        "${workspaceFolder}/mod-builds/TOMLs/KOTOR1_Full.toml",
+        "--kotor-dir",
+        "${workspaceFolder}/tmp/kotor_template",
+        "--mod-dir",
+        "${workspaceFolder}/tmp/mod_downloads"
+      ],
+      "dependsOn": [
+        "agent: create template install"
+      ],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "agent: launch gui desktop (k2 full)",
+      "type": "shell",
+      "command": "${workspaceFolder}/scripts/agents/launch_gui_desktop.sh",
+      "args": [
+        "--instruction-file",
+        "${workspaceFolder}/mod-builds/TOMLs/KOTOR2_Full.toml",
+        "--kotor-dir",
+        "${workspaceFolder}/tmp/kotor_template",
+        "--mod-dir",
+        "${workspaceFolder}/tmp/mod_downloads"
+      ],
+      "dependsOn": [
+        "agent: create template install"
+      ],
+      "presentation": {
+        "panel": "dedicated",
+        "reveal": "always"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "agent: headless main window smoke",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "test",
+        "${workspaceFolder}/src/KOTORModSync.Tests/KOTORModSync.Tests.csproj",
+        "--filter",
+        "FullyQualifiedName~MainWindowHeadlessTests"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "agent: validate page smoke",
+      "type": "shell",
+      "command": "dotnet",
+      "args": [
+        "test",
+        "${workspaceFolder}/src/KOTORModSync.Tests/KOTORModSync.Tests.csproj",
+        "--filter",
+        "FullyQualifiedName~ValidatePageHeadlessTests"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}

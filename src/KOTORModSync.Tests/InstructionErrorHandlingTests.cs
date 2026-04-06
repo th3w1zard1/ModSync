@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -86,7 +86,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.Not.EqualTo(Instruction.ActionExitCode.Success), "Corrupted archive should fail");
-                Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.InvalidArchive).Or.EqualTo(Instruction.ActionExitCode.ArchiveParseError), 
+                Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.InvalidArchive).Or.EqualTo(Instruction.ActionExitCode.ArchiveParseError),
                     "Should return appropriate error code");
             });
         }
@@ -225,7 +225,7 @@ namespace KOTORModSync.Tests
             catch { }
 
             // Delete with overwrite=true should handle read-only files
-            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.Success).Or.EqualTo(Instruction.ActionExitCode.UnauthorizedAccessException), 
+            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.Success).Or.EqualTo(Instruction.ActionExitCode.UnauthorizedAccessException),
                 "Delete should handle read-only file appropriately");
         }
 
@@ -277,7 +277,7 @@ namespace KOTORModSync.Tests
             File.WriteAllText(validFile, "content");
 
             var component = new ModComponent { Name = "Partial Failure", Guid = Guid.NewGuid(), IsSelected = true };
-            
+
             // First instruction will fail (missing file)
             component.Instructions.Add(new Instruction
             {

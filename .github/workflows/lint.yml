@@ -28,7 +28,7 @@ jobs:
     - name: Setup .NET Core
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '8.0.x' # SDK Version to use;
+        dotnet-version: '9.0.x'
 
     # Format the output of dotnet format
     - name: Add dotnet-format problem matcher
@@ -38,6 +38,6 @@ jobs:
     - name: Install dotnet format
       run: dotnet tool update --global dotnet-format
 
-    # Run dotnet format
-    - name: Run dotnet format
-      run: dotnet format --verify-no-changes
+    # Whitespace + line endings only (analyzer output is not a formatting gate)
+    - name: Run dotnet format (whitespace)
+      run: dotnet format whitespace --verify-no-changes KOTORModSync.sln

@@ -550,7 +550,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 await PumpEventsAsync();
 
-                Assert.False(modA.IsSelected, "Mod A should be unselected");
+                Assert.True(modA.IsSelected, "Mod A should remain selected because restrictions are resolved directly, not transitively");
                 Assert.False(modB.IsSelected, "Mod B should be unselected");
                 Assert.True(modC.IsSelected, "Mod C should be selected");
             }

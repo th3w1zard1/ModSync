@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -537,10 +537,10 @@ namespace KOTORModSync.Tests
         public void ShouldRunInstruction_WithNestedDependencies_AllMet_ReturnsTrue()
         {
             var dep1 = new ModComponent { Name = "Dep 1", Guid = Guid.NewGuid(), IsSelected = true };
-            var dep2 = new ModComponent 
-            { 
-                Name = "Dep 2", 
-                Guid = Guid.NewGuid(), 
+            var dep2 = new ModComponent
+            {
+                Name = "Dep 2",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { dep1.Guid }
             };

@@ -4,6 +4,6 @@
 [submodule "src/RtfDomParserAvalonia"]
 	path = src/RtfDomParserAvalonia
 	url = https://github.com/th3w1zard1/RtfDomParserAvalonia.git
-[submodule "vendor/HoloPatcher.NET"]
-	path = vendor/HoloPatcher.NET
-	url = https://github.com/OldRepublicDevs/HoloPatcher.NET
+[submodule "vendor/KPatcher"]
+	path = vendor/KPatcher
+	url = https://github.com/th3w1zard1/KPatcher.git

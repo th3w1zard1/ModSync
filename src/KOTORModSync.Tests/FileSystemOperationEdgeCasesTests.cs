@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
+using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
-using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -441,6 +441,7 @@ namespace KOTORModSync.Tests
         {
             var archivePath = Path.Combine(_modDirectory, "archive.zip");
             CreateMinimalZip(archivePath, new Dictionary<string, string>
+(StringComparer.Ordinal)
             {
                 { "file1.txt", "content1" },
                 { "file2.txt", "content2" }
@@ -473,6 +474,7 @@ namespace KOTORModSync.Tests
         {
             var archivePath = Path.Combine(_modDirectory, "archive.zip");
             CreateMinimalZip(archivePath, new Dictionary<string, string>
+(StringComparer.Ordinal)
             {
                 { "file.txt", "new content" }
             });

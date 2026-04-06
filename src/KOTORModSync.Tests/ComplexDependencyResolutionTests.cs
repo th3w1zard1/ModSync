@@ -10,8 +10,8 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -387,13 +387,13 @@ namespace KOTORModSync.Tests
         {
             var modA = new ModComponent { Name = "Mod A", Guid = Guid.NewGuid(), IsSelected = true };
             var modB = new ModComponent { Name = "Mod B", Guid = Guid.NewGuid(), IsSelected = false }; // Not selected
-            var modC = new ModComponent 
-            { 
-                Name = "Mod C", 
-                Guid = Guid.NewGuid(), 
+            var modC = new ModComponent
+            {
+                Name = "Mod C",
+                Guid = Guid.NewGuid(),
                 Dependencies = new List<Guid> { modA.Guid },
                 Restrictions = new List<Guid> { modB.Guid },
-                IsSelected = true 
+                IsSelected = true
             };
 
             File.WriteAllText(Path.Combine(_modDirectory, "modA.txt"), "A");
@@ -436,7 +436,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "modA.txt")), Is.True, "Mod A should install");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "modC.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "modC.txt")), Is.True,
                     "Mod C should install (dependency met, restriction not active)");
             });
         }
@@ -452,19 +452,19 @@ namespace KOTORModSync.Tests
             var depComponent = new ModComponent { Name = "Dependency", Guid = Guid.NewGuid(), IsSelected = true };
 
             var option1 = new Option { Name = "Option 1", Guid = Guid.NewGuid(), IsSelected = true };
-            var option2 = new Option 
-            { 
-                Name = "Option 2", 
-                Guid = Guid.NewGuid(), 
+            var option2 = new Option
+            {
+                Name = "Option 2",
+                Guid = Guid.NewGuid(),
                 Dependencies = new List<Guid> { option1.Guid },
-                IsSelected = true 
+                IsSelected = true
             };
-            var option3 = new Option 
-            { 
-                Name = "Option 3", 
-                Guid = Guid.NewGuid(), 
+            var option3 = new Option
+            {
+                Name = "Option 3",
+                Guid = Guid.NewGuid(),
                 Dependencies = new List<Guid> { option2.Guid, depComponent.Guid },
-                IsSelected = true 
+                IsSelected = true
             };
 
             File.WriteAllText(Path.Combine(_modDirectory, "option1.txt"), "option1");
@@ -523,11 +523,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Nested options should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Option 1 should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.True,
                     "Option 2 should execute (depends on option1)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.True,
                     "Option 3 should execute (depends on option2 and component)");
             });
         }

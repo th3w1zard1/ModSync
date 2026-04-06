@@ -16,11 +16,11 @@ using Avalonia.Layout;
 using Avalonia.Media;
 using Avalonia.Threading;
 using JetBrains.Annotations;
+using KOTORModSync;
 using KOTORModSync.Core;
 using KOTORModSync.Dialogs;
 using KOTORModSync.Dialogs.WizardPages;
 using KOTORModSync.Services;
-using KOTORModSync;
 
 namespace KOTORModSync.Controls
 {

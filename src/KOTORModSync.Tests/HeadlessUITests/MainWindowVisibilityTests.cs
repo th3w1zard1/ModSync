@@ -32,6 +32,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
                 () =>
                 {
                     var w = new MainWindow();
+                    w.WizardMode = false;
                     w.EditorMode = editorMode;
                     w.WizardMode = wizardMode;
                     w.Show();

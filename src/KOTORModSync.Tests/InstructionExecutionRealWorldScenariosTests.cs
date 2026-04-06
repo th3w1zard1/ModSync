@@ -10,12 +10,12 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -75,6 +75,7 @@ namespace KOTORModSync.Tests
 
             // Create archive
             var archiveFiles = new Dictionary<string, string>
+(StringComparer.Ordinal)
             {
                 { "mod/override/file1.2da", "2da content" },
                 { "mod/override/file2.tga", "tga content" },
@@ -128,11 +129,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Complete workflow should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.2da")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.2da")), Is.True,
                     "Override file should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.True,
                     "Override TGA should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Modules", "module.mod")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Modules", "module.mod")), Is.True,
                     "Module file should be copied");
             });
         }
@@ -152,10 +153,10 @@ namespace KOTORModSync.Tests
 
             // Mod B: Depends on Mod A
             File.WriteAllText(Path.Combine(_modDirectory, "modB.txt"), "Mod B");
-            var modB = new ModComponent 
-            { 
-                Name = "Mod B", 
-                Guid = Guid.NewGuid(), 
+            var modB = new ModComponent
+            {
+                Name = "Mod B",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { modA.Guid }
             };
@@ -168,10 +169,10 @@ namespace KOTORModSync.Tests
 
             // Mod C: Depends on Mod B
             File.WriteAllText(Path.Combine(_modDirectory, "modC.txt"), "Mod C");
-            var modC = new ModComponent 
-            { 
-                Name = "Mod C", 
-                Guid = Guid.NewGuid(), 
+            var modC = new ModComponent
+            {
+                Name = "Mod C",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { modB.Guid }
             };
@@ -205,7 +206,7 @@ namespace KOTORModSync.Tests
             foreach (var mod in ordered)
             {
                 var result = await mod.ExecuteInstructionsAsync(components, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     $"{mod.Name} should install successfully");
             }
         }
@@ -274,11 +275,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Options mod should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Selected option1 should be installed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False,
                     "Unselected option2 should NOT be installed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.True,
                     "Selected option3 should be installed");
             });
         }
@@ -289,10 +290,10 @@ namespace KOTORModSync.Tests
             File.WriteAllText(Path.Combine(_modDirectory, "restricted.txt"), "Restricted");
 
             var baseMod = new ModComponent { Name = "Base Mod", Guid = Guid.NewGuid(), IsSelected = true };
-            var restrictedMod = new ModComponent 
-            { 
-                Name = "Restricted Mod", 
-                Guid = Guid.NewGuid(), 
+            var restrictedMod = new ModComponent
+            {
+                Name = "Restricted Mod",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { baseMod.Guid } // Requires base mod
             };
@@ -326,7 +327,7 @@ namespace KOTORModSync.Tests
             foreach (var mod in ordered)
             {
                 var result = await mod.ExecuteInstructionsAsync(components, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     $"{mod.Name} should install successfully");
             }
         }

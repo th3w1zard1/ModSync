@@ -5,8 +5,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
-// Enforce a 120-second timeout on all NUnit tests by default.
-// Tests that legitimately need more time must be marked [Category("Slow")].
 [assembly: NUnit.Framework.Timeout(120_000)]
 
 [assembly: SuppressMessage("Usage", "MA0004:Use Task.ConfigureAwait(false)", Justification = "<Pending>", Scope = "member", Target = "~M:KOTORModSync.Tests.VirtualFileSystemWildcardTests.RunBothProviders(System.Collections.Generic.List{KOTORModSync.Core.Instruction},System.String,System.String)~System.Threading.Tasks.Task{System.ValueTuple{KOTORModSync.Core.Services.FileSystem.VirtualFileSystemProvider,KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider}}")]

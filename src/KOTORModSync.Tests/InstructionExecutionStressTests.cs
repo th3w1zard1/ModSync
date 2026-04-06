@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -97,7 +97,7 @@ namespace KOTORModSync.Tests
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Many instructions should succeed");
                 for (int i = 0; i < 50; i++)
                 {
-                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"file{i:D3}.txt")), Is.True, 
+                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"file{i:D3}.txt")), Is.True,
                         $"File {i} should be moved");
                 }
             });
@@ -112,11 +112,11 @@ namespace KOTORModSync.Tests
             for (int i = 0; i < 20; i++)
             {
                 File.WriteAllText(Path.Combine(_modDirectory, $"mod{i}.txt"), $"mod{i}");
-                var component = new ModComponent 
-                { 
-                    Name = $"Mod {i}", 
-                    Guid = Guid.NewGuid(), 
-                    IsSelected = true 
+                var component = new ModComponent
+                {
+                    Name = $"Mod {i}",
+                    Guid = Guid.NewGuid(),
+                    IsSelected = true
                 };
 
                 component.Instructions.Add(new Instruction
@@ -150,7 +150,7 @@ namespace KOTORModSync.Tests
             // Verify all files were moved
             for (int i = 0; i < 20; i++)
             {
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"mod{i}.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"mod{i}.txt")), Is.True,
                     $"Mod {i} file should exist");
             }
         }
@@ -164,10 +164,10 @@ namespace KOTORModSync.Tests
             for (int i = 0; i < 10; i++)
             {
                 File.WriteAllText(Path.Combine(_modDirectory, $"option{i}.txt"), $"option{i}");
-                var option = new Option 
-                { 
-                    Name = $"Option {i}", 
-                    Guid = Guid.NewGuid(), 
+                var option = new Option
+                {
+                    Name = $"Option {i}",
+                    Guid = Guid.NewGuid(),
                     IsSelected = (i % 2 == 0) // Even numbers selected
                 };
 
@@ -210,13 +210,13 @@ namespace KOTORModSync.Tests
                 // Even-numbered options should be installed
                 for (int i = 0; i < 10; i += 2)
                 {
-                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"option{i}.txt")), Is.True, 
+                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"option{i}.txt")), Is.True,
                         $"Option {i} should be installed");
                 }
                 // Odd-numbered options should NOT be installed
                 for (int i = 1; i < 10; i += 2)
                 {
-                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"option{i}.txt")), Is.False, 
+                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", $"option{i}.txt")), Is.False,
                         $"Option {i} should NOT be installed");
                 }
             });
@@ -254,7 +254,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Deep nesting should work");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved from deep nesting");
             });
         }

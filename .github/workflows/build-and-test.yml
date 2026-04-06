@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
 
 env:
-  DOTNET_VERSION: "8.0.x"
+  DOTNET_VERSION: "9.0.x"
 
 jobs:
   build-and-test:
@@ -33,10 +33,10 @@ jobs:
       - name: Build for .NET Framework 4.8
         run: msbuild KOTORModSync.sln /p:Configuration=Release /p:TargetFramework=net48
 
-      - name: Restore NuGet Packages (net8.0)
-        run: dotnet restore --framework net9.0
+      - name: Restore NuGet Packages (net9.0)
+        run: dotnet restore KOTORModSync.sln /p:TargetFramework=net9.0
 
-      - name: Build for .NET 8.0
+      - name: Build for .NET 9.0
         run: dotnet build -c Release --framework net9.0 --no-restore
 
       - name: Run Unit Tests
@@ -66,14 +66,14 @@ jobs:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore Dependencies
-        run: dotnet restore --framework net9.0
+        run: dotnet restore KOTORModSync.sln /p:TargetFramework=net9.0
 
       - name: Run Security Audit
         run: dotnet list package --vulnerable --include-transitive
         continue-on-error: true
 
       - name: Check for Secrets in Code
-        uses: trufflesecurity/trufflehog@main
+        uses: trufflesecurity/trufflehog@v3.88.2
         with:
           extra_args: --only-verified
         continue-on-error: true

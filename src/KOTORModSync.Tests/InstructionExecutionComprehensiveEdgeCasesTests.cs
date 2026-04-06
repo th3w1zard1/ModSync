@@ -8,8 +8,8 @@ using System.IO;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -236,7 +236,7 @@ namespace KOTORModSync.Tests
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
             // Should succeed in lenient mode
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Delete should succeed in lenient mode for missing files");
         }
 
@@ -295,7 +295,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.Not.Null, "Should return a result");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "File should not be moved for unselected component");
             });
         }
@@ -310,7 +310,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Component with no instructions should succeed");
         }
 
@@ -356,9 +356,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should succeed even when all instructions are skipped");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "No files should be moved");
             });
         }

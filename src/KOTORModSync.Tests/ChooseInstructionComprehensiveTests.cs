@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -110,9 +110,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Choose should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Selected option file should exist");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False,
                     "Unselected option file should not exist");
             });
         }
@@ -180,11 +180,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Choose should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "First selected option should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.True,
                     "Second selected option should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.False,
                     "Unselected option should not execute");
             });
         }
@@ -242,9 +242,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Choose should succeed even with no selections");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.False,
                     "No files should be moved when no options selected");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.False,
                     "No files should be moved when no options selected");
             });
         }
@@ -258,10 +258,10 @@ namespace KOTORModSync.Tests
         {
             var depComponent = new ModComponent { Name = "Dependency", Guid = Guid.NewGuid(), IsSelected = true };
             var component = new ModComponent { Name = "Dependent Option Mod", Guid = Guid.NewGuid(), IsSelected = true };
-            var option1 = new Option 
-            { 
-                Name = "Option 1", 
-                Guid = Guid.NewGuid(), 
+            var option1 = new Option
+            {
+                Name = "Option 1",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Dependencies = new List<Guid> { depComponent.Guid }
             };
@@ -303,7 +303,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed when dependency met");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "Option should execute when dependency is met");
             });
         }
@@ -313,10 +313,10 @@ namespace KOTORModSync.Tests
         {
             var restrictedComponent = new ModComponent { Name = "Restricted", Guid = Guid.NewGuid(), IsSelected = true };
             var component = new ModComponent { Name = "Restricted Option Mod", Guid = Guid.NewGuid(), IsSelected = true };
-            var option1 = new Option 
-            { 
-                Name = "Option 1", 
-                Guid = Guid.NewGuid(), 
+            var option1 = new Option
+            {
+                Name = "Option 1",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 Restrictions = new List<Guid> { restrictedComponent.Guid }
             };
@@ -358,7 +358,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed (option skipped)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.False,
                     "Option should not execute when restriction is active");
             });
         }
@@ -426,13 +426,13 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Complex option should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")), Is.True,
                     "First instruction should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")), Is.True,
                     "Second instruction should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.txt")), Is.True,
                     "Third instruction should execute");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "file2.txt")), Is.True,
                     "Copied file should remain in source");
             });
         }
@@ -493,8 +493,8 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Conflicting options should handle correctly");
                 // Both files should exist (different names) or last one wins if same name
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1_file.txt")) || 
-                           File.Exists(Path.Combine(_kotorDirectory, "Override", "option2_file.txt")), 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1_file.txt")) ||
+                           File.Exists(Path.Combine(_kotorDirectory, "Override", "option2_file.txt")),
                            Is.True, "At least one file should exist");
             });
         }
@@ -567,11 +567,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Ordered choose should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt")), Is.True,
                     "All selected options should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt")), Is.True,
                     "All selected options should execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "option3.txt")), Is.True,
                     "All selected options should execute");
             });
         }

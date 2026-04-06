@@ -194,9 +194,9 @@ namespace KOTORModSync.Tests.Services.DistributedCache
 
                 Task<string> outputTask = infoProcess.StandardOutput.ReadToEndAsync();
                 Task<string> errorTask = infoProcess.StandardError.ReadToEndAsync();
-                
+
                 await NetFrameworkCompatibility.WaitForExitAsync(infoProcess, cancellationToken).ConfigureAwait(false);
-                
+
                 string errorOutput = await errorTask.ConfigureAwait(false);
                 string standardOutput = await outputTask.ConfigureAwait(false);
 
@@ -255,9 +255,9 @@ namespace KOTORModSync.Tests.Services.DistributedCache
 
                 Task<string> psOutputTask = psProcess.StandardOutput.ReadToEndAsync();
                 Task<string> psErrorTask = psProcess.StandardError.ReadToEndAsync();
-                
+
                 await NetFrameworkCompatibility.WaitForExitAsync(psProcess, cancellationToken).ConfigureAwait(false);
-                
+
                 string psErrorOutput = await psErrorTask.ConfigureAwait(false);
                 string psStandardOutput = await psOutputTask.ConfigureAwait(false);
 
@@ -272,7 +272,7 @@ namespace KOTORModSync.Tests.Services.DistributedCache
                                              psErrorLower.Contains("unable to connect to podman") ||
                                              psErrorLower.Contains("connection list") ||
                                              (psErrorLower.Contains("dial tcp") && psErrorLower.Contains("127.0.0.1"));
-                    
+
                     await Logger.LogVerboseAsync($"[Podman] Connection error detected: {isPsConnectionError}").ConfigureAwait(false);
                     return !isPsConnectionError;
                 }
@@ -300,10 +300,10 @@ namespace KOTORModSync.Tests.Services.DistributedCache
             switch (_clientFlavor)
             {
                 case CacheClientFlavor.Relay:
-                {
-                    string imageName = "linuxserver/transmission:latest";
-                    string containerName = $"transmission-test-{Guid.NewGuid():N}";
-                    var args = new List<string>
+                    {
+                        string imageName = "linuxserver/transmission:latest";
+                        string containerName = $"transmission-test-{Guid.NewGuid():N}";
+                        var args = new List<string>
                     {
                         "run", "-d",
                         "-p", $"{_webPort}:9091",
@@ -316,14 +316,14 @@ namespace KOTORModSync.Tests.Services.DistributedCache
                         "--name", containerName,
                         imageName,
                     };
-                    return (imageName, args);
-                }
+                        return (imageName, args);
+                    }
 
                 case CacheClientFlavor.Cascade:
-                {
-                    string imageName = "linuxserver/deluge:latest";
-                    string containerName = $"deluge-test-{Guid.NewGuid():N}";
-                    var args = new List<string>
+                    {
+                        string imageName = "linuxserver/deluge:latest";
+                        string containerName = $"deluge-test-{Guid.NewGuid():N}";
+                        var args = new List<string>
                     {
                         "run", "-d",
                         "-p", $"{_webPort}:8112",
@@ -334,8 +334,8 @@ namespace KOTORModSync.Tests.Services.DistributedCache
                         "--name", containerName,
                         imageName,
                     };
-                    return (imageName, args);
-                }
+                        return (imageName, args);
+                    }
 
                 default:
                     throw new InvalidOperationException($"Unsupported client flavor: {_clientFlavor}");
@@ -395,9 +395,9 @@ namespace KOTORModSync.Tests.Services.DistributedCache
 
             try
             {
-            using var process = Process.Start(psi);
-            if (process == null)
-            {
+                using var process = Process.Start(psi);
+                if (process == null)
+                {
                     if (throwOnError)
                     {
                         throw new InvalidOperationException($"Failed to start process: {engine} {arguments}");
@@ -412,8 +412,8 @@ namespace KOTORModSync.Tests.Services.DistributedCache
 
                 await NetFrameworkCompatibility.WaitForExitAsync(process, cancellationToken).ConfigureAwait(false);
 
-            if (process.ExitCode != 0)
-            {
+                if (process.ExitCode != 0)
+                {
                     if (throwOnError)
                     {
                         throw new InvalidOperationException($"Command failed: {engine} {arguments}\nExit Code: {process.ExitCode}\nError: {error}");
@@ -421,9 +421,9 @@ namespace KOTORModSync.Tests.Services.DistributedCache
 
                     await Logger.LogVerboseAsync($"[{engine}] Command '{arguments}' failed with exit code {process.ExitCode}: {error}").ConfigureAwait(false);
                     return string.Empty;
-            }
+                }
 
-            return output;
+                return output;
             }
             catch (Exception ex) when (!throwOnError)
             {

@@ -244,7 +244,7 @@ namespace KOTORModSync.Core.Utility
                     }
 
                     string extractFolderName = Path.GetFileNameWithoutExtension(sfxPath);
-                    string extractPath = Path.Combine(destinationPath, extractFolderName);
+                    string extractPath = Path.GetFullPath(Path.Combine(destinationPath, extractFolderName));
 
                     using (FileStream stream = File.OpenRead(tempSevenZipPath))
                     using (var archive = SevenZipArchive.Open(stream))
@@ -257,8 +257,15 @@ namespace KOTORModSync.Core.Utility
                                 continue;
                             }
 
-                            string destinationItemPath = Path.Combine(extractPath, reader.Entry.Key);
-                            string destinationDirectory = Path.GetDirectoryName(destinationItemPath);
+                            if (!PathHelper.TryGetZipSafeArchiveEntryExtractPath(
+                                    extractPath,
+                                    reader.Entry.Key,
+                                    out string destinationItemPath,
+                                    out string destinationDirectory))
+                            {
+                                Logger.LogWarning($"[ArchiveHelper] Skipping 7z SFX entry with unsafe path: '{reader.Entry.Key}'");
+                                continue;
+                            }
 
                             if (MainConfig.CaseInsensitivePathing && !Directory.Exists(destinationDirectory))
                             {

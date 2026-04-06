@@ -189,6 +189,11 @@ namespace KOTORModSync.Core.Services.FileSystem
                         throw new InvalidOperationException($"'{sourceRelDirPath}' is not a valid 7z self-extracting executable. Cannot extract.");
                     }
 
+                    string extractRootDirectory = isExplicitDestination
+                        ? Path.GetFullPath(destPath).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar)
+                        : Path.GetFullPath(Path.Combine(destPath, Path.GetFileNameWithoutExtension(archive.Name)))
+                            .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
                     using (FileStream stream = File.OpenRead(archive.FullName))
                     {
                         IArchive arch = GetArchiveByExtension(archive.Extension, stream);
@@ -203,12 +208,15 @@ namespace KOTORModSync.Core.Services.FileSystem
                                     continue;
                                 }
 
-                                // When destination is explicitly provided, extract directly to it
-                                // Otherwise, add archive name subfolder to avoid conflicts when extracting multiple archives
-                                string destinationItemPath = isExplicitDestination
-                                    ? Path.Combine(destPath, reader.Entry.Key)
-                                    : Path.Combine(destPath, Path.GetFileNameWithoutExtension(archive.Name), reader.Entry.Key);
-                                string destinationDirectory = Path.GetDirectoryName(destinationItemPath) ?? throw new InvalidOperationException($"Path.GetDirectoryName({destinationItemPath})");
+                                if (!PathHelper.TryGetZipSafeArchiveEntryExtractPath(
+                                        extractRootDirectory,
+                                        reader.Entry.Key,
+                                        out string destinationItemPath,
+                                        out string destinationDirectory))
+                                {
+                                    await Logger.LogWarningAsync($"Skipping archive entry with unsafe path: '{reader.Entry.Key}'").ConfigureAwait(false);
+                                    continue;
+                                }
 
                                 if (MainConfig.CaseInsensitivePathing && !Directory.Exists(destinationDirectory))
                                 {

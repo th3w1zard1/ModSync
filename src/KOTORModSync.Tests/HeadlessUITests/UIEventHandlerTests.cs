@@ -82,11 +82,11 @@ namespace KOTORModSync.Tests.HeadlessUITests
                 landingPage.UpdateState(true, "test.toml", false);
                 var instructionStatus = landingPage.FindControl<TextBlock>("InstructionStatusText");
                 Assert.NotNull(instructionStatus);
-                Assert.Contains("test.toml", instructionStatus.Text ?? string.Empty);
+                Assert.Contains("test.toml", instructionStatus.Text ?? string.Empty, StringComparison.Ordinal);
 
                 // Test with no instruction file
                 landingPage.UpdateState(false, null, false);
-                Assert.Contains("No instruction file", instructionStatus.Text ?? string.Empty);
+                Assert.Contains("No instruction file", instructionStatus.Text ?? string.Empty, StringComparison.Ordinal);
 
                 // Test with editor mode enabled
                 landingPage.UpdateState(true, "test.toml", true);

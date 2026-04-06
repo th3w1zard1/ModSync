@@ -13,7 +13,6 @@ using Avalonia.VisualTree;
 using KOTORModSync;
 using KOTORModSync.Controls;
 using KOTORModSync.Core;
-using KOTORModSync.Models;
 using Xunit;
 
 namespace KOTORModSync.Tests.HeadlessUITests
@@ -21,6 +20,15 @@ namespace KOTORModSync.Tests.HeadlessUITests
     [Collection(HeadlessTestApp.CollectionName)]
     public sealed class InstructionEditorVisibilityTests
     {
+        private static void ExpandEditor(InstructionEditorControl editor)
+        {
+            Expander expander = editor.GetVisualDescendants().OfType<Expander>().FirstOrDefault();
+            if (expander != null)
+            {
+                expander.IsExpanded = true;
+            }
+        }
+
         private static async Task PumpEventsAsync()
         {
             await Dispatcher.UIThread.InvokeAsync(() => { }, DispatcherPriority.Background);
@@ -34,11 +42,11 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Choose,
                     Source = new List<string> { Guid.NewGuid().ToString() }
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -47,6 +55,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find controls
                 var choosePanel = editor.GetLogicalDescendants()
@@ -65,11 +74,11 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Extract,
                     Source = new List<string> { "<<modDirectory>>/file.zip" }
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -78,14 +87,12 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
-                // Find file path controls
-                var filePathPanel = editor.GetLogicalDescendants()
-                    .OfType<StackPanel>()
-                    .FirstOrDefault(p => p.IsVisible && p.Children.OfType<TextBox>().Any());
+                TextBox sourceTextBox = editor.FindControl<TextBox>("SourceTextBox");
 
-                Assert.NotNull(filePathPanel);
-                Assert.True(filePathPanel.IsVisible, "Extract action should show file paths");
+                Assert.NotNull(sourceTextBox);
+                Assert.True(sourceTextBox.IsVisible, "Extract action should show file paths");
             }, DispatcherPriority.Background);
 
             await PumpEventsAsync();
@@ -96,12 +103,12 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.DelDuplicate,
                     Source = new List<string> { ".tpc", ".tga" },
                     Arguments = ".tpc"
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -110,6 +117,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find arguments panel
                 var argumentsPanel = editor.GetLogicalDescendants()
@@ -128,12 +136,12 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Execute,
                     Source = new List<string> { "<<modDirectory>>/program.exe" },
                     Arguments = "/arg1 /arg2"
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -142,6 +150,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find arguments textbox
                 var argumentsTextBox = editor.GetLogicalDescendants()
@@ -160,12 +169,12 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Patcher,
                     Source = new List<string> { "<<modDirectory>>/tslpatchdata" },
                     Arguments = "0"
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -174,6 +183,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find arguments panel
                 var argumentsPanel = editor.GetLogicalDescendants()
@@ -192,13 +202,13 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Move,
                     Source = new List<string> { "<<modDirectory>>/file.txt" },
                     Destination = "<<kotorDirectory>>/Override",
                     Overwrite = true
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -207,6 +217,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find overwrite checkbox
                 var overwriteCheckbox = editor.GetLogicalDescendants()
@@ -225,13 +236,13 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Copy,
                     Source = new List<string> { "<<modDirectory>>/file.txt" },
                     Destination = "<<kotorDirectory>>/Override",
                     Overwrite = true
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -240,6 +251,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find overwrite checkbox
                 var overwriteCheckbox = editor.GetLogicalDescendants()
@@ -258,13 +270,13 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Rename,
                     Source = new List<string> { "<<kotorDirectory>>/Override/old.txt" },
                     Destination = "new.txt",
                     Overwrite = true
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -273,6 +285,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find overwrite checkbox
                 var overwriteCheckbox = editor.GetLogicalDescendants()
@@ -291,13 +304,13 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Extract,
                     Source = new List<string> { "<<modDirectory>>/archive.zip" },
                     Destination = "<<modDirectory>>/extracted",
                     Overwrite = true
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -306,6 +319,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find overwrite checkbox
                 var overwriteCheckbox = editor.GetLogicalDescendants()
@@ -319,16 +333,18 @@ namespace KOTORModSync.Tests.HeadlessUITests
             await PumpEventsAsync();
         }
 
-        [AvaloniaFact(DisplayName = "Overwrite checkbox hidden for Choose action")]
-        public async Task InstructionEditor_ChooseAction_HidesOverwrite()
+        [AvaloniaFact(DisplayName = "Overwrite checkbox visible for Choose action")]
+        public async Task InstructionEditor_ChooseAction_ShowsOverwrite()
         {
+            CheckBox overwriteCheckbox = null;
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Choose,
                     Source = new List<string> { Guid.NewGuid().ToString() }
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -337,31 +353,32 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find overwrite checkbox
-                var overwriteCheckbox = editor.GetLogicalDescendants()
+                overwriteCheckbox = editor.GetLogicalDescendants()
                     .OfType<CheckBox>()
                     .FirstOrDefault(cb => cb.Content?.ToString()?.Contains("Overwrite") == true);
-
-                if (overwriteCheckbox != null)
-                {
-                    Assert.False(overwriteCheckbox.IsVisible, "Choose action should hide overwrite checkbox");
-                }
             }, DispatcherPriority.Background);
 
             await PumpEventsAsync();
+
+            if (overwriteCheckbox != null)
+            {
+                Assert.True(overwriteCheckbox.IsVisible, "Choose action should show overwrite checkbox");
+            }
         }
 
-        [AvaloniaFact(DisplayName = "Overwrite checkbox hidden for Delete action")]
-        public async Task InstructionEditor_DeleteAction_HidesOverwrite()
+        [AvaloniaFact(DisplayName = "Overwrite checkbox visible for Delete action")]
+        public async Task InstructionEditor_DeleteAction_ShowsOverwrite()
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Delete,
                     Source = new List<string> { "<<kotorDirectory>>/Override/file.txt" }
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -370,16 +387,15 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find overwrite checkbox
                 var overwriteCheckbox = editor.GetLogicalDescendants()
                     .OfType<CheckBox>()
                     .FirstOrDefault(cb => cb.Content?.ToString()?.Contains("Overwrite") == true);
 
-                if (overwriteCheckbox != null)
-                {
-                    Assert.False(overwriteCheckbox.IsVisible, "Delete action should hide overwrite checkbox");
-                }
+                Assert.NotNull(overwriteCheckbox);
+                Assert.True(overwriteCheckbox.IsVisible, "Delete action should show overwrite checkbox");
             }, DispatcherPriority.Background);
 
             await PumpEventsAsync();
@@ -390,14 +406,14 @@ namespace KOTORModSync.Tests.HeadlessUITests
         {
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                var instruction = new InstructionViewModel(new Instruction
+                var instruction = new Instruction
                 {
                     Action = Instruction.ActionType.Move,
                     Source = new List<string> { "<<modDirectory>>/file.txt" },
                     Destination = "<<kotorDirectory>>/Override",
                     Dependencies = new List<Guid> { Guid.NewGuid() },
                     Restrictions = new List<Guid> { Guid.NewGuid() }
-                });
+                };
 
                 var editor = new InstructionEditorControl
                 {
@@ -406,6 +422,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                 var window = new Window { Content = editor };
                 window.Show();
+                ExpandEditor(editor);
 
                 // Find conditional execution expander
                 var expander = editor.GetLogicalDescendants()
@@ -432,12 +449,12 @@ namespace KOTORModSync.Tests.HeadlessUITests
             {
                 await Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    var instruction = new InstructionViewModel(new Instruction
+                    var instruction = new Instruction
                     {
                         Action = actionType,
                         Source = new List<string> { actionType == Instruction.ActionType.Choose ? Guid.NewGuid().ToString() : "<<modDirectory>>/file.txt" },
                         Destination = actionType == Instruction.ActionType.Choose ? string.Empty : "<<kotorDirectory>>/Override"
-                    });
+                    };
 
                     var editor = new InstructionEditorControl
                     {
@@ -446,6 +463,7 @@ namespace KOTORModSync.Tests.HeadlessUITests
 
                     var window = new Window { Content = editor };
                     window.Show();
+                    ExpandEditor(editor);
 
                     // Verify editor is created successfully for each action type
                     Assert.NotNull(editor);

@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 using JetBrains.Annotations;
 
+using KOTORModSync.Core;
 using KOTORModSync.Core.FileSystemUtils;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services.Checkpoints;
@@ -556,6 +557,107 @@ Exception Type: {ex.GetType().FullName}";
             return await PlatformAgnosticMethods.ExecuteProcessAsync(holopatcherPath, args).ConfigureAwait(false);
         }
 
+        /// <summary>
+        /// Resolves the KPatcher CLI executable: optional user path, then <c>PATH</c>, then common names next to the app / in Resources.
+        /// </summary>
+        public static async Task<(string path, bool found)> FindKPatcherExecutableAsync(string baseDir = null, string resourcesDir = null)
+        {
+            if (!string.IsNullOrWhiteSpace(MainConfig.KPatcherExecutablePath))
+            {
+                string configured = MainConfig.KPatcherExecutablePath.Trim();
+                if (File.Exists(configured))
+                {
+                    await Logger.LogVerboseAsync($"[KPatcher] Using configured executable: {configured}").ConfigureAwait(false);
+                    return (configured, true);
+                }
+
+                await Logger.LogWarningAsync($"[KPatcher] Configured path not found: {configured}").ConfigureAwait(false);
+            }
+
+            baseDir = baseDir ?? UtilityHelper.GetBaseDirectory();
+            resourcesDir = resourcesDir ?? UtilityHelper.GetResourcesDirectory(baseDir);
+
+            string[] names =
+            {
+                "KPatcher",
+                "KPatcher.exe",
+                "kpatcher",
+                "kpatcher.exe",
+            };
+
+            string pathEnv = Environment.GetEnvironmentVariable("PATH") ?? string.Empty;
+            char sep = Path.PathSeparator;
+            foreach (string dir in pathEnv.Split(sep, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (string.IsNullOrWhiteSpace(dir))
+                {
+                    continue;
+                }
+
+                try
+                {
+                    foreach (string name in names)
+                    {
+                        string candidate = Path.Combine(dir.Trim(), name);
+                        if (File.Exists(candidate))
+                        {
+                            await Logger.LogVerboseAsync($"[KPatcher] Found on PATH: {candidate}").ConfigureAwait(false);
+                            return (candidate, true);
+                        }
+                    }
+                }
+                catch
+                {
+                    // ignore invalid PATH segments
+                }
+            }
+
+            foreach (string name in names)
+            {
+                string nextToApp = Path.Combine(baseDir, name);
+                if (File.Exists(nextToApp))
+                {
+                    return (nextToApp, true);
+                }
+
+                string inResources = Path.Combine(resourcesDir, name);
+                if (File.Exists(inResources))
+                {
+                    return (inResources, true);
+                }
+            }
+
+            return (null, false);
+        }
+
+        /// <summary>Runs TSLPatcher/HoloPatcher/KPatcher with the same CLI shape HoloPatcher expects for <c>--install</c>.</summary>
+        public static async Task<(int exitCode, string stdout, string stderr)> RunTslPatcherCliAsync(
+            string args,
+            Services.FileSystem.IFileSystemProvider fileSystemProvider = null)
+        {
+            string engine = MainConfig.PatcherEngine ?? PatcherEngines.Holopatcher;
+            if (string.Equals(engine, PatcherEngines.KPatcher, StringComparison.OrdinalIgnoreCase))
+            {
+                (string kPath, bool kFound) = await FindKPatcherExecutableAsync().ConfigureAwait(false);
+                if (!kFound)
+                {
+                    return (1, string.Empty, "KPatcher executable not found. Set the path in Settings or install KPatcher on PATH.");
+                }
+
+                string prefix = OperatingSystem.IsWindows() ? string.Empty : "--console ";
+                string fullArgs = prefix + args.TrimStart();
+                await Logger.LogVerboseAsync($"[KPatcher] {kPath} {fullArgs}").ConfigureAwait(false);
+                if (fileSystemProvider != null)
+                {
+                    return await fileSystemProvider.ExecuteProcessAsync(kPath, fullArgs).ConfigureAwait(false);
+                }
+
+                return await PlatformAgnosticMethods.ExecuteProcessAsync(kPath, fullArgs).ConfigureAwait(false);
+            }
+
+            return await RunHolopatcherAsync(args).ConfigureAwait(false);
+        }
+
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0051:Method is too long", Justification = "<Pending>")]
         public static async Task<(bool success, string informationMessage)> ValidateInstallationEnvironmentAsync(
             [NotNull] MainConfig mainConfig,
@@ -573,63 +675,93 @@ Exception Type: {ex.GetType().FullName}";
                     return (false, "Please set your directories first");
                 }
 
-                bool holopatcherIsExecutable = true;
-                bool holopatcherTestExecute = false;
+                bool patcherIsExecutable = true;
+                bool patcherTestExecute = false;
                 string baseDir = UtilityHelper.GetBaseDirectory();
                 string resourcesDir = UtilityHelper.GetResourcesDirectory(baseDir);
+                string engine = MainConfig.PatcherEngine ?? PatcherEngines.Holopatcher;
 
-                // Use helper method to find holopatcher
-                (string holopatcherPath, bool usePythonVersion, bool found) = await FindHolopatcherAsync(resourcesDir, baseDir).ConfigureAwait(false);
-
-                if (!found)
+                if (string.Equals(engine, PatcherEngines.KPatcher, StringComparison.OrdinalIgnoreCase))
                 {
-                    return (false,
-                        "HoloPatcher could not be found in the Resources directory. Please ensure your AV isn't quarantining it and the files exist.");
-                }
+                    (string kPath, bool kFound) = await FindKPatcherExecutableAsync(baseDir, resourcesDir).ConfigureAwait(false);
+                    if (!kFound)
+                    {
+                        return (false,
+                            "KPatcher was selected in Settings but no executable was found. Set the KPatcher path in Settings or add it to PATH.");
+                    }
 
-                if (usePythonVersion)
-                {
-                    // Initialize Python environment and test holopatcher
-                    await Logger.LogVerboseAsync("Initializing embedded Python environment...").ConfigureAwait(false);
                     try
                     {
-                        await EnsurePythonInitializedAsync().ConfigureAwait(false);
+                        await PlatformAgnosticMethods.MakeExecutableAsync(new FileInfo(kPath)).ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {
                         await Logger.LogExceptionAsync(e).ConfigureAwait(false);
-                        holopatcherIsExecutable = false;
+                        patcherIsExecutable = false;
                     }
 
-                    // Test holopatcher execution with Python
-                    (int, string, string) result = await RunHolopatcherPyAsync(holopatcherPath, "--install").ConfigureAwait(false);
-                    if (result.Item1 == 2)
+                    string prefix = OperatingSystem.IsWindows() ? string.Empty : "--console ";
+                    // --install without paths exits 2; --help exits 0 and proves the CLI runs.
+                    (int, string, string) kResult = await PlatformAgnosticMethods.ExecuteProcessAsync(
+                        kPath,
+                        prefix + "--help"
+                    ).ConfigureAwait(false);
+                    if (kResult.Item1 == 0)
                     {
-                        holopatcherTestExecute = true;
+                        patcherTestExecute = true;
                     }
                 }
                 else
                 {
-                    // Use platform-specific executable
-                    await Logger.LogVerboseAsync("Ensuring the holopatcher binary has executable permissions...").ConfigureAwait(false);
-                    try
+                    // HoloPatcher (Resources binary or embedded Python)
+                    (string holopatcherPath, bool usePythonVersion, bool found) = await FindHolopatcherAsync(resourcesDir, baseDir).ConfigureAwait(false);
+
+                    if (!found)
                     {
-                        await PlatformAgnosticMethods.MakeExecutableAsync(new FileInfo(holopatcherPath)).ConfigureAwait(false);
-                    }
-                    catch (Exception e)
-                    {
-                        await Logger.LogExceptionAsync(e).ConfigureAwait(false);
-                        holopatcherIsExecutable = false;
+                        return (false,
+                            "HoloPatcher could not be found in the Resources directory. Please ensure your AV isn't quarantining it and the files exist.");
                     }
 
-                    // Test holopatcher execution with executable
-                    (int, string, string) result = await PlatformAgnosticMethods.ExecuteProcessAsync(
-                        holopatcherPath,
-                        args: "--install"
-                    ).ConfigureAwait(false);
-                    if (result.Item1 == 2)
+                    if (usePythonVersion)
                     {
-                        holopatcherTestExecute = true;
+                        await Logger.LogVerboseAsync("Initializing embedded Python environment...").ConfigureAwait(false);
+                        try
+                        {
+                            await EnsurePythonInitializedAsync().ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            await Logger.LogExceptionAsync(e).ConfigureAwait(false);
+                            patcherIsExecutable = false;
+                        }
+
+                        (int, string, string) result = await RunHolopatcherPyAsync(holopatcherPath, "--install").ConfigureAwait(false);
+                        if (result.Item1 == 2)
+                        {
+                            patcherTestExecute = true;
+                        }
+                    }
+                    else
+                    {
+                        await Logger.LogVerboseAsync("Ensuring the holopatcher binary has executable permissions...").ConfigureAwait(false);
+                        try
+                        {
+                            await PlatformAgnosticMethods.MakeExecutableAsync(new FileInfo(holopatcherPath)).ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            await Logger.LogExceptionAsync(e).ConfigureAwait(false);
+                            patcherIsExecutable = false;
+                        }
+
+                        (int, string, string) result = await PlatformAgnosticMethods.ExecuteProcessAsync(
+                            holopatcherPath,
+                            args: "--install"
+                        ).ConfigureAwait(false);
+                        if (result.Item1 == 2)
+                        {
+                            patcherTestExecute = true;
+                        }
                     }
                 }
 
@@ -724,15 +856,15 @@ Exception Type: {ex.GetType().FullName}";
 
                 string informationMessage = string.Empty;
 
-                if (!holopatcherIsExecutable)
+                if (!patcherIsExecutable)
                 {
-                    informationMessage = "The HoloPatcher binary does not seem to be executable, please see the logs in the output window for more information.";
+                    informationMessage = "The patcher binary does not seem to be executable, please see the logs in the output window for more information.";
                     await Logger.LogErrorAsync(informationMessage).ConfigureAwait(false);
                 }
 
-                if (!holopatcherTestExecute)
+                if (!patcherTestExecute)
                 {
-                    informationMessage = "The holopatcher test execution did not pass, this may mean the"
+                    informationMessage = "The patcher test execution did not pass, this may mean the"
                     + " binary is corrupted or has unresolved dependency problems.";
                     await Logger.LogErrorAsync(informationMessage).ConfigureAwait(false);
                 }
@@ -775,7 +907,7 @@ Exception Type: {ex.GetType().FullName}";
                     await Logger.LogErrorAsync(informationMessage).ConfigureAwait(false);
                 }
 
-                return !string.IsNullOrWhiteSpace(informationMessage)
+                return string.IsNullOrWhiteSpace(informationMessage)
                     ? (success: true, informationMessage: "No issues found. If you encounter any problems during the installation, please submit a bug report.")
                     : (success: false, informationMessage: informationMessage);
             }

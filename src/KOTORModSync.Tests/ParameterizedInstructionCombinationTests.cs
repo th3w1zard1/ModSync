@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -223,14 +223,14 @@ namespace KOTORModSync.Tests
             }
 
             var result = await component.ExecuteInstructionsAsync(
-                new List<ModComponent> { depComponent, restrictedComponent, component }, 
+                new List<ModComponent> { depComponent, restrictedComponent, component },
                 fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should complete successfully");
                 bool fileExists = File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt"));
-                Assert.That(fileExists, Is.EqualTo(shouldExecute), 
+                Assert.That(fileExists, Is.EqualTo(shouldExecute),
                     $"File should {(shouldExecute ? "exist" : "not exist")} based on dependency/restriction combination");
             });
         }
@@ -245,10 +245,10 @@ namespace KOTORModSync.Tests
             var dependencies = new List<ModComponent>();
             for (int i = 0; i < dependencyCount; i++)
             {
-                dependencies.Add(new ModComponent 
-                { 
-                    Name = $"Dependency {i}", 
-                    Guid = Guid.NewGuid(), 
+                dependencies.Add(new ModComponent
+                {
+                    Name = $"Dependency {i}",
+                    Guid = Guid.NewGuid(),
                     IsSelected = allSelected || (i == 0 && dependencyCount == 1) // Make first selected if testing partial
                 });
             }
@@ -280,7 +280,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should complete successfully");
-                Assert.That(fileExists, Is.EqualTo(shouldExecute), 
+                Assert.That(fileExists, Is.EqualTo(shouldExecute),
                     $"File should {(shouldExecute ? "exist" : "not exist")} based on dependency selection");
             });
         }
@@ -326,9 +326,9 @@ namespace KOTORModSync.Tests
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Wildcard move should succeed");
                 Assert.That(movedCount, Is.EqualTo(expectedMatches), $"Should move {expectedMatches} matching files");
                 // Note: remainingCount includes the archive if created, so we check moved files exist
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")) || 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.txt")) ||
                            File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.txt")) ||
-                           File.Exists(Path.Combine(_kotorDirectory, "Override", "test1.txt")), 
+                           File.Exists(Path.Combine(_kotorDirectory, "Override", "test1.txt")),
                            Is.True, "At least one matching file should be moved");
             });
         }
@@ -397,10 +397,10 @@ namespace KOTORModSync.Tests
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Choose instruction should succeed");
                 bool option1FileExists = File.Exists(Path.Combine(_kotorDirectory, "Override", "option1.txt"));
                 bool option2FileExists = File.Exists(Path.Combine(_kotorDirectory, "Override", "option2.txt"));
-                
+
                 Assert.That(option1FileExists, Is.EqualTo(option1Selected), "Option 1 file should exist only if selected");
                 Assert.That(option2FileExists, Is.EqualTo(option2Selected), "Option 2 file should exist only if selected");
-                Assert.That(option1FileExists || option2FileExists, Is.EqualTo(shouldExecuteAny), 
+                Assert.That(option1FileExists || option2FileExists, Is.EqualTo(shouldExecuteAny),
                     "At least one file should exist if any option is selected");
             });
         }
@@ -441,15 +441,15 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Extract should succeed");
-                
+
                 if (hasDestination)
                 {
-                    Assert.That(File.Exists(Path.Combine(_modDirectory, destination, "file.txt")), Is.True, 
+                    Assert.That(File.Exists(Path.Combine(_modDirectory, destination, "file.txt")), Is.True,
                         "File should be extracted to specified destination");
                 }
                 else
                 {
-                    Assert.That(File.Exists(Path.Combine(_modDirectory, "file.txt")), Is.True, 
+                    Assert.That(File.Exists(Path.Combine(_modDirectory, "file.txt")), Is.True,
                         "File should be extracted to archive directory when no destination specified");
                 }
             });
@@ -501,13 +501,13 @@ namespace KOTORModSync.Tests
                 if (overwrite)
                 {
                     // Overwrite=true means strict mode - should return error
-                    Assert.That(result, Is.Not.EqualTo(ModComponent.InstallExitCode.Success), 
+                    Assert.That(result, Is.Not.EqualTo(ModComponent.InstallExitCode.Success),
                         "Should return error when file doesn't exist and Overwrite=true");
                 }
                 else
                 {
                     // Overwrite=false means lenient mode - should succeed silently
-                    Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                    Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                         "Should succeed silently when file doesn't exist and Overwrite=false");
                 }
             }

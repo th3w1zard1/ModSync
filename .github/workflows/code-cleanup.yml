@@ -25,24 +25,25 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '9.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore --framework net9.0
+      run: dotnet restore KOTORModSync.sln /p:TargetFramework=net9.0
 
     - name: Build solution
-      run: dotnet build --no-restore --configuration Release
+      run: dotnet build KOTORModSync.sln --no-restore --configuration Release -f net9.0
 
     - name: Run code style verification
+      shell: bash
       run: |
         if [ "$RUNNER_OS" = "Windows" ]; then
-          .\cleanup-code.ps1 -Verify
+          pwsh -NoProfile -File ./cleanup-code.ps1 -Verify
         else
           ./cleanup-code.sh --verify
         fi
 
     - name: Run tests
-      run: dotnet test --no-build --configuration Release --verbosity normal
+      run: dotnet test KOTORModSync.sln --no-build --configuration Release -f net9.0 --verbosity normal
 
     - name: Upload test results
       uses: actions/upload-artifact@v4
@@ -78,10 +79,10 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '9.0.x'
 
     - name: Restore dependencies
-      run: dotnet restore --framework net9.0
+      run: dotnet restore KOTORModSync.sln /p:TargetFramework=net9.0
 
     - name: Auto-fix code style issues
       run: ./cleanup-code.sh --fix

@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -76,7 +76,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteSingleInstructionAsync(instruction, 0, new List<ModComponent> { component }, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.FileNotFoundPost), 
+            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.FileNotFoundPost),
                 "Should return FileNotFound when executable doesn't exist");
         }
 
@@ -86,9 +86,9 @@ namespace KOTORModSync.Tests
             // Create a simple batch file that writes arguments to a file
             string batchFile = Path.Combine(_modDirectory, "test.bat");
             string outputFile = Path.Combine(_modDirectory, "output.txt");
-            
+
             // Create a batch file that writes its arguments to output.txt
-            File.WriteAllText(batchFile, 
+            File.WriteAllText(batchFile,
                 "@echo off\n" +
                 $"echo %1 > \"{outputFile}\"\n");
 
@@ -111,7 +111,7 @@ namespace KOTORModSync.Tests
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 var result = await component.ExecuteSingleInstructionAsync(instruction, 0, new List<ModComponent> { component }, fileSystemProvider);
-                
+
                 // The result depends on whether the batch file executes successfully
                 // We mainly verify it doesn't crash and handles the instruction
                 Assert.That(result, Is.Not.Null, "Should return a result");
@@ -147,7 +147,7 @@ namespace KOTORModSync.Tests
             if (Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
                 var result = await component.ExecuteSingleInstructionAsync(instruction, 0, new List<ModComponent> { component }, fileSystemProvider);
-                
+
                 // Verify both executables were processed
                 Assert.That(result, Is.Not.Null, "Should return a result");
             }
@@ -173,7 +173,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteSingleInstructionAsync(instruction, 0, new List<ModComponent> { component }, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.FileNotFoundPost), 
+            Assert.That(result, Is.EqualTo(Instruction.ActionExitCode.FileNotFoundPost),
                 "Run should behave the same as Execute");
         }
 
@@ -210,7 +210,7 @@ namespace KOTORModSync.Tests
             // Create a minimal tslpatchdata structure
             string tslpatchdataDir = Path.Combine(_modDirectory, "mod", "tslpatchdata");
             Directory.CreateDirectory(tslpatchdataDir);
-            
+
             // Create minimal required files for patcher
             File.WriteAllText(Path.Combine(tslpatchdataDir, "changes.ini"), "[Changes]");
             File.WriteAllText(Path.Combine(tslpatchdataDir, "namespaces.ini"), "[Namespaces]\nOption0=Option 1\nOption1=Option 2");
@@ -231,7 +231,7 @@ namespace KOTORModSync.Tests
 
             // Note: This will likely fail if HoloPatcher is not available, but tests the instruction setup
             var result = await component.ExecuteSingleInstructionAsync(instruction, 0, new List<ModComponent> { component }, fileSystemProvider);
-            
+
             Assert.That(result, Is.Not.Null, "Should return a result");
         }
 
@@ -240,10 +240,10 @@ namespace KOTORModSync.Tests
         {
             // This would require creating a proper archive with tslpatchdata
             // For now, we test the instruction setup
-            var component = new ModComponent 
-            { 
-                Name = "Patcher AutoExtract", 
-                Guid = Guid.NewGuid(), 
+            var component = new ModComponent
+            {
+                Name = "Patcher AutoExtract",
+                Guid = Guid.NewGuid(),
                 IsSelected = true,
                 ResourceRegistry = new Dictionary<string, ResourceMetadata>(StringComparer.Ordinal)
                 {
@@ -274,7 +274,7 @@ namespace KOTORModSync.Tests
             instruction.SetParentComponent(component);
 
             var result = await component.ExecuteSingleInstructionAsync(instruction, 0, new List<ModComponent> { component }, fileSystemProvider);
-            
+
             Assert.That(result, Is.Not.Null, "Should return a result");
         }
 
@@ -287,7 +287,7 @@ namespace KOTORModSync.Tests
         {
             // Test that invalid action types are handled
             var component = new ModComponent { Name = "Invalid Action", Guid = Guid.NewGuid(), IsSelected = true };
-            
+
             // Create instruction with potentially invalid setup
             var instruction = new Instruction
             {
@@ -303,7 +303,7 @@ namespace KOTORModSync.Tests
             instruction.SetParentComponent(component);
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
-            
+
             // Should handle null source gracefully
             Assert.That(result, Is.Not.Null, "Should return a result even with invalid instruction");
         }
@@ -326,8 +326,8 @@ namespace KOTORModSync.Tests
             instruction.SetParentComponent(component);
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
-            
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Should handle empty source list gracefully");
         }
 
@@ -349,7 +349,7 @@ namespace KOTORModSync.Tests
             instruction.SetParentComponent(component);
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
-            
+
             // Should handle invalid placeholders gracefully
             Assert.That(result, Is.Not.Null, "Should return a result even with invalid placeholder");
         }
@@ -384,7 +384,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Nested path should resolve");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved from nested directory");
             });
         }
@@ -414,7 +414,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Relative path should resolve");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved");
             });
         }

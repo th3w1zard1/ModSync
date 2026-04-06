@@ -168,14 +168,26 @@
 
   <PropertyGroup>
     <LegacyHoloPatcherBinDir>$(SolutionDir)vendor$(DirectorySeparatorChar)bin$(DirectorySeparatorChar)</LegacyHoloPatcherBinDir>
+    <VendorHoloPatcherProject>$(SolutionDir)vendor$(DirectorySeparatorChar)HoloPatcher.NET$(DirectorySeparatorChar)src$(DirectorySeparatorChar)HoloPatcher$(DirectorySeparatorChar)HoloPatcher.csproj</VendorHoloPatcherProject>
+    <VendorHoloPatcherAssetsFile>$(SolutionDir)vendor$(DirectorySeparatorChar)HoloPatcher.NET$(DirectorySeparatorChar)src$(DirectorySeparatorChar)HoloPatcher$(DirectorySeparatorChar)obj$(DirectorySeparatorChar)project.assets.json</VendorHoloPatcherAssetsFile>
     <VendorHoloPatcherOutputDir>$(SolutionDir)vendor$(DirectorySeparatorChar)HoloPatcher.NET$(DirectorySeparatorChar)src$(DirectorySeparatorChar)HoloPatcher$(DirectorySeparatorChar)bin$(DirectorySeparatorChar)$(Configuration)$(DirectorySeparatorChar)$(TargetFramework)$(DirectorySeparatorChar)</VendorHoloPatcherOutputDir>
-    <MacHoloPatcherSource Condition="Exists('$(LegacyHoloPatcherBinDir)HoloPatcher.app$(DirectorySeparatorChar)Contents$(DirectorySeparatorChar)MacOS$(DirectorySeparatorChar)HoloPatcher')">$(LegacyHoloPatcherBinDir)HoloPatcher.app$(DirectorySeparatorChar)Contents$(DirectorySeparatorChar)MacOS$(DirectorySeparatorChar)HoloPatcher</MacHoloPatcherSource>
-    <MacHoloPatcherSource Condition="'$(MacHoloPatcherSource)' == '' AND Exists('$(VendorHoloPatcherOutputDir)HoloPatcher')">$(VendorHoloPatcherOutputDir)HoloPatcher</MacHoloPatcherSource>
-    <LinuxHoloPatcherSource Condition="Exists('$(LegacyHoloPatcherBinDir)HoloPatcher_linux')">$(LegacyHoloPatcherBinDir)HoloPatcher_linux</LinuxHoloPatcherSource>
-    <LinuxHoloPatcherSource Condition="'$(LinuxHoloPatcherSource)' == '' AND Exists('$(VendorHoloPatcherOutputDir)HoloPatcher')">$(VendorHoloPatcherOutputDir)HoloPatcher</LinuxHoloPatcherSource>
-    <WindowsHoloPatcherSource Condition="Exists('$(LegacyHoloPatcherBinDir)HoloPatcher.exe')">$(LegacyHoloPatcherBinDir)HoloPatcher.exe</WindowsHoloPatcherSource>
-    <WindowsHoloPatcherSource Condition="'$(WindowsHoloPatcherSource)' == '' AND Exists('$(VendorHoloPatcherOutputDir)HoloPatcher.exe')">$(VendorHoloPatcherOutputDir)HoloPatcher.exe</WindowsHoloPatcherSource>
+    <MacLegacyHoloPatcherSource>$(LegacyHoloPatcherBinDir)HoloPatcher.app$(DirectorySeparatorChar)Contents$(DirectorySeparatorChar)MacOS$(DirectorySeparatorChar)HoloPatcher</MacLegacyHoloPatcherSource>
+    <MacVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)HoloPatcher</MacVendorHoloPatcherSource>
+    <LinuxLegacyHoloPatcherSource>$(LegacyHoloPatcherBinDir)HoloPatcher_linux</LinuxLegacyHoloPatcherSource>
+    <LinuxVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)HoloPatcher</LinuxVendorHoloPatcherSource>
+    <WindowsLegacyHoloPatcherSource>$(LegacyHoloPatcherBinDir)HoloPatcher.exe</WindowsLegacyHoloPatcherSource>
+    <WindowsVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)HoloPatcher.exe</WindowsVendorHoloPatcherSource>
   </PropertyGroup>
+
+  <Target Name="BuildVendorHoloPatcher" BeforeTargets="PostBuild"
+    Condition="'$(DesignTimeBuild)' != 'true' AND Exists('$(VendorHoloPatcherProject)') AND Exists('$(VendorHoloPatcherAssetsFile)') AND !Exists('$(WindowsVendorHoloPatcherSource)') AND !Exists('$(MacVendorHoloPatcherSource)') AND !Exists('$(LinuxVendorHoloPatcherSource)')">
+    <Message Importance="High" Text="Building vendor HoloPatcher from $(VendorHoloPatcherProject) for $(Configuration)|$(TargetFramework)..." />
+    <MSBuild Projects="$(VendorHoloPatcherProject)"
+      Targets="Build"
+      Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)"
+      BuildInParallel="false"
+      StopOnFirstFailure="true" />
+  </Target>
 
   <!-- Install Python dependencies at build time - DISABLED due to subprocess deadlock in MSBuild -->
   <!-- Python dependencies will be installed at runtime on first use instead -->
@@ -214,12 +226,20 @@
       SkipUnchangedFiles="true" />
 
     <!-- For Mac -->
-    <Copy Condition=" ('$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64') AND Exists('$(MacHoloPatcherSource)') "
-      SourceFiles="$(MacHoloPatcherSource)"
+    <Copy Condition=" ('$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64') AND Exists('$(MacVendorHoloPatcherSource)') "
+      SourceFiles="$(MacVendorHoloPatcherSource)"
       DestinationFolder="$(TargetDir)Resources$(DirectorySeparatorChar)"
       SkipUnchangedFiles="true" />
-    <Copy Condition=" ('$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64') AND '$(PublishDir)' != '' AND Exists('$(MacHoloPatcherSource)') "
-      SourceFiles="$(MacHoloPatcherSource)"
+    <Copy Condition=" ('$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64') AND !Exists('$(MacVendorHoloPatcherSource)') AND Exists('$(MacLegacyHoloPatcherSource)') "
+      SourceFiles="$(MacLegacyHoloPatcherSource)"
+      DestinationFolder="$(TargetDir)Resources$(DirectorySeparatorChar)"
+      SkipUnchangedFiles="true" />
+    <Copy Condition=" ('$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64') AND '$(PublishDir)' != '' AND Exists('$(MacVendorHoloPatcherSource)') "
+      SourceFiles="$(MacVendorHoloPatcherSource)"
+      DestinationFolder="$(PublishDir)Resources$(DirectorySeparatorChar)"
+      SkipUnchangedFiles="true" />
+    <Copy Condition=" ('$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64') AND '$(PublishDir)' != '' AND !Exists('$(MacVendorHoloPatcherSource)') AND Exists('$(MacLegacyHoloPatcherSource)') "
+      SourceFiles="$(MacLegacyHoloPatcherSource)"
       DestinationFolder="$(PublishDir)Resources$(DirectorySeparatorChar)"
       SkipUnchangedFiles="true" />
     <Move Condition=" ('$(RuntimeIdentifier)' == 'osx-x64' OR '$(RuntimeIdentifier)' == 'osx-arm64') AND Exists('$(TargetDir)Resources$(DirectorySeparatorChar)HoloPatcher') "
@@ -230,30 +250,48 @@
       DestinationFiles="$(PublishDir)Resources$(DirectorySeparatorChar)holopatcher" />
 
     <!-- For Linux -->
-    <Copy Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND Exists('$(LinuxHoloPatcherSource)') "
-      SourceFiles="$(LinuxHoloPatcherSource)"
+    <Copy Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND Exists('$(LinuxVendorHoloPatcherSource)') "
+      SourceFiles="$(LinuxVendorHoloPatcherSource)"
       DestinationFolder="$(TargetDir)Resources$(DirectorySeparatorChar)"
       SkipUnchangedFiles="true" />
-    <Copy Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND '$(PublishDir)' != '' AND Exists('$(LinuxHoloPatcherSource)') "
-      SourceFiles="$(LinuxHoloPatcherSource)"
+    <Copy Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND !Exists('$(LinuxVendorHoloPatcherSource)') AND Exists('$(LinuxLegacyHoloPatcherSource)') "
+      SourceFiles="$(LinuxLegacyHoloPatcherSource)"
+      DestinationFolder="$(TargetDir)Resources$(DirectorySeparatorChar)"
+      SkipUnchangedFiles="true" />
+    <Copy Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND '$(PublishDir)' != '' AND Exists('$(LinuxVendorHoloPatcherSource)') "
+      SourceFiles="$(LinuxVendorHoloPatcherSource)"
       DestinationFolder="$(PublishDir)Resources$(DirectorySeparatorChar)"
       SkipUnchangedFiles="true" />
-    <Move Condition=" '$(RuntimeIdentifier)' == 'linux-x64' "
+    <Copy Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND '$(PublishDir)' != '' AND !Exists('$(LinuxVendorHoloPatcherSource)') AND Exists('$(LinuxLegacyHoloPatcherSource)') "
+      SourceFiles="$(LinuxLegacyHoloPatcherSource)"
+      DestinationFolder="$(PublishDir)Resources$(DirectorySeparatorChar)"
+      SkipUnchangedFiles="true" />
+    <Move Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND Exists('$(TargetDir)Resources$(DirectorySeparatorChar)HoloPatcher_linux') "
       SourceFiles="$(TargetDir)Resources$(DirectorySeparatorChar)HoloPatcher_linux"
       DestinationFiles="$(TargetDir)Resources$(DirectorySeparatorChar)holopatcher" />
-    <Move Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND '$(PublishDir)' != '' "
+    <Move Condition=" '$(RuntimeIdentifier)' == 'linux-x64' AND '$(PublishDir)' != '' AND Exists('$(PublishDir)Resources$(DirectorySeparatorChar)HoloPatcher_linux') "
       SourceFiles="$(PublishDir)Resources$(DirectorySeparatorChar)HoloPatcher_linux"
       DestinationFiles="$(PublishDir)Resources$(DirectorySeparatorChar)holopatcher" />
 
     <!-- For Windows -->
     <Copy
-      Condition=" '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64' AND Exists('$(WindowsHoloPatcherSource)') "
-      SourceFiles="$(WindowsHoloPatcherSource)"
+      Condition=" '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64' AND Exists('$(WindowsVendorHoloPatcherSource)') "
+      SourceFiles="$(WindowsVendorHoloPatcherSource)"
       DestinationFiles="$(TargetDir)Resources$(DirectorySeparatorChar)holopatcher.exe"
       SkipUnchangedFiles="true" />
     <Copy
-      Condition=" '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64' AND '$(PublishDir)' != '' AND Exists('$(WindowsHoloPatcherSource)') "
-      SourceFiles="$(WindowsHoloPatcherSource)"
+      Condition=" '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64' AND !Exists('$(WindowsVendorHoloPatcherSource)') AND Exists('$(WindowsLegacyHoloPatcherSource)') "
+      SourceFiles="$(WindowsLegacyHoloPatcherSource)"
+      DestinationFiles="$(TargetDir)Resources$(DirectorySeparatorChar)holopatcher.exe"
+      SkipUnchangedFiles="true" />
+    <Copy
+      Condition=" '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64' AND '$(PublishDir)' != '' AND Exists('$(WindowsVendorHoloPatcherSource)') "
+      SourceFiles="$(WindowsVendorHoloPatcherSource)"
+      DestinationFiles="$(PublishDir)Resources$(DirectorySeparatorChar)holopatcher.exe"
+      SkipUnchangedFiles="true" />
+    <Copy
+      Condition=" '$(RuntimeIdentifier)' != 'linux-x64' AND '$(RuntimeIdentifier)' != 'osx-x64' AND '$(RuntimeIdentifier)' != 'osx-arm64' AND '$(PublishDir)' != '' AND !Exists('$(WindowsVendorHoloPatcherSource)') AND Exists('$(WindowsLegacyHoloPatcherSource)') "
+      SourceFiles="$(WindowsLegacyHoloPatcherSource)"
       DestinationFiles="$(PublishDir)Resources$(DirectorySeparatorChar)holopatcher.exe"
       SkipUnchangedFiles="true" />
 

@@ -283,13 +283,13 @@ namespace KOTORModSync
                 {
                     spoilerFreeMode = mainWindow.SpoilerFreeMode;
                 }
-                
+
                 // Don't copy URL in spoiler-free mode
                 if (spoilerFreeMode)
                 {
                     return;
                 }
-                
+
                 if (sender is MenuItem menuItem && menuItem.DataContext is DownloadProgress progress)
                 {
                     if (string.IsNullOrEmpty(progress.Url))

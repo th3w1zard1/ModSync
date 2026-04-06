@@ -55,7 +55,7 @@ namespace KOTORModSync.Core
             noAdmin = false;
             caseInsensitivePathing = true;
             validateAndReplaceInvalidArchives = true;
-            filterDownloadsByResolution = true;
+            filterDownloadsByResolution = false;
         }
 
         [JetBrains.Annotations.NotNull]
@@ -158,6 +158,27 @@ namespace KOTORModSync.Core
         public static string SelectedHolopatcherVersion { get; private set; }
         /// <summary>Instance accessor for <see cref="SelectedHolopatcherVersion"/>.</summary>
         public string selectedHolopatcherVersion { get => SelectedHolopatcherVersion; set => SelectedHolopatcherVersion = value; }
+
+        /// <summary>
+        /// Which backend runs TSLPatcher-style installs (<c>--install --game-dir --tslpatchdata</c>).
+        /// Use <see cref="PatcherEngines.Holopatcher"/> (Resources holopatcher / PyKotor) or <see cref="PatcherEngines.KPatcher"/> (external KPatcher CLI).
+        /// </summary>
+        public static string PatcherEngine { get; private set; } = PatcherEngines.Holopatcher;
+        /// <summary>Instance accessor for <see cref="PatcherEngine"/>.</summary>
+        public string patcherEngine
+        {
+            get => PatcherEngine;
+            set => PatcherEngine = string.IsNullOrWhiteSpace(value) ? PatcherEngines.Holopatcher : value;
+        }
+
+        /// <summary>Optional full path to KPatcher executable when <see cref="PatcherEngine"/> is <see cref="PatcherEngines.KPatcher"/>.</summary>
+        public static string KPatcherExecutablePath { get; private set; }
+        /// <summary>Instance accessor for <see cref="KPatcherExecutablePath"/>.</summary>
+        public string kpatcherExecutablePath
+        {
+            get => KPatcherExecutablePath;
+            set => KPatcherExecutablePath = value;
+        }
 
         /// <summary>Determines whether file-system watchers are enabled. Mutate via <see cref="enableFileWatcher"/>.</summary>
         public static bool EnableFileWatcher { get; private set; }

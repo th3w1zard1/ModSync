@@ -361,7 +361,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(v, Is.Not.Null, "Virtual file system provider should not be null");
-                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0), 
+                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0),
                     "Wildcard move with star pattern should not produce validation errors");
                 Assert.That(v.GetValidationIssues(), Is.Not.Null, "Validation issues list should not be null");
                 Assert.That(File.Exists(archivePath), Is.True, "Source archive should exist");
@@ -394,7 +394,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(v, Is.Not.Null, "Virtual file system provider should not be null");
-                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0), 
+                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0),
                     "Wildcard move with star pattern should not produce validation errors");
                 Assert.That(v.GetValidationIssues(), Is.Not.Null, "Validation issues list should not be null");
                 Assert.That(File.Exists(archivePath), Is.True, "Source archive should exist");
@@ -428,7 +428,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(v, Is.Not.Null, "Virtual file system provider should not be null");
-                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0), 
+                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0),
                     "Wildcard move with star pattern should not produce validation errors");
                 Assert.That(v.GetValidationIssues(), Is.Not.Null, "Validation issues list should not be null");
                 Assert.That(File.Exists(archivePath), Is.True, "Source archive should exist");
@@ -480,15 +480,15 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(extractedFiles, Is.Not.Null, "Extracted files list should not be null");
                 Assert.That(extractedFiles, Is.Not.Empty, "Extracted files list should not be empty");
-                Assert.That(extractedFiles.Count(x => x.EndsWith("version.txt", StringComparison.Ordinal)), Is.EqualTo(2), 
+                Assert.That(extractedFiles.Count(x => x.EndsWith("version.txt", StringComparison.Ordinal)), Is.EqualTo(2),
                     "Should extract version.txt from both matching archives");
-                Assert.That(extractedFiles, Has.Some.EqualTo(@"mod_v1.0\version.txt"), 
+                Assert.That(extractedFiles, Has.Some.EqualTo(@"mod_v1.0\version.txt"),
                     "Should extract version.txt from mod_v1.0 archive");
-                Assert.That(extractedFiles, Has.Some.EqualTo(@"mod_v2.0\version.txt"), 
+                Assert.That(extractedFiles, Has.Some.EqualTo(@"mod_v2.0\version.txt"),
                     "Should extract version.txt from mod_v2.0 archive");
-                Assert.That(extractedFiles.Any(x => x.Contains("data.txt")), Is.False, 
+                Assert.That(extractedFiles.Any(x => x.Contains("data.txt")), Is.False,
                     "File from non-matching archive should not be extracted");
-                Assert.That(extractedFiles.Any(x => x.Contains("other")), Is.False, 
+                Assert.That(extractedFiles.Any(x => x.Contains("other")), Is.False,
                     "Files from non-matching archive should not be extracted");
             });
         }
@@ -531,7 +531,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(v, Is.Not.Null, "Virtual file system provider should not be null");
-                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0), 
+                Assert.That(v.GetValidationIssues().Count(issue => issue.Severity >= ValidationSeverity.Error), Is.EqualTo(0),
                     "Wildcard move with star pattern should not produce validation errors");
                 Assert.That(v.GetValidationIssues(), Is.Not.Null, "Validation issues list should not be null");
                 Assert.That(File.Exists(archivePath), Is.True, "Source archive should exist");
@@ -547,7 +547,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(copiedFiles, Is.Not.Null, "Copied files list should not be null");
-                Assert.That(copiedFiles, Has.Count.EqualTo(6), 
+                Assert.That(copiedFiles, Has.Count.EqualTo(6),
                     "Should copy 6 files matching wildcard patterns (2 .ncs, 2 .dlg, 2 .2da)");
                 Assert.That(copiedFiles, Does.Contain("script1.ncs"), "Should contain first .ncs file");
                 Assert.That(copiedFiles, Does.Contain("script2.ncs"), "Should contain second .ncs file");
@@ -555,7 +555,7 @@ namespace KOTORModSync.Tests
                 Assert.That(copiedFiles, Does.Contain("dialog2.dlg"), "Should contain second .dlg file");
                 Assert.That(copiedFiles, Does.Contain("appearance.2da"), "Should contain first .2da file");
                 Assert.That(copiedFiles, Does.Contain("portraits.2da"), "Should contain second .2da file");
-                Assert.That(copiedFiles, Does.Not.Contain("readme.txt"), 
+                Assert.That(copiedFiles, Does.Not.Contain("readme.txt"),
                     "Files not matching wildcard patterns should not be copied");
             });
         }
@@ -579,7 +579,7 @@ namespace KOTORModSync.Tests
 
             var exception = Assert.ThrowsAsync<Core.Exceptions.WildcardPatternNotFoundException>(
                 async () => await RunBothProviders(instructions, _sourceDir, _destinationDir).ConfigureAwait(false));
-            
+
             Assert.Multiple(() =>
             {
                 Assert.That(exception, Is.Not.Null, "Wildcard pattern with no matches should throw WildcardPatternNotFoundException");

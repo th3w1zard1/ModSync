@@ -61,7 +61,7 @@ namespace KOTORModSync.Tests
                 Assert.That(pieceHashes, Is.Not.Null, "Piece hashes should not be null");
                 Assert.That(pieceHashes.Length % 40, Is.EqualTo(0), "Piece hashes length should be multiple of 40 (20 bytes per piece hash)");
                 Assert.That(pieceHashes, Does.Match("^[0-9a-f]*$"), "Piece hashes should contain only hexadecimal digits");
-                
+
                 // File should exist
                 Assert.That(File.Exists(testFile), Is.True, "Test file should exist");
             });
@@ -81,7 +81,7 @@ namespace KOTORModSync.Tests
                 Assert.That(sha256, Is.Not.Null, "SHA-256 hash should not be null");
                 Assert.That(sha256, Has.Length.EqualTo(64), "SHA-256 hash should be exactly 64 hexadecimal characters");
                 Assert.That(sha256, Does.Match("^[0-9a-f]+$"), "SHA-256 hash should contain only hexadecimal digits");
-                
+
                 // Piece length should be larger for large files
                 Assert.That(pieceLength, Is.GreaterThanOrEqualTo(65536), "Piece length should be at least 64KB for large files");
                 Assert.That(pieceLength, Is.LessThanOrEqualTo(4194304), "Piece length should not exceed 4MB maximum");
@@ -92,7 +92,7 @@ namespace KOTORModSync.Tests
                 int pieceCount = pieceHashes.Length / 40;
                 Assert.That(pieceCount, Is.GreaterThan(1), "Large file should have multiple pieces");
                 Assert.That(pieceCount, Is.LessThanOrEqualTo(1048576), "Piece count should not exceed 2^20 maximum");
-                
+
                 // File should exist and have correct size
                 Assert.That(File.Exists(testFile), Is.True, "Test file should exist");
                 Assert.That(new FileInfo(testFile).Length, Is.EqualTo(10L * 1024 * 1024), "File should be 10MB");
@@ -112,20 +112,20 @@ namespace KOTORModSync.Tests
             {
                 Assert.That(result1.contentHashSHA256, Is.Not.Null, "First SHA-256 hash should not be null");
                 Assert.That(result2.contentHashSHA256, Is.Not.Null, "Second SHA-256 hash should not be null");
-                Assert.That(result1.contentHashSHA256, Is.EqualTo(result2.contentHashSHA256), 
+                Assert.That(result1.contentHashSHA256, Is.EqualTo(result2.contentHashSHA256),
                     "Same file should produce identical SHA-256 hashes on multiple computations");
                 Assert.That(result1.contentHashSHA256, Has.Length.EqualTo(64), "SHA-256 hash should be 64 characters");
-                
-                Assert.That(result1.pieceLength, Is.EqualTo(result2.pieceLength), 
+
+                Assert.That(result1.pieceLength, Is.EqualTo(result2.pieceLength),
                     "Same file should produce identical piece length on multiple computations");
                 Assert.That(result1.pieceLength, Is.GreaterThan(0), "Piece length should be greater than zero");
-                
+
                 Assert.That(result1.pieceHashes, Is.Not.Null, "First piece hashes should not be null");
                 Assert.That(result2.pieceHashes, Is.Not.Null, "Second piece hashes should not be null");
-                Assert.That(result1.pieceHashes, Is.EqualTo(result2.pieceHashes), 
+                Assert.That(result1.pieceHashes, Is.EqualTo(result2.pieceHashes),
                     "Same file should produce identical piece hashes on multiple computations");
                 Assert.That(result1.pieceHashes.Length % 40, Is.EqualTo(0), "Piece hashes length should be multiple of 40");
-                
+
                 Assert.That(File.Exists(testFile), Is.True, "Test file should exist");
             });
         }
@@ -214,7 +214,7 @@ namespace KOTORModSync.Tests
                 Assert.That(File.Exists(testFile), Is.True, "Test file should exist");
                 Assert.That(metadata, Is.Not.Null, "Metadata should not be null");
                 Assert.That(metadata.FileSize, Is.EqualTo(99999), "Metadata should have wrong file size");
-                Assert.That(new FileInfo(testFile).Length, Is.Not.EqualTo(metadata.FileSize), 
+                Assert.That(new FileInfo(testFile).Length, Is.Not.EqualTo(metadata.FileSize),
                     "Actual file size should differ from metadata file size");
             });
         }
@@ -245,7 +245,7 @@ namespace KOTORModSync.Tests
                 Assert.That(pieceSize, Is.GreaterThanOrEqualTo(131072), "100GB file should use at least 128KB piece size");
                 Assert.That(pieceSize, Is.GreaterThan(0), "Piece size should be greater than zero");
                 Assert.That(pieceSize, Is.LessThanOrEqualTo(4194304), "Piece size should not exceed 4MB maximum");
-                
+
                 // Verify piece count constraint
                 long pieceCount = (fileSize + pieceSize - 1) / pieceSize;
                 Assert.That(pieceCount, Is.LessThanOrEqualTo(1048576), "Piece count should not exceed 2^20 maximum");

@@ -1266,12 +1266,17 @@ namespace KOTORModSync.Core
                     string baseDir = UtilityHelper.GetBaseDirectory();
                     string resourcesDir = UtilityHelper.GetResourcesDirectory(baseDir);
 
-                    // Use helper method to find holopatcher
-                    (string holopatcherPath, bool usePythonVersion, bool found) = await Services.InstallationService.FindHolopatcherAsync(resourcesDir, baseDir).ConfigureAwait(false);
+                    string engine = MainConfig.PatcherEngine ?? PatcherEngines.Holopatcher;
+                    bool useKpatcher = string.Equals(engine, PatcherEngines.KPatcher, StringComparison.OrdinalIgnoreCase);
 
-                    if (!found)
+                    (string holopatcherPath, bool usePythonVersion, bool found) = (null, false, false);
+                    if (!useKpatcher)
                     {
-                        throw new FileNotFoundException($"Could not load HoloPatcher from the '{resourcesDir}' directory!");
+                        (holopatcherPath, usePythonVersion, found) = await Services.InstallationService.FindHolopatcherAsync(resourcesDir, baseDir).ConfigureAwait(false);
+                        if (!found)
+                        {
+                            throw new FileNotFoundException($"Could not load HoloPatcher from the '{resourcesDir}' directory!");
+                        }
                     }
 
                     if (int.TryParse(Arguments.Trim(), System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out int namespaceId))
@@ -1281,29 +1286,34 @@ namespace KOTORModSync.Core
                         await Logger.LogWarningAsync(message).ConfigureAwait(false);
                     }
 
-                    await Logger.LogAsync($"Using CLI to run command: '{holopatcherPath}' {args}").ConfigureAwait(false);
-
                     int exitCode;
                     string output;
                     string error;
-                    if (usePythonVersion)
+                    if (useKpatcher)
                     {
-                        // Use Python.NET to run holopatcher
-                        (exitCode, output, error) = await Services.InstallationService.RunHolopatcherPyAsync(
-                                holopatcherPath,
-                                args
-                            ).ConfigureAwait(false);
+                        await Logger.LogAsync($"Using KPatcher CLI: {args}").ConfigureAwait(false);
+                        (exitCode, output, error) = await Services.InstallationService.RunTslPatcherCliAsync(args, _fileSystemProvider).ConfigureAwait(false);
                     }
                     else
                     {
-                        // Use platform-specific executable
-                        (exitCode, output, error) = await _fileSystemProvider.ExecuteProcessAsync(
-                            holopatcherPath,
-                            args
-                        ).ConfigureAwait(false);
+                        await Logger.LogAsync($"Using CLI to run command: '{holopatcherPath}' {args}").ConfigureAwait(false);
+                        if (usePythonVersion)
+                        {
+                            (exitCode, output, error) = await Services.InstallationService.RunHolopatcherPyAsync(
+                                    holopatcherPath,
+                                    args
+                                ).ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            (exitCode, output, error) = await _fileSystemProvider.ExecuteProcessAsync(
+                                holopatcherPath,
+                                args
+                            ).ConfigureAwait(false);
+                        }
                     }
 
-                    await Logger.LogAsync($"'holopatcher' exited with exit code {exitCode}").ConfigureAwait(false);
+                    await Logger.LogAsync($"Patcher exited with exit code {exitCode}").ConfigureAwait(false);
                     if (exitCode != 0)
                     {
                         return ActionExitCode.PatcherError;

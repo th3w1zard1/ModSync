@@ -93,3 +93,23 @@ pwsh -Command '& {
     }
 }'
 ```
+
+=== LOCAL DESKTOP GUI TESTING (VERIFIED) ===
+
+- If a task touches the Avalonia GUI, install wizard, or full-build manual validation, read `AGENTS.md`, `docs/local_desktop_agent_runbook.md`, and the relevant skill under `.cursor/skills/` first.
+- Prefer repo helper scripts over ad hoc launch commands:
+  - `scripts/agents/create_template_kotor_install.sh`
+  - `scripts/agents/ensure_linux_holopatcher.sh`
+  - `scripts/agents/launch_gui_desktop.sh`
+- Prefer GUI preload args over native file-pickers:
+  - `--instructionFile=...`
+  - `--kotorPath=...`
+  - `--modDirectory=...`
+- The real full-build GUI flow uses:
+  - `ModSelectionPage.SelectAllButton`
+  - downloads step `Fetch Downloads`
+  - `ValidatePage.ValidateButton` (`Run Validation`)
+- The install wizard page order is documented in `AGENTS.md` and `docs/local_desktop_agent_runbook.md`; use that order instead of guessing.
+- For local Linux desktop runs, if validation says HoloPatcher is missing, run `scripts/agents/ensure_linux_holopatcher.sh` before assuming the GUI flow itself is broken.
+- `mod-builds` is expected at the repo root as `./mod-builds` for full-build tests.
+- Anything user-visible in the GUI should be exercised in a real desktop session, not only headless tests.

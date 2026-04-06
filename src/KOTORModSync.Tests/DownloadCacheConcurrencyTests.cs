@@ -253,7 +253,7 @@ namespace KOTORModSync.Tests
                 string contentId = $"blocked_{i}";
                 Assert.Multiple(() =>
                 {
-                    Assert.That(DownloadCacheOptimizer.IsContentIdBlocked(contentId), Is.True, 
+                    Assert.That(DownloadCacheOptimizer.IsContentIdBlocked(contentId), Is.True,
                         $"ContentId '{contentId}' should be blocked after concurrent blocking");
                     Assert.That(contentId, Is.Not.Null.And.Not.Empty, "ContentId should not be null or empty");
                 });
@@ -309,7 +309,7 @@ namespace KOTORModSync.Tests
                 {
                     Assert.That(result, Is.GreaterThan(0), "Piece size should be greater than zero");
                     Assert.That(result, Is.LessThanOrEqualTo(4194304), "Piece size should not exceed 4MB maximum");
-                    Assert.That(validPieceSizes, Contains.Item(result), 
+                    Assert.That(validPieceSizes, Contains.Item(result),
                         $"Piece size {result} should be one of the valid piece sizes");
                 });
             }

@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -89,9 +89,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Exact match should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ui_old.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ui_old.tga")), Is.False,
                     "Files should be deleted on exact match");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ui_old.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ui_old.tpc")), Is.False,
                     "Files should be deleted on exact match");
             });
         }
@@ -127,7 +127,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Case insensitive match should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ui_old.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "ui_old.tga")), Is.False,
                     "Files should be deleted on case insensitive match");
             });
         }
@@ -198,9 +198,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Mandatory deletions should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old1.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old1.tga")), Is.False,
                     "Mandatory deletion should always execute");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old2.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old2.tpc")), Is.False,
                     "Mandatory deletion should always execute");
             });
         }
@@ -209,7 +209,7 @@ namespace KOTORModSync.Tests
         public async Task CleanList_MultipleModsInCSV_ProcessesAllSelected()
         {
             string csvPath = Path.Combine(_modDirectory, "cleanlist.csv");
-            File.WriteAllText(csvPath, 
+            File.WriteAllText(csvPath,
                 "Mod A,file1.tga\n" +
                 "Mod B,file2.tga\n" +
                 "Mod C,file3.tga\n");
@@ -244,11 +244,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Multiple mods should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.False,
                     "Mod A files should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file2.tga")), Is.False,
                     "Mod B files should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file3.tga")), Is.True,
                     "Mod C files should NOT be deleted (not selected)");
             });
         }
@@ -277,7 +277,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Empty CSV should be handled gracefully");
         }
 
@@ -285,7 +285,7 @@ namespace KOTORModSync.Tests
         public async Task CleanList_MalformedCSV_HandlesGracefully()
         {
             string csvPath = Path.Combine(_modDirectory, "cleanlist.csv");
-            File.WriteAllText(csvPath, 
+            File.WriteAllText(csvPath,
                 "Mod A,file1.tga\n" +
                 "Mod B\n" + // Missing files
                 "Mod C,file3.tga,file4.tga\n");
@@ -318,9 +318,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Malformed CSV should be handled gracefully");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file1.tga")), Is.False,
                     "Valid entries should still be processed");
             });
         }

@@ -9,8 +9,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -86,10 +86,10 @@ namespace KOTORModSync.Tests
             {
                 Assert.Multiple(() =>
                 {
-                    Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                    Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                         "Should succeed on case-insensitive systems");
-                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")) || 
-                               File.Exists(Path.Combine(_kotorDirectory, "Override", "File.txt")), 
+                    Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")) ||
+                               File.Exists(Path.Combine(_kotorDirectory, "Override", "File.txt")),
                                Is.True, "File should be moved");
                 });
             }
@@ -137,7 +137,7 @@ namespace KOTORModSync.Tests
             File.WriteAllText(Path.Combine(_modDirectory, "file.txt"), "content");
 
             var component = new ModComponent { Name = "Path Normalization", Guid = Guid.NewGuid(), IsSelected = true };
-            
+
             // Test with forward slashes
             var instruction1 = new Instruction
             {
@@ -159,9 +159,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle forward slashes");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved");
             });
         }
@@ -190,9 +190,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle relative path components");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.True,
                     "File should be moved");
             });
         }
@@ -225,9 +225,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle Unicode filenames");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", unicodeFileName)), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", unicodeFileName)), Is.True,
                     "Unicode file should be moved");
             });
         }
@@ -256,9 +256,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle spaces in filenames");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", fileNameWithSpaces)), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", fileNameWithSpaces)), Is.True,
                     "File with spaces should be moved");
             });
         }
@@ -292,9 +292,9 @@ namespace KOTORModSync.Tests
 
             Assert.Multiple(() =>
             {
-                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+                Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                     "Should handle deeply nested paths");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "deep", "nested", "path", "file.txt")), 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "deep", "nested", "path", "file.txt")),
                     Is.True, "File should be moved to nested destination");
             });
         }

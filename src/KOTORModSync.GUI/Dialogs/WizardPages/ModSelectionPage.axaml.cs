@@ -14,8 +14,8 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Media;
 using Avalonia.VisualTree;
 using JetBrains.Annotations;
-using KOTORModSync.Core;
 using KOTORModSync;
+using KOTORModSync.Core;
 
 namespace KOTORModSync.Dialogs.WizardPages
 {

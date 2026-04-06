@@ -1408,19 +1408,6 @@ namespace KOTORModSync.Core.Services
                 return false;
             }
         }
-
-        private static void RollbackInstructions(
-            [NotNull][ItemNotNull] List<(Instruction instruction, List<string> source, string destination)> original)
-        {
-            foreach ((Instruction instruction, List<string> source, string destination) item in original)
-            {
-                Instruction instruction = item.instruction;
-                List<string> source = item.source;
-                string destination = item.destination;
-                instruction.Source = new List<string>(source);
-                instruction.Destination = destination;
-            }
-        }
         private static string ExtractFilenameFromSource(string sourcePath)
         {
             if (string.IsNullOrEmpty(sourcePath))
@@ -1433,22 +1420,6 @@ namespace KOTORModSync.Core.Services
             string filename = Path.GetFileName(cleanedPath);
 
             return filename;
-        }
-
-        private static string NormalizeModName(string name)
-        {
-            if (string.IsNullOrEmpty(name))
-            {
-                return string.Empty;
-            }
-
-            string normalized = name.ToLowerInvariant();
-            normalized = s_underscoreDashSpaceRegex.Replace(normalized, " ");
-            normalized = s_versionRegex.Replace(normalized, "");
-            normalized = s_startsWithWordOrSpaceRegex.Replace(normalized, "");
-            normalized = normalized.Trim();
-
-            return normalized;
         }
 
         private static bool FileMatchesPattern(string filename, string pattern)

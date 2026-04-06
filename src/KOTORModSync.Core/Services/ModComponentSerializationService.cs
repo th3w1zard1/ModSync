@@ -3721,7 +3721,7 @@ namespace KOTORModSync.Core.Services
                 }
 
                 // Use unified serialization
-                Dictionary<string, object> componentDict = SerializeComponentToDictionary(component, validationContext);
+                Dictionary<string, object> componentDict = SerializeComponentToDictionary(component, validationContext, duplicateNameAsHeadingWhenEmpty: false);
 
                 Logger.LogVerbose($"[SerializeToml] Component '{component.Name}': SerializeComponentToDictionary returned {componentDict.Count} keys");
                 Logger.LogVerbose($"[SerializeToml] Component '{component.Name}': Has ResourceRegistry in dict = {componentDict.ContainsKey("ResourceRegistry")}");
@@ -4250,7 +4250,7 @@ namespace KOTORModSync.Core.Services
                 sb.AppendLine("---");
 
                 // Use unified serialization
-                Dictionary<string, object> dict = SerializeComponentToDictionary(component, validationContext);
+                Dictionary<string, object> dict = SerializeComponentToDictionary(component, validationContext, duplicateNameAsHeadingWhenEmpty: false);
 
                 // YAML-specific: Render validation comments from metadata
                 if (dict.TryGetValue("_ValidationIssues", out object validationIssuesValue) && validationIssuesValue is List<string> componentIssues)
@@ -4823,7 +4823,7 @@ namespace KOTORModSync.Core.Services
                 .Build();
 
             // Use unified serialization
-            Dictionary<string, object> dict = SerializeComponentToDictionary(component, validationContext: null);
+            Dictionary<string, object> dict = SerializeComponentToDictionary(component, validationContext: null, duplicateNameAsHeadingWhenEmpty: true);
 
             // YAML-specific: Remove internal metadata and convert action to lowercase
             dict.Remove("_HasInstructions");
@@ -5078,7 +5078,8 @@ namespace KOTORModSync.Core.Services
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "MA0051:Method is too long", Justification = "<Pending>")]
         private static Dictionary<string, object> SerializeComponentToDictionary(
             [NotNull] ModComponent component,
-            [CanBeNull] ComponentValidationContext validationContext = null)
+            [CanBeNull] ComponentValidationContext validationContext = null,
+            bool duplicateNameAsHeadingWhenEmpty = false)
         {
             // Log component state at START of serialization to diagnose issues
             Logger.LogVerbose($"[SerializeComponentToDictionary] START for component '{component.Name}' (GUID={component.Guid})");
@@ -5186,17 +5187,14 @@ namespace KOTORModSync.Core.Services
                 componentDict["SteamNotes"] = component.SteamNotes;
             }
 
-            // Always serialize Heading if it's set, or if Name is set (for Markdown round-trip preservation)
-            // When Markdown uses Name as heading text, we need to preserve this in metadata
+            // TOML/YAML/JSON: only persist Heading when explicitly set (empty stays absent).
+            // Markdown embedded YAML: duplicate Name into Heading when Heading is empty so <!--ModSync>> metadata round-trips.
             if (!string.IsNullOrWhiteSpace(component.Heading))
             {
                 componentDict["Heading"] = component.Heading;
             }
-            else if (!string.IsNullOrWhiteSpace(component.Name))
+            else if (duplicateNameAsHeadingWhenEmpty && !string.IsNullOrWhiteSpace(component.Name))
             {
-                // If Heading is empty but Name is set, serialize Name as Heading
-                // This ensures that when Markdown uses Name for heading text, it's preserved in metadata
-                // and will be correctly extracted and preserved during round-trips
                 componentDict["Heading"] = component.Name;
             }
 

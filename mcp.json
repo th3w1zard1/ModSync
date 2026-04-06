@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "repo-filesystem": {
+      "command": "bash",
+      "args": [
+        "./scripts/agents/mcp_filesystem.sh"
+      ]
+    },
+    "desktop-commander": {
+      "command": "bash",
+      "args": [
+        "./scripts/agents/mcp_desktop_commander.sh"
+      ]
+    },
+    "playwright": {
+      "command": "bash",
+      "args": [
+        "./scripts/agents/mcp_playwright.sh"
+      ]
+    }
+  }
+}

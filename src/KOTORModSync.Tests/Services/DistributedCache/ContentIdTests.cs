@@ -256,13 +256,13 @@ namespace KOTORModSync.Tests.Services.DistributedCache
 
             Assert.NotNull(ids);
             Assert.Equal(10, ids.Count);
-            Assert.All(ids, id => 
+            Assert.All(ids, id =>
             {
                 Assert.NotNull(id);
                 Assert.Equal(40, id.Length);
                 Assert.Matches("^[0-9a-f]+$", id);
             });
-            Assert.True(ids.All(id => string.Equals(id, ids[0], StringComparison.Ordinal)), 
+            Assert.True(ids.All(id => string.Equals(id, ids[0], StringComparison.Ordinal)),
                 "All 10 computations should produce identical ContentId");
         }
 

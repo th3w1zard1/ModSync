@@ -103,10 +103,69 @@ namespace KOTORModSync.Dialogs
             LoadTelemetrySettings();
             LoadFileEncodingSettings();
             LoadHolopatcherVersionSettings();
+            LoadPatcherEngineSettings();
             LoadNexusModsApiKeySettings();
             LoadFileWatcherSettings();
 
             Logger.LogVerbose("SettingsDialog.InitializeFromMainWindow end");
+        }
+
+        private void LoadPatcherEngineSettings()
+        {
+            try
+            {
+                ComboBox engineCombo = this.FindControl<ComboBox>("PatcherEngineComboBox");
+                TextBox kPathBox = this.FindControl<TextBox>("KPatcherPathTextBox");
+                if (engineCombo == null || MainConfigInstance == null)
+                {
+                    return;
+                }
+
+                engineCombo.SelectionChanged -= PatcherEngineComboBox_SelectionChanged;
+                engineCombo.Items.Clear();
+                engineCombo.Items.Add(new ComboBoxItem { Content = "HoloPatcher (bundled / Resources)", Tag = PatcherEngines.Holopatcher });
+                engineCombo.Items.Add(new ComboBoxItem { Content = "KPatcher (external CLI)", Tag = PatcherEngines.KPatcher });
+
+                string current = MainConfigInstance.patcherEngine ?? PatcherEngines.Holopatcher;
+                int selectIdx = string.Equals(current, PatcherEngines.KPatcher, StringComparison.OrdinalIgnoreCase) ? 1 : 0;
+                engineCombo.SelectedIndex = selectIdx;
+
+                engineCombo.SelectionChanged += PatcherEngineComboBox_SelectionChanged;
+
+                if (kPathBox != null)
+                {
+                    kPathBox.TextChanged -= KPatcherPathTextBox_TextChanged;
+                    kPathBox.Text = MainConfigInstance.kpatcherExecutablePath ?? string.Empty;
+                    kPathBox.TextChanged += KPatcherPathTextBox_TextChanged;
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.LogException(ex, "Failed to load patcher engine settings");
+            }
+        }
+
+        private void PatcherEngineComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!(sender is ComboBox cb) || !(cb.SelectedItem is ComboBoxItem item) || MainConfigInstance is null)
+            {
+                return;
+            }
+
+            string tag = item.Tag?.ToString() ?? PatcherEngines.Holopatcher;
+            MainConfigInstance.patcherEngine = tag;
+            Logger.LogVerbose($"[Settings] Patcher engine: {tag}");
+        }
+
+        private void KPatcherPathTextBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (!(sender is TextBox tb) || MainConfigInstance is null)
+            {
+                return;
+            }
+
+            string t = tb.Text?.Trim() ?? string.Empty;
+            MainConfigInstance.kpatcherExecutablePath = string.IsNullOrEmpty(t) ? null : t;
         }
 
         private void LoadDirectorySettings()

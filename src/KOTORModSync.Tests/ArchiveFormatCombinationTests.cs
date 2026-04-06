@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -81,8 +81,8 @@ namespace KOTORModSync.Tests
             var instruction = new Instruction
             {
                 Action = Instruction.ActionType.Extract,
-                Source = new List<string> 
-                { 
+                Source = new List<string>
+                {
                     "<<modDirectory>>/part1.zip",
                     "<<modDirectory>>/part2.zip",
                     "<<modDirectory>>/part3.zip"
@@ -101,11 +101,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Multiple zips should succeed");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file1.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file1.txt")), Is.True,
                     "First archive should extract");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file2.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file2.txt")), Is.True,
                     "Second archive should extract");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file3.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file3.txt")), Is.True,
                     "Third archive should extract");
             });
         }
@@ -145,7 +145,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Nested archives should be handled");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "outer.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "outer.txt")), Is.True,
                     "Outer archive should extract");
             });
         }
@@ -183,7 +183,7 @@ namespace KOTORModSync.Tests
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Large archive should extract");
                 for (int i = 0; i < 10; i++)
                 {
-                    Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", $"file{i}.txt")), Is.True, 
+                    Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", $"file{i}.txt")), Is.True,
                         $"File {i} should be extracted");
                 }
             });
@@ -219,9 +219,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Special characters should be handled");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file with spaces.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file with spaces.txt")), Is.True,
                     "Files with spaces should extract");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file-with-dashes.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "file-with-dashes.txt")), Is.True,
                     "Files with dashes should extract");
             });
         }
@@ -277,9 +277,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Extract-process sequence should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture1.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture1.tga")), Is.True,
                     "Textures should be moved");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture2.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture2.tga")), Is.True,
                     "Textures should be moved");
             });
         }
@@ -330,9 +330,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Extract-copy-rename should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "renamed_model.mdl")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "renamed_model.mdl")), Is.True,
                     "File should be renamed");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "model.mdl")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "model.mdl")), Is.True,
                     "Source should remain (copy operation)");
             });
         }

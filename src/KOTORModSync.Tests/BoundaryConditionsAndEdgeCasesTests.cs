@@ -9,12 +9,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Services.FileSystem;
-using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 using NUnit.Framework;
 using SharpCompress.Archives;
 using SharpCompress.Archives.Zip;
 using SharpCompress.Common;
 using SharpCompress.Writers;
+using RealFileSystemProvider = KOTORModSync.Core.Services.FileSystem.RealFileSystemProvider;
 
 namespace KOTORModSync.Tests
 {
@@ -89,7 +89,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Large file move should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "large.bin")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "large.bin")), Is.True,
                     "Large file should be moved");
                 byte[] movedData = File.ReadAllBytes(Path.Combine(_kotorDirectory, "Override", "large.bin"));
                 Assert.That(movedData.Length, Is.EqualTo(data.Length), "File size should be preserved");
@@ -143,7 +143,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Empty component should succeed");
         }
 
@@ -176,7 +176,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should succeed (all skipped)");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "file.txt")), Is.False,
                     "No instructions should execute");
             });
         }
@@ -209,7 +209,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Root level should work");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "root.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "root.txt")), Is.True,
                     "File should be moved to root");
             });
         }
@@ -271,11 +271,11 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should handle three extensions");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False,
                     "TPC should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tga")), Is.True,
                     "TGA should remain");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.dds")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.dds")), Is.True,
                     "DDS should remain");
             });
         }
@@ -306,9 +306,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Case insensitive should work");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.tpc")), Is.False,
                     "TPC should be deleted");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.TGA")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "texture.TGA")), Is.True,
                     "TGA should remain (case insensitive match)");
             });
         }
@@ -344,7 +344,7 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Rename multiple should succeed");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "new.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "new.txt")), Is.True,
                     "Renamed file should exist");
                 // Only one file should exist with the new name
                 int newFileCount = Directory.GetFiles(Path.Combine(_kotorDirectory, "Override"), "new.txt").Length;
@@ -378,9 +378,9 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Should skip gracefully");
-                Assert.That(File.ReadAllText(Path.Combine(_kotorDirectory, "Override", "new.txt")), 
+                Assert.That(File.ReadAllText(Path.Combine(_kotorDirectory, "Override", "new.txt")),
                     Is.EqualTo("existing content"), "Existing file should not be overwritten");
-                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_kotorDirectory, "Override", "old.txt")), Is.True,
                     "Source file should remain when overwrite is false");
             });
         }
@@ -415,7 +415,7 @@ namespace KOTORModSync.Tests
 
             var result = await component.ExecuteInstructionsAsync(new List<ModComponent> { component }, fileSystemProvider, System.Threading.CancellationToken.None, fileSystemProvider);
 
-            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), 
+            Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success),
                 "Should handle archive with only directories");
         }
 
@@ -451,10 +451,10 @@ namespace KOTORModSync.Tests
             Assert.Multiple(() =>
             {
                 Assert.That(result, Is.EqualTo(ModComponent.InstallExitCode.Success), "Overlapping archives should work");
-                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "common.txt")), Is.True, 
+                Assert.That(File.Exists(Path.Combine(_modDirectory, "extracted", "common.txt")), Is.True,
                     "Common file should exist");
                 // Last archive should win
-                Assert.That(File.ReadAllText(Path.Combine(_modDirectory, "extracted", "common.txt")), 
+                Assert.That(File.ReadAllText(Path.Combine(_modDirectory, "extracted", "common.txt")),
                     Is.EqualTo("archive2 content"), "Last archive should overwrite");
             });
         }

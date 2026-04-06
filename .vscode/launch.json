@@ -1,0 +1,41 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "KOTORModSync GUI (K1 full desktop)",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "dotnet",
+      "args": [
+        "${workspaceFolder}/src/KOTORModSync.GUI/bin/Debug/net9.0/KOTORModSync.dll",
+        "--instructionFile=${workspaceFolder}/mod-builds/TOMLs/KOTOR1_Full.toml",
+        "--kotorPath=${workspaceFolder}/tmp/kotor_template",
+        "--modDirectory=${workspaceFolder}/tmp/mod_downloads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "preLaunchTask": "agent: create template install",
+      "env": {
+        "DISPLAY": ":1"
+      }
+    },
+    {
+      "name": "KOTORModSync GUI (K2 full desktop)",
+      "type": "coreclr",
+      "request": "launch",
+      "program": "dotnet",
+      "args": [
+        "${workspaceFolder}/src/KOTORModSync.GUI/bin/Debug/net9.0/KOTORModSync.dll",
+        "--instructionFile=${workspaceFolder}/mod-builds/TOMLs/KOTOR2_Full.toml",
+        "--kotorPath=${workspaceFolder}/tmp/kotor_template",
+        "--modDirectory=${workspaceFolder}/tmp/mod_downloads"
+      ],
+      "cwd": "${workspaceFolder}",
+      "console": "integratedTerminal",
+      "preLaunchTask": "agent: create template install",
+      "env": {
+        "DISPLAY": ":1"
+      }
+    }
+  ]
+}

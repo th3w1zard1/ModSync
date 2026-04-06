@@ -11,6 +11,8 @@ using JetBrains.Annotations;
 
 using KOTORModSync.Core;
 
+using PatcherEngines = KOTORModSync.Core.PatcherEngines;
+
 namespace KOTORModSync.Models
 {
 
@@ -58,7 +60,7 @@ namespace KOTORModSync.Models
         public bool ValidateAndReplaceInvalidArchives { get; set; } = true;
 
         [JsonPropertyName("filterDownloadsByResolution")]
-        public bool FilterDownloadsByResolution { get; set; } = true;
+        public bool FilterDownloadsByResolution { get; set; } = false;
 
         [JsonPropertyName("nexusModsApiKey")]
         [CanBeNull]
@@ -71,6 +73,14 @@ namespace KOTORModSync.Models
         [JsonPropertyName("selectedHolopatcherVersion")]
         [CanBeNull]
         public string SelectedHolopatcherVersion { get; set; }
+
+        [JsonPropertyName("patcherEngine")]
+        [CanBeNull]
+        public string PatcherEngine { get; set; } = PatcherEngines.Holopatcher;
+
+        [JsonPropertyName("kpatcherExecutablePath")]
+        [CanBeNull]
+        public string KPatcherExecutablePath { get; set; }
 
         [JsonPropertyName("enableFileWatcher")]
         public bool EnableFileWatcher { get; set; } = true;
@@ -113,6 +123,8 @@ namespace KOTORModSync.Models
                 NexusModsApiKey = mainConfig.nexusModsApiKey,
                 FileEncoding = mainConfig.fileEncoding,
                 SelectedHolopatcherVersion = mainConfig.selectedHolopatcherVersion,
+                PatcherEngine = mainConfig.patcherEngine,
+                KPatcherExecutablePath = mainConfig.kpatcherExecutablePath,
                 EnableFileWatcher = mainConfig.enableFileWatcher,
                 SpoilerFreeMode = spoilerFreeMode,
             };
@@ -163,6 +175,8 @@ namespace KOTORModSync.Models
             mainConfig.fileEncoding = FileEncoding
                                       ?? "utf-8";
             mainConfig.selectedHolopatcherVersion = SelectedHolopatcherVersion;
+            mainConfig.patcherEngine = PatcherEngine;
+            mainConfig.kpatcherExecutablePath = KPatcherExecutablePath;
             mainConfig.enableFileWatcher = EnableFileWatcher;
 
             if (!string.IsNullOrEmpty(LastOutputDirectory) && Directory.Exists(LastOutputDirectory))
