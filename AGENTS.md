@@ -17,6 +17,91 @@ Start with:
 - `.cursor/skills/local_desktop_gui_testing/SKILL.md`
 - `.cursor/skills/full_build_install_validation/SKILL.md`
 
+## Project layout
+
+```
+KOTORModSync.sln
+src/
+  KOTORModSync.Core/         # Core logic, VFS, instructions, serialization
+  KOTORModSync.GUI/          # Avalonia desktop app
+  KOTORModSync.Tests/        # All automated tests (single project)
+  AvRichTextBox/             # Rich text control submodule
+  RtfDomParserAvalonia/      # RTF parser submodule
+scripts/
+  agents/                    # Helper scripts for agent workflows
+docs/                        # Runbooks and documentation
+vendor/                      # Third-party binaries
+mod-builds/                  # Clone here: github.com/th3w1zard1/mod-builds
+```
+
+## Build
+
+```bash
+dotnet build KOTORModSync.sln
+```
+
+## Cursor Cloud specific instructions
+
+Cloud agents run headless (no X11 desktop). The following applies:
+
+- Run automated tests (`dotnet test`) instead of GUI desktop tests.
+- Do NOT attempt to launch the Avalonia app or use `xdotool`/`xwininfo` — there is no display.
+- GUI changes must still be manually exercised. If you have made GUI changes, request a desktop session or note that GUI validation was skipped.
+- The test project path is `src/KOTORModSync.Tests/KOTORModSync.Tests.csproj`.
+
+### Running tests (Cloud / headless)
+
+```bash
+# Run all non-long-running, non-seeding tests
+dotnet test src/KOTORModSync.Tests/KOTORModSync.Tests.csproj \
+  --filter "FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding"
+```
+
+Run a single named test with a 120-second timeout to classify duration:
+
+```pwsh
+pwsh -Command '& {
+  $proj = "src/KOTORModSync.Tests/KOTORModSync.Tests.csproj"
+  $args = "test {0} --filter ""FullyQualifiedName~<TestName>"" --list-tests" -f $proj
+  $psi = New-Object System.Diagnostics.ProcessStartInfo
+  $psi.FileName = "dotnet"
+  $psi.Arguments = $args
+  $psi.RedirectStandardOutput = $true
+  $psi.RedirectStandardError = $true
+  $psi.UseShellExecute = $false
+  $process = New-Object System.Diagnostics.Process
+  $process.StartInfo = $psi
+  $null = $process.Start()
+  if (-not $process.WaitForExit(120000)) {
+    $stdout = $process.StandardOutput.ReadToEnd()
+    $stderr = $process.StandardError.ReadToEnd()
+    $process.Kill()
+    $process.WaitForExit()
+    Write-Output $stdout
+    Write-Output $stderr
+    Write-Output "--- COMMAND TIMED OUT AFTER 120s ---"
+  } else {
+    $stdout = $process.StandardOutput.ReadToEnd()
+    $stderr = $process.StandardError.ReadToEnd()
+    Write-Output $stdout
+    Write-Output $stderr
+  }
+}'
+```
+
+### Test naming conventions (CRITICAL)
+
+| Suffix | Meaning | Duration |
+|---|---|---|
+| `GitHubRunnerSeeding` | GitHub Actions ONLY — continuous seeding ops | 5-6 hours |
+| `LongRunning` | Long local tests, NOT for GitHub runners | > 2 minutes |
+| _(none)_ | Regular test | < 2 minutes |
+
+Rules:
+- NEVER use `GitHubRunnerSeeding` unless the test is exclusively for GitHub Actions runners.
+- NEVER combine `LongRunning` with "Seeding" in a test name.
+- GitHub workflow `.github/workflows/distributed-cache-tests.yml` filters on `FullyQualifiedName~GitHubRunnerSeeding`.
+
 ## Verified local desktop baseline
 
 These steps were verified in a Linux desktop VM similar to the one used during development:
@@ -155,6 +240,7 @@ Update all of the following together:
 
 - `docs/local_desktop_agent_runbook.md`
 - the relevant `.cursor/skills/*/SKILL.md`
+- `AGENTS.md` (this file) — especially the `## Cursor Cloud specific instructions` section
 - `.cursorrules` if the rule should always apply
 - `.cursor/mcp.json` or the wrapper scripts if agent tooling changed
 - `.vscode/tasks.json` / `.vscode/launch.json` if the launch flow changed
