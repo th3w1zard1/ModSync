@@ -16,7 +16,7 @@ on:
 
 env:
   DOTNET_VERSION: "8.0.x"
-  PROJECT_FILE: "KOTORModSync.GUI/KOTORModSync.csproj"
+  PROJECT_FILE: "src/KOTORModSync.GUI/KOTORModSync.csproj"
   DOTNET_VERSION_SHORT: "net8.0"  # Specify net8.0 once here, so it's incredibly easy to change to another version globally.
   DOTNET_FRAMEWORK_VERSION_SHORT: "net48"  # Specify net48 once here, so it's incredibly easy to change to another version globally.
 
@@ -36,7 +36,7 @@ jobs:
         id: extract
         shell: pwsh
         run: |
-          $mainConfigPath = "KOTORModSync.Core/MainConfig.cs"
+          $mainConfigPath = "src/KOTORModSync.Core/MainConfig.cs"
           $content = Get-Content $mainConfigPath -Raw
 
           if ($content -match 'CurrentVersion\s*=>\s*"([^"]+)"') {
@@ -190,7 +190,7 @@ jobs:
         run: |
           Write-Host "🔐 Injecting telemetry signing secret..."
 
-          $secretFile = "KOTORModSync.Core/Services/EmbeddedSecrets.cs"
+          $secretFile = "src/KOTORModSync.Core/Services/EmbeddedSecrets.cs"
           $dir = Split-Path -Parent $secretFile
           if (-not (Test-Path $dir)) {
             New-Item -ItemType Directory -Path $dir -Force | Out-Null

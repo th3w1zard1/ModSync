@@ -98,7 +98,7 @@ jobs:
         run: dotnet restore "${{ env.TEST_PROJECT }}"
 
       - name: Build test project
-        run: dotnet build "${{ env.TEST_PROJECT }}" --configuration Debug --no-restore
+        run: dotnet build "${{ env.TEST_PROJECT }}" --configuration Debug --no-restore --disable-build-servers -m:1
 
       - name: Windows auto-update service coverage
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~AutoUpdateServiceTests"
