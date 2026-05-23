@@ -11,14 +11,22 @@ Use this repository's local-agent assets whenever a task touches:
 - full-build validation against `mod-builds`
 - any manual test that requires a real desktop session instead of pure headless tests
 
+For broad repo tasks, start with `.github/copilot-instructions.md` for the short Copilot/autopilot brief, then use this file as the routing layer into the deeper runbooks and skills.
+
 Start with:
 
 - `docs/local_desktop_agent_runbook.md`
 - `.cursor/skills/local_desktop_gui_testing/SKILL.md`
 - `.cursor/skills/full_build_install_validation/SKILL.md`
 
-## Project layout
+## Autonomous defaults
 
+- If the task touches `src/KOTORModSync.Core`, `src/KOTORModSync.Tests`, repo-root docs/config, or normal build/test/lint behavior, default to the headless .NET workflow. Do not stop to ask which project to inspect first when the file paths already answer it.
+- If the task touches `src/KOTORModSync.GUI`, the install wizard, `scripts/agents/`, or full-build validation against `mod-builds`, default to this file plus `docs/local_desktop_agent_runbook.md` and the relevant `.cursor/skills/*` guidance.
+- If the task touches `telemetry-auth/`, treat it as the Python/Docker sidecar with its own local docs and workflows rather than routing it through the Avalonia/.NET guidance in this file.
+- Only stop or ask when a real prerequisite is missing: no `./mod-builds` for full-build work, no desktop/X11 session for required GUI validation, missing credentials/secrets/manual external approval, or conflicting local changes that block a safe edit.
+
+## Project layout
 ```
 KOTORModSync.sln
 src/
@@ -62,7 +70,7 @@ Run a single named test with a 120-second timeout to classify duration:
 ```pwsh
 pwsh -Command '& {
   $proj = "src/KOTORModSync.Tests/KOTORModSync.Tests.csproj"
-  $args = "test {0} --filter ""FullyQualifiedName~<TestName>"" --list-tests" -f $proj
+  $args = "test {0} --filter ""FullyQualifiedName~<TestName>""" -f $proj
   $psi = New-Object System.Diagnostics.ProcessStartInfo
   $psi.FileName = "dotnet"
   $psi.Arguments = $args
