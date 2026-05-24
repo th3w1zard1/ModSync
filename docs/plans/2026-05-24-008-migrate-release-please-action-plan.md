@@ -1,7 +1,7 @@
 ---
 title: Migrate Release Please GitHub Action to googleapis org
 type: fix
-status: active
+status: shipped
 date: 2026-05-24
 ---
 
