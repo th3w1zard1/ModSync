@@ -10,6 +10,9 @@ using System.Text;
 using KOTORModSync.Core.TSLPatcher;
 
 using NUnit.Framework;
+using SharpCompress.Archives.Zip;
+using SharpCompress.Common;
+using SharpCompress.Writers;
 
 namespace KOTORModSync.Tests
 {
@@ -25,13 +28,11 @@ namespace KOTORModSync.Tests
         private static Stream CreateNamespacesIniArchive(string content)
         {
             var memoryStream = new MemoryStream();
-            using (SharpCompress.Writers.IWriter archive = SharpCompress.Writers.WriterFactory.Open(memoryStream, SharpCompress.Common.ArchiveType.Zip, new SharpCompress.Writers.WriterOptions(SharpCompress.Common.CompressionType.Deflate) { LeaveStreamOpen = true }))
+            using (var archive = ZipArchive.CreateArchive())
             {
                 byte[] contentBytes = Encoding.UTF8.GetBytes(content);
-                using (var contentStream = new MemoryStream(contentBytes))
-                {
-                    archive.Write("tslpatchdata/namespaces.ini", contentStream, DateTime.Now);
-                }
+                archive.AddEntry("tslpatchdata/namespaces.ini", new MemoryStream(contentBytes), closeStream: true);
+                archive.SaveTo(memoryStream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.Deflate));
             }
             memoryStream.Position = 0;
             return memoryStream;
@@ -87,7 +88,7 @@ Name=hk50 with tslrcm
         {
 
             var memoryStream = new MemoryStream();
-            using (SharpCompress.Writers.IWriter archive = SharpCompress.Writers.WriterFactory.Open(memoryStream, SharpCompress.Common.ArchiveType.Zip, new SharpCompress.Writers.WriterOptions(SharpCompress.Common.CompressionType.Deflate) { LeaveStreamOpen = true }))
+            using (var archive = ZipArchive.CreateArchive())
             {
                 const string content = @"
 [Namespaces]
@@ -97,11 +98,8 @@ Namespace3=standardTSLRCM
 Namespace4=hk50TSLRCM
 ";
                 byte[] contentBytes = Encoding.UTF8.GetBytes(content);
-                using (var contentStream = new MemoryStream(contentBytes))
-                {
-
-                    archive.Write("namespaces.ini", contentStream, DateTime.Now);
-                }
+                archive.AddEntry("namespaces.ini", new MemoryStream(contentBytes), closeStream: true);
+                archive.SaveTo(memoryStream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.Deflate));
             }
             memoryStream.Position = 0;
 

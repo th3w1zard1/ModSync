@@ -29,12 +29,7 @@ namespace KOTORModSync.Core.Utility
 {
     public static class ArchiveHelper
     {
-        public static readonly ExtractionOptions DefaultExtractionOptions = new ExtractionOptions
-        {
-            ExtractFullPath = false,
-            Overwrite = true,
-            PreserveFileTime = true,
-        };
+        public static readonly ExtractionOptions DefaultExtractionOptions = new ExtractionOptions(extractFullPath: false, overwrite: true, preserveFileTime: true);
 
         public static readonly string[] DefaultArchiveSearchPatterns =
         {
@@ -48,6 +43,11 @@ namespace KOTORModSync.Core.Utility
         private static bool s_sevenZipInitialized;
         private static bool s_sevenZipAvailable;
         private static bool s_missingSevenZipLogged;
+
+        private static ReaderOptions CreateReaderOptions()
+        {
+            return new ReaderOptions();
+        }
 
         public static bool IsArchive([NotNull] string filePath)
         {
@@ -105,21 +105,7 @@ namespace KOTORModSync.Core.Utility
             try
             {
                 stream = File.OpenRead(archivePath);
-                IArchive archive = null;
-
-                if (archivePath.EndsWith(value: ".zip", StringComparison.OrdinalIgnoreCase))
-                {
-                    archive = ZipArchive.Open(stream);
-                }
-                else if (archivePath.EndsWith(value: ".rar", StringComparison.OrdinalIgnoreCase))
-                {
-                    archive = RarArchive.Open(stream);
-                }
-                else if (archivePath.EndsWith(value: ".7z", StringComparison.OrdinalIgnoreCase))
-                {
-                    archive = SevenZipArchive.Open(stream);
-                }
-
+                IArchive archive = OpenArchiveFromStream(Path.GetExtension(archivePath), stream);
                 return (archive, stream);
             }
             catch (Exception ex)
@@ -247,7 +233,7 @@ namespace KOTORModSync.Core.Utility
                     string extractPath = Path.GetFullPath(Path.Combine(destinationPath, extractFolderName));
 
                     using (FileStream stream = File.OpenRead(tempSevenZipPath))
-                    using (var archive = SevenZipArchive.Open(stream))
+                    using (var archive = SevenZipArchive.OpenArchive(stream, CreateReaderOptions()))
                     using (IReader reader = archive.ExtractAllEntries())
                     {
                         while (reader.MoveToNextEntry())
@@ -1099,20 +1085,20 @@ namespace KOTORModSync.Core.Utility
             {
                 if (normalizedExtension.Equals(".zip", StringComparison.Ordinal))
                 {
-                    return ZipArchive.Open(stream);
+                    return ZipArchive.OpenArchive(stream, CreateReaderOptions());
                 }
 
                 if (normalizedExtension.Equals(".rar", StringComparison.Ordinal))
                 {
-                    return RarArchive.Open(stream);
+                    return RarArchive.OpenArchive(stream, CreateReaderOptions());
                 }
 
                 if (normalizedExtension.Equals(".7z", StringComparison.Ordinal) || normalizedExtension.Equals(".exe", StringComparison.Ordinal))
                 {
-                    return SevenZipArchive.Open(stream);
+                    return SevenZipArchive.OpenArchive(stream, CreateReaderOptions());
                 }
 
-                return ArchiveFactory.Open(stream);
+                return ArchiveFactory.OpenArchive(stream, CreateReaderOptions());
             }
             catch
             {

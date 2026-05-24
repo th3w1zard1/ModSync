@@ -299,7 +299,7 @@ namespace KOTORModSync.Tests
 
         #region Helper Methods
 
-        private string CreateTestArchive(string fileName, Action<ZipArchive> populateArchive)
+        private string CreateTestArchive(string fileName, Action<SharpCompress.Archives.IWritableArchive<SharpCompress.Writers.Zip.ZipWriterOptions>> populateArchive)
         {
             if (_testDirectory is null)
             {
@@ -307,7 +307,7 @@ namespace KOTORModSync.Tests
             }
             string archivePath = Path.Combine(_testDirectory, fileName);
 
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
                 populateArchive(archive);
                 archive.SaveTo(archivePath, CompressionType.Deflate);
@@ -316,7 +316,7 @@ namespace KOTORModSync.Tests
             return archivePath;
         }
 
-        private static void AddTextFileToArchive(ZipArchive archive, string path, string content)
+        private static void AddTextFileToArchive(SharpCompress.Archives.IWritableArchive<SharpCompress.Writers.Zip.ZipWriterOptions> archive, string path, string content)
         {
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
             archive.AddEntry(path, memoryStream, closeStream: true);

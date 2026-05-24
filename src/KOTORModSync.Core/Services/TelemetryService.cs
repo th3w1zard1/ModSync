@@ -162,7 +162,7 @@ namespace KOTORModSync.Core.Services
 #else
                         meterProviderBuilder.AddPrometheusHttpListener(options =>
                         {
-                            options.UriPrefixes = new[] { $"http://localhost:{_config.PrometheusPort}/" };
+						    options.UriPrefixes = new[] { BuildPrometheusUriPrefix(_config.PrometheusPort) };
                         });
                         Logger.Log($"[Telemetry] Prometheus HTTP listener started on http://localhost:{_config.PrometheusPort}/metrics (LOCAL ONLY - for development/testing)");
                         Logger.Log("[Telemetry] Note: For authenticated remote telemetry, use OTLP exporter (enabled by default)");
@@ -768,7 +768,9 @@ namespace KOTORModSync.Core.Services
             }
         }
 
-        private string GetAuthHeaders(string requestPath)
+        internal static string BuildPrometheusUriPrefix(int port) => $"http://localhost:{port}/";
+
+        internal string GetAuthHeaders(string requestPath)
         {
             if (_authenticator is null || !_authenticator.HasValidSecret())
             {

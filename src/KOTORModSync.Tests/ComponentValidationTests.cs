@@ -518,15 +518,15 @@ namespace KOTORModSync.Tests
         private string CreateTestZip(string fileName, Dictionary<string, string> files)
         {
             string zipPath = Path.Combine(_modDirectory, fileName);
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
                 foreach (KeyValuePair<string, string> kvp in files)
                 {
-                    ZipArchiveEntry entry = archive.AddEntry(kvp.Key, new MemoryStream(System.Text.Encoding.UTF8.GetBytes(kvp.Value)));
+                    _ = archive.AddEntry(kvp.Key, new MemoryStream(System.Text.Encoding.UTF8.GetBytes(kvp.Value)), closeStream: true);
                 }
                 using (Stream stream = File.OpenWrite(zipPath))
                 {
-                    archive.SaveTo(stream, new WriterOptions(CompressionType.None));
+                    archive.SaveTo(stream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.None));
                 }
             }
             return zipPath;
@@ -879,4 +879,3 @@ namespace KOTORModSync.Tests
         #endregion
     }
 }
-

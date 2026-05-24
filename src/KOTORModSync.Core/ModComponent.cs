@@ -8,6 +8,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
@@ -914,8 +915,11 @@ namespace KOTORModSync.Core
                 await Logger.LogVerboseAsync("Source files not found, attempting auto-extraction...").ConfigureAwait(false);
                 if (await TryAutoExtractMissingFilesAsync(instruction, fileSystemProvider).ConfigureAwait(false))
                 {
-                    instruction.SetRealPaths(sourceIsNotFilePath, skipExistenceCheck);
-                    return true;
+                    return await TryFinalizeInstructionSourceResolutionAsync(
+                        instruction,
+                        fileSystemProvider,
+                        skipExistenceCheck,
+                        sourceIsNotFilePath).ConfigureAwait(false);
                 }
 
                 if (TryRemapMoveFirstModSubfolderToVariant(instruction, fileSystemProvider))
@@ -931,8 +935,11 @@ namespace KOTORModSync.Core
                 await Logger.LogVerboseAsync("Source pattern not found, attempting auto-extraction...").ConfigureAwait(false);
                 if (await TryAutoExtractMissingFilesAsync(instruction, fileSystemProvider).ConfigureAwait(false))
                 {
-                    instruction.SetRealPaths(sourceIsNotFilePath, skipExistenceCheck);
-                    return true;
+                    return await TryFinalizeInstructionSourceResolutionAsync(
+                        instruction,
+                        fileSystemProvider,
+                        skipExistenceCheck,
+                        sourceIsNotFilePath).ConfigureAwait(false);
                 }
 
                 if (TryRemapMoveFirstModSubfolderToVariant(instruction, fileSystemProvider))
@@ -943,6 +950,116 @@ namespace KOTORModSync.Core
 
                 return false;
             }
+        }
+
+        private async Task<bool> TryFinalizeInstructionSourceResolutionAsync(
+            [NotNull] Instruction instruction,
+            [NotNull] Services.FileSystem.IFileSystemProvider fileSystemProvider,
+            bool skipExistenceCheck,
+            bool sourceIsNotFilePath)
+        {
+            try
+            {
+                instruction.SetRealPaths(sourceIsNotFilePath, skipExistenceCheck);
+                return true;
+            }
+            catch (FileNotFoundException)
+            {
+            }
+            catch (Exceptions.WildcardPatternNotFoundException)
+            {
+            }
+
+            if (!TryRemapSourcesToExtractedDescendants(instruction, fileSystemProvider))
+            {
+                return false;
+            }
+
+            instruction.SetRealPaths(sourceIsNotFilePath, skipExistenceCheck);
+            await Logger.LogVerboseAsync("Remapped extracted archive sources to resolved descendants.").ConfigureAwait(false);
+            return true;
+        }
+
+        private static bool TryRemapSourcesToExtractedDescendants(
+            [NotNull] Instruction instruction,
+            [NotNull] Services.FileSystem.IFileSystemProvider fileSystemProvider)
+        {
+            if (instruction?.Source == null || instruction.Source.Count == 0 || MainConfig.SourcePath == null)
+            {
+                return false;
+            }
+
+            string modRoot = MainConfig.SourcePath.FullName;
+            if (!fileSystemProvider.DirectoryExists(modRoot))
+            {
+                return false;
+            }
+
+            var remappedSources = new List<string>();
+            bool changed = false;
+
+            foreach (string source in instruction.Source)
+            {
+                if (string.IsNullOrWhiteSpace(source))
+                {
+                    return false;
+                }
+
+                string resolved = UtilityHelper.ReplaceCustomVariables(source)
+                    .Replace('\\', Path.DirectorySeparatorChar)
+                    .Replace('/', Path.DirectorySeparatorChar);
+
+                if (fileSystemProvider.FileExists(resolved))
+                {
+                    remappedSources.Add(source);
+                    continue;
+                }
+
+                bool containsWildcards = resolved.IndexOf('*') >= 0 || resolved.IndexOf('?') >= 0;
+                if (containsWildcards)
+                {
+                    string pattern = Path.GetFileName(resolved);
+                    List<string> matches = fileSystemProvider.GetFilesInDirectory(modRoot, pattern, SearchOption.AllDirectories)
+                        .Where(path => !string.Equals(Path.GetDirectoryName(path)?.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                                                      modRoot.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar),
+                                                      StringComparison.OrdinalIgnoreCase))
+                        .Distinct(StringComparer.OrdinalIgnoreCase)
+                        .ToList();
+
+                    if (matches.Count == 0)
+                    {
+                        return false;
+                    }
+
+                    remappedSources.AddRange(matches);
+                    changed = true;
+                    continue;
+                }
+
+                string fileName = Path.GetFileName(resolved);
+                List<string> candidates = fileSystemProvider.GetFilesInDirectory(modRoot, fileName, SearchOption.AllDirectories)
+                    .Where(path => !string.Equals(path, resolved, StringComparison.OrdinalIgnoreCase))
+                    .Distinct(StringComparer.OrdinalIgnoreCase)
+                    .ToList();
+
+                if (candidates.Count != 1)
+                {
+                    return false;
+                }
+
+                remappedSources.Add(candidates[0]);
+                changed = true;
+            }
+
+            if (!changed)
+            {
+                return false;
+            }
+
+            instruction.Source = remappedSources
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            return true;
         }
 
         /// <summary>
@@ -1106,16 +1223,22 @@ namespace KOTORModSync.Core
             }
 
             string destRaw = instruction.Destination ?? string.Empty;
-            if (!destRaw.Contains("<<kotorDirectory>>", StringComparison.OrdinalIgnoreCase))
+            if (!NetFrameworkCompatibility.Contains(destRaw, "<<kotorDirectory>>", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }
 
-            string relToGame = destRaw
-                .Replace("<<kotorDirectory>>", string.Empty, StringComparison.OrdinalIgnoreCase)
-                .Replace("<<KotorDirectory>>", string.Empty, StringComparison.OrdinalIgnoreCase)
-                .Trim()
-                .Trim('\\', '/');
+            string relToGame = NetFrameworkCompatibility.Replace(
+                destRaw,
+                "<<kotorDirectory>>",
+                string.Empty,
+                StringComparison.OrdinalIgnoreCase);
+            relToGame = NetFrameworkCompatibility.Replace(
+                relToGame,
+                "<<KotorDirectory>>",
+                string.Empty,
+                StringComparison.OrdinalIgnoreCase);
+            relToGame = relToGame.Trim().Trim('\\', '/');
             string gameRoot = MainConfig.DestinationPath.FullName;
             string destDir = string.IsNullOrEmpty(relToGame)
                 ? gameRoot
@@ -1205,16 +1328,16 @@ namespace KOTORModSync.Core
                     // Check if this resource contains the missing file
                     foreach (var file in resource.Value.Files)
                     {
-                        if (file.Value == true &&
-                            (string.Equals(file.Key, missingFile, StringComparison.OrdinalIgnoreCase) ||
-                             file.Key.EndsWith($"/{missingFile}", StringComparison.OrdinalIgnoreCase) ||
-                             file.Key.EndsWith($"\\{missingFile}", StringComparison.OrdinalIgnoreCase)))
+                        if (file.Value == true && ResourceRegistryEntryMatchesMissingSource(file.Key, missingFile))
                         {
                             if (!archiveMatches.ContainsKey(missingFile))
                             {
                                 archiveMatches[missingFile] = new List<string>();
                             }
-                            archiveMatches[missingFile].Add(resource.Key);
+                            if (!archiveMatches[missingFile].Any(existing => string.Equals(existing, resource.Key, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                archiveMatches[missingFile].Add(resource.Key);
+                            }
                         }
                     }
                 }
@@ -1289,6 +1412,41 @@ namespace KOTORModSync.Core
             }
 
             return !hasWarnings;
+        }
+
+        private static bool ResourceRegistryEntryMatchesMissingSource([CanBeNull] string resourceEntryPath, [CanBeNull] string missingSource)
+        {
+            if (string.IsNullOrWhiteSpace(resourceEntryPath) || string.IsNullOrWhiteSpace(missingSource))
+            {
+                return false;
+            }
+
+            string normalizedEntry = resourceEntryPath.Replace('\\', '/');
+            string normalizedMissing = missingSource.Replace('\\', '/');
+            bool containsWildcards = normalizedMissing.IndexOf('*') >= 0 || normalizedMissing.IndexOf('?') >= 0;
+
+            if (!containsWildcards)
+            {
+                return string.Equals(normalizedEntry, normalizedMissing, StringComparison.OrdinalIgnoreCase)
+                    || normalizedEntry.EndsWith($"/{normalizedMissing}", StringComparison.OrdinalIgnoreCase);
+            }
+
+            return WildcardMatches(normalizedEntry, normalizedMissing)
+                || WildcardMatches(Path.GetFileName(normalizedEntry), normalizedMissing);
+        }
+
+        private static bool WildcardMatches([CanBeNull] string candidate, [CanBeNull] string pattern)
+        {
+            if (string.IsNullOrWhiteSpace(candidate) || string.IsNullOrWhiteSpace(pattern))
+            {
+                return false;
+            }
+
+            string regexPattern = "^" + Regex.Escape(pattern)
+                .Replace("\\*", ".*")
+                .Replace("\\?", ".") + "$";
+
+            return Regex.IsMatch(candidate, regexPattern, RegexOptions.IgnoreCase);
         }
 
         /// <summary>
