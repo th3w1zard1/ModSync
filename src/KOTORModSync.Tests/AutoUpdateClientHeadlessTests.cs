@@ -3,11 +3,12 @@
 // See LICENSE.txt file in the project root for full license information.
 
 using System;
-using System.Reflection;
 
 using Avalonia.Headless.XUnit;
 
 using KOTORModSync.Services;
+
+using NetSparkleUpdater;
 
 using Xunit;
 
@@ -27,13 +28,13 @@ namespace KOTORModSync.Tests
             };
 
             client.Initialize(settings);
-            object sparkleInstance = GetSparkleInstance(client);
+            SparkleUpdater sparkleInstance = client.SparkleForTests;
 
             Assert.NotNull(sparkleInstance);
 
             client.Initialize(settings);
 
-            Assert.Same(sparkleInstance, GetSparkleInstance(client));
+            Assert.Same(sparkleInstance, client.SparkleForTests);
         }
 
         [Fact]
@@ -42,14 +43,6 @@ namespace KOTORModSync.Tests
             using var client = new NetSparkleUpdateClient();
 
             Assert.Throws<ArgumentNullException>(() => client.Initialize(null));
-        }
-
-        private static object GetSparkleInstance(NetSparkleUpdateClient client)
-        {
-            FieldInfo sparkleField = typeof(NetSparkleUpdateClient).GetField("_sparkle", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.NotNull(sparkleField);
-
-            return sparkleField.GetValue(client);
         }
     }
 }

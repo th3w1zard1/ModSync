@@ -173,6 +173,15 @@ jobs:
                   }
               )
 
+              has_free_desktop = any(
+                  key.startswith("Avalonia.FreeDesktop/")
+                  for key in data.get("libraries", {})
+              )
+              if has_free_desktop and not versions:
+                  errors.append(
+                      f"{label}: Avalonia.FreeDesktop is present but Tmds.DBus.Protocol is missing from restored assets"
+                  )
+
               for version in versions:
                   if is_vulnerable(version):
                       errors.append(f"{label}: vulnerable Tmds.DBus.Protocol {version}")

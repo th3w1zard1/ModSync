@@ -108,6 +108,8 @@ namespace KOTORModSync.Services
 
         public void StopLoop() => _sparkle?.StopLoop();
 
+        internal SparkleUpdater SparkleForTests => _sparkle;
+
         public void Dispose()
         {
             _sparkle?.Dispose();
