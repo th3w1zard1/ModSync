@@ -34,7 +34,13 @@ Restore green **Release Please** workflow on `master` by fixing `release-please-
 
 **Files:** `release-please-config.json`
 
-Remove `plist` entry; fix `MainConfig.cs` path; add `generic` entries for both Info.plist files if appropriate.
+Remove `plist` entry; fix `MainConfig.cs` path; use `xml` + xpath for both Info.plist version keys.
+
+### U3. Replace plist generic extra-files with xml xpath updaters
+
+**Files:** `release-please-config.json`
+
+Use `type: xml` with xpath for `CFBundleShortVersionString` and `CFBundleVersion` in both plist paths.
 
 ### U2. Validate Release Please config
 

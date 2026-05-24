@@ -13,13 +13,27 @@
           "glob": false
         },
         {
-          "type": "generic",
+          "type": "xml",
           "path": "Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleShortVersionString']/following-sibling::string[1]",
           "glob": false
         },
         {
-          "type": "generic",
+          "type": "xml",
+          "path": "Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleVersion']/following-sibling::string[1]",
+          "glob": false
+        },
+        {
+          "type": "xml",
           "path": "src/KOTORModSync.GUI/Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleShortVersionString']/following-sibling::string[1]",
+          "glob": false
+        },
+        {
+          "type": "xml",
+          "path": "src/KOTORModSync.GUI/Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleVersion']/following-sibling::string[1]",
           "glob": false
         }
       ],
