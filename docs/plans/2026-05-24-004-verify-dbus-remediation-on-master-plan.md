@@ -1,7 +1,7 @@
 ---
 title: Verify D-Bus remediation closed on master
 type: fix
-status: completed
+status: shipped
 date: 2026-05-24
 ---
 
