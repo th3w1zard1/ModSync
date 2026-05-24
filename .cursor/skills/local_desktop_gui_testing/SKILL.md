@@ -13,8 +13,10 @@ Do not use this skill for pure parser / serialization / core-only work.
 
 ## Read first
 
+- `docs/knowledgebase/README.md` — routing, parity matrix, CLI reference
 - `AGENTS.md`
 - `docs/local_desktop_agent_runbook.md`
+- `docs/knowledgebase/agent-action-parity.md` — wizard steps vs CLI/scripts
 
 ## Verified local launch pattern
 

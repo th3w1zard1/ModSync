@@ -15,10 +15,10 @@
     <Authors>th3w1zard1</Authors>
     <Company>OldRepublicDevs</Company>
     <Product>HoloPatcher.UI</Product>
-    <Description>Avalonia UI components for HoloPatcher.NET, providing a graphical interface for installing and managing KOTOR mods.</Description>
+    <Description>Avalonia UI components for KPatcher, providing a graphical interface for installing and managing KOTOR mods.</Description>
     <PackageTags>kotor;tsl;patcher;mod;gui;avalonia;holopatcher;ui</PackageTags>
-    <PackageProjectUrl>https://github.com/th3w1zard1/HoloPatcher.NET</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/th3w1zard1/HoloPatcher.NET</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>BSL-1.1</PackageLicenseExpression>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
@@ -91,7 +91,7 @@
 
   <ItemGroup>
     <!-- Avalonia packages - use versions compatible with .NET 6+ and net48 -->
-    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.9" />
+    <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics" Version="11.3.16" />
     <PackageReference Include="DialogHost.Avalonia" Version="0.10.2" />
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
@@ -102,12 +102,12 @@
     <PackageReference Include="System.Reactive" Version="6.1.0" />
     <ProjectCapability Include="Avalonia" />
     <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.1.5" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.9" />
-    <PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.16" />
+    <PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.16" />
     <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.9" />
     <TrimmerRootAssembly Include="Avalonia.Themes.Fluent" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.9" />
-    <PackageReference Include="Avalonia" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.16" />
+    <PackageReference Include="Avalonia" Version="11.3.16" />
     <!-- AvRichTextBox reference removed - update path if needed -->
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="JetBrains.Annotations" Version="2025.2.4" />

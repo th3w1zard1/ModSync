@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services;
+using KOTORModSync.Core.Services.Checkpoints;
+
 using KOTORModSync.Tests.TestHelpers;
 
 using NUnit.Framework;
@@ -129,6 +131,44 @@ namespace KOTORModSync.Tests
                 Assert.That(progressEvents[1], Is.EqualTo((1, 2, "SecondComponent")));
                 Assert.That(firstComponent.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Completed));
                 Assert.That(secondComponent.InstallState, Is.EqualTo(ModComponent.ComponentInstallState.Completed));
+            });
+        }
+
+        [Test]
+        public async Task InstallationService_LeavesCheckpointSessionDeletableAfterSuccess()
+        {
+            ModComponent component = TestComponentFactory.CreateComponent("CleanupComponent", _workingDirectory);
+            _mainConfigInstance.allComponents = new List<ModComponent> { component };
+
+            ModComponent.InstallExitCode exitCode = await InstallationService.InstallAllSelectedComponentsAsync(
+                MainConfig.AllComponents,
+                progressCallback: null,
+                CancellationToken.None);
+
+            string workingDirectoryPath = _workingDirectory.FullName;
+            string gitDir = CheckpointPaths.GetGitDirectory(workingDirectoryPath);
+            bool gitDirectoryExistsBeforeCleanup = Directory.Exists(gitDir);
+
+            Exception cleanupException = null;
+            try
+            {
+                InstallCoordinatorTestsHelper.CleanupTestDirectory(_workingDirectory);
+            }
+            catch (Exception ex)
+            {
+                cleanupException = ex;
+            }
+            finally
+            {
+                _workingDirectory = null;
+            }
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(exitCode, Is.EqualTo(ModComponent.InstallExitCode.Success));
+                Assert.That(gitDirectoryExistsBeforeCleanup, Is.True, "Install path should create the checkpoint repository.");
+                Assert.That(cleanupException, Is.Null, "Cleanup helper should not throw after install completion.");
+                Assert.That(Directory.Exists(workingDirectoryPath), Is.False, "Cleanup helper should remove the working directory after install completion.");
             });
         }
     }

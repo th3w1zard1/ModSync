@@ -7,9 +7,9 @@
     <key>CFBundleIdentifier</key>
     <string>com.th3w1zard1.kotormodsync</string>
     <key>CFBundleShortVersionString</key>
-    <string>v0.10</string>
+    <string>2.0.0a1</string>
     <key>CFBundleVersion</key>
-    <string>v0.10.43</string>
+    <string>2.0.0a1</string>
     <key>LSMinimumSystemVersion</key>
     <string>10.13</string>
     <key>CFBundleIconFile</key>

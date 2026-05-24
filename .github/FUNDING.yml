@@ -1,4 +1,12 @@
-# These are supported funding model platforms
+# Supported funding model platforms
+#
+# Funding for this project
+# Support the core maintainer:
+#
+# - th3w1zard1 (Boden): Core maintainer and project lead
+#
+# Individual maintainers will appear if they have GitHub Sponsors enabled
 
-github: [th3w1zard1]
-
+github: th3w1zard1
+patreon: openkotor
+open_collective: openkotor

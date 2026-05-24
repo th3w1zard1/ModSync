@@ -293,7 +293,7 @@ namespace KOTORModSync.Tests
         {
             // Create archive with 200 files
             string archivePath = Path.Combine(_modDirectory, "large_archive.zip");
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
                 for (int i = 0; i < 200; i++)
                 {
@@ -301,7 +301,7 @@ namespace KOTORModSync.Tests
                 }
                 using (var stream = File.OpenWrite(archivePath))
                 {
-                    archive.SaveTo(stream, new WriterOptions(CompressionType.None));
+                    archive.SaveTo(stream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.None));
                 }
             }
 

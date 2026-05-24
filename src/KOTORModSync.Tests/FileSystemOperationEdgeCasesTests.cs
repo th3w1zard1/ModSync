@@ -513,16 +513,16 @@ namespace KOTORModSync.Tests
                 Directory.CreateDirectory(dir);
             }
 
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
                 foreach (var file in files)
                 {
-                    _ = archive.AddEntry(file.Key, new MemoryStream(System.Text.Encoding.UTF8.GetBytes(file.Value)));
+                    _ = archive.AddEntry(file.Key, new MemoryStream(System.Text.Encoding.UTF8.GetBytes(file.Value)), closeStream: true);
                 }
 
                 using (var stream = File.Create(path))
                 {
-                    archive.SaveTo(stream, new WriterOptions(CompressionType.None));
+                    archive.SaveTo(stream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.None));
                 }
             }
         }
@@ -530,4 +530,3 @@ namespace KOTORModSync.Tests
         #endregion
     }
 }
-

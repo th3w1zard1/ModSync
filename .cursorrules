@@ -27,46 +27,43 @@ Instructions MUST use relative paths with placeholders: <<modDirectory>>\filenam
 
 - ZIndex is NOT valid in AvaloniaUI. Literally anything and everything related to a 'z' index is highly incorrect and unusable in avalonia.
 
+=== AUTONOMOUS EXECUTION DEFAULTS ===
+
+- Treat `.github/copilot-instructions.md`, `AGENTS.md`, and `.cursorrules` as the repo's initial routing layer before asking broad "what should I do?" questions.
+- For repo-root work, `src/KOTORModSync.Core`, `src/KOTORModSync.Tests`, and normal build/test/lint changes, default to the headless .NET workflow. Do not stop to ask which project to inspect first when the task path already answers it.
+- If a task touches `src/KOTORModSync.GUI`, the install wizard, `scripts/agents/`, or full-build validation, default to the documented desktop workflow, helper scripts, and preload args before attempting native file-picker automation.
+- If a task touches `telemetry-auth/`, treat it as the Python/Docker sidecar and use that directory's local docs/workflows instead of the Avalonia/.NET path.
+- Only stop or ask when a real prerequisite is missing: no `./mod-builds` for full-build work, no desktop/X11 for required GUI validation, missing credentials/secrets/manual external approval, or conflicting local changes that block a safe edit.
+
 
 ## Testing
 
 - All tests specified in KOTORModSync.Tests, do not create additional projects for any reason.
-- For distributed/optimization testing, use specifically the command `dotnet test KOTORModSync.Tests/KOTORModSync.Tests.csproj --filter "FullyQualifiedName~DistributedCache&FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding"` to run them. Never run tests in this path with any other arguments/parameters.
 
 === TEST NAMING CONVENTIONS ===
 
 **CRITICAL: Test naming prefixes/suffixes have specific meanings:**
 
-1. **GitHubRunnerSeeding** - Tests intended EXCLUSIVELY for GitHub Actions runners:
-   - These tests run for 5-6 hours and are meant for continuous seeding operations
-   - Use suffix: `GitHubRunnerSeeding` (e.g., `RealMods_KOTOR1Full_GitHubRunnerSeeding`)
-   - GitHub workflow `.github/workflows/distributed-cache-tests.yml` runs ONLY these tests
-   - DO NOT use this suffix for any other tests, even if they take a long time
-
-2. **LongRunning** - Tests that take longer than 2 minutes but are NOT for GitHub runners:
-   - Use suffix: `LongRunning` (e.g., `RealMods_KOTOR1_CanComputeContentIds_LongRunning`)
+1. **LongRunning** - Tests that take longer than 2 minutes:
+   - Use suffix: `LongRunning` (e.g., `RealMods_KOTOR1_CanComputeHashes_LongRunning`)
    - These are excluded from GitHub workflows and normal test runs
-   - DO NOT use "Seeding" in the name for these tests
 
-3. **Regular tests** - All other tests:
+2. **Regular tests** - All other tests:
    - No special suffix needed
    - Should complete in under 2 minutes
 
 **Rules:**
-- NEVER use `GitHubRunnerSeeding` suffix unless the test is specifically intended for GitHub Actions runners
-- NEVER use `LongRunning` suffix with "Seeding" in the name
-- Tests taking >2 minutes that are NOT for GitHub runners should use `LongRunning` suffix only
-- GitHub workflow filters: `FullyQualifiedName~GitHubRunnerSeeding` to run ONLY seeding tests
+- Tests taking >2 minutes should use `LongRunning` suffix
 
-- Always use the following command to run tests:
+- Use the following PowerShell wrapper only when classifying whether a single named test should stay a normal test or be renamed with the `LongRunning` suffix. For normal test execution, use the standard `dotnet test` commands from the repo docs/runbooks.
 
 ```pwsh
 # ALWAYS use 120000 to differentiate between normal tests and slightly longer tests.
 # ALWAYS use 600000 to differentiate between 'slightly long tests' and 'long tests'.
 # IF a timelimit is specified as 120000, EXCLUSIVELY ensure FullyQualifiedName refers to a **SINGULAR** test! DO NOT run multiple tests with a timelimit as that defeats the purpose of figuring out how long a singular test takes and whether it meets the criteria where it'd be considered a 'slightly long' test vs a normal test.
 pwsh -Command '& {
-    $proj = ''KOTORModSync.Tests/KOTORModSync.Tests.csproj''
-    $args = ''test {0} --filter "FullyQualifiedName~<filterable_name_of_test(s)_to_run>" --list-tests'' -f $proj
+    $proj = ''src/KOTORModSync.Tests/KOTORModSync.Tests.csproj''
+    $args = ''test {0} --filter "FullyQualifiedName~<filterable_name_of_test(s)_to_run>"'' -f $proj
     $psi = New-Object System.Diagnostics.ProcessStartInfo
     $psi.FileName = ''dotnet''
     $psi.Arguments = $args

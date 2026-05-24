@@ -17,6 +17,7 @@ using KOTORModSync.Core.FileSystemUtils;
 using KOTORModSync.Core.Services.FileSystem;
 using KOTORModSync.Core.Utility;
 using SharpCompress.Archives;
+using SharpCompress.Readers;
 
 namespace KOTORModSync.Core.Services
 {
@@ -55,7 +56,11 @@ namespace KOTORModSync.Core.Services
                     string resolvedPath = rawSource ?? string.Empty;
                     if (MainConfig.SourcePath != null)
                     {
-                        resolvedPath = resolvedPath.Replace("<<modDirectory>>", MainConfig.SourcePath.FullName, StringComparison.OrdinalIgnoreCase);
+                        resolvedPath = NetFrameworkCompatibility.Replace(
+                            resolvedPath,
+                            "<<modDirectory>>",
+                            MainConfig.SourcePath.FullName,
+                            StringComparison.OrdinalIgnoreCase);
                     }
 
                     resolvedPath = PathHelper.FixPathFormatting(resolvedPath);
@@ -67,7 +72,7 @@ namespace KOTORModSync.Core.Services
                     try
                     {
                         using (var stream = File.OpenRead(resolvedPath))
-                        using (var archive = ArchiveFactory.Open(stream))
+                        using (var archive = ArchiveFactory.OpenArchive(stream, new ReaderOptions()))
                         {
                             _ = archive.Entries.Count();
                         }

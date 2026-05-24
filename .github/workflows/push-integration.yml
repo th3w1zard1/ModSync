@@ -58,6 +58,9 @@ jobs:
       - name: Auto-update service regression tests
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~AutoUpdateServiceTests"
 
+      - name: Headless auto-update client regression tests
+        run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~AutoUpdateClientHeadlessTests|FullyQualifiedName~AutoUpdateServiceHeadlessTests|FullyQualifiedName~HeadlessBootstrapTests"
+
       - name: Self-update integration tests
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~SelfUpdateIntegrationTests"
 
@@ -98,10 +101,13 @@ jobs:
         run: dotnet restore "${{ env.TEST_PROJECT }}"
 
       - name: Build test project
-        run: dotnet build "${{ env.TEST_PROJECT }}" --configuration Debug --no-restore
+        run: dotnet build "${{ env.TEST_PROJECT }}" --configuration Debug --no-restore --disable-build-servers -m:1
 
       - name: Windows auto-update service coverage
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~AutoUpdateServiceTests"
+
+      - name: Windows headless auto-update client coverage
+        run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~AutoUpdateClientHeadlessTests|FullyQualifiedName~AutoUpdateServiceHeadlessTests|FullyQualifiedName~HeadlessBootstrapTests"
 
       - name: Windows self-update integration coverage
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~SelfUpdateIntegrationTests"

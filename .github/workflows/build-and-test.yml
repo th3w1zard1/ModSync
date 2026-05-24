@@ -13,6 +13,8 @@ permissions:
 
 env:
   DOTNET_VERSION: "9.0.x"
+  CORE_PROJECT: "src/KOTORModSync.Core/KOTORModSync.Core.csproj"
+  GUI_PROJECT: "src/KOTORModSync.GUI/KOTORModSync.csproj"
   TEST_PROJECT: "src/KOTORModSync.Tests/KOTORModSync.Tests.csproj"
 
 jobs:
@@ -29,6 +31,9 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
       - name: Provision mod-builds
         shell: pwsh
         run: |
@@ -36,17 +41,30 @@ jobs:
             git clone https://github.com/th3w1zard1/mod-builds ./mod-builds
           }
 
-      - name: Authenticate NuGet source for GitHub Packages
-        run: dotnet nuget update source github-th3w1zard1 --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text --configfile NuGet.config
-
       - name: Restore NuGet Packages (net48)
         run: msbuild KOTORModSync.sln /t:Restore /p:TargetFramework=net48 /p:Configuration=Release
 
       - name: Restore test project
         run: dotnet restore "${{ env.TEST_PROJECT }}"
 
+      - name: Restore Core release dependency surface
+        run: dotnet restore "${{ env.CORE_PROJECT }}" -p:Configuration=Release
+
+      - name: Restore GUI release dependency surface
+        run: dotnet restore "${{ env.GUI_PROJECT }}" -p:Configuration=Release
+
       - name: Build test project
         run: dotnet build "${{ env.TEST_PROJECT }}" --configuration Debug --no-restore
+
+      - name: Build Core release dependency surface
+        run: |
+          dotnet build "${{ env.CORE_PROJECT }}" --configuration Release --framework net9.0 --no-restore
+          dotnet build "${{ env.CORE_PROJECT }}" --configuration Release --framework net48 --no-restore
+
+      - name: Build GUI release dependency surface
+        run: |
+          dotnet build "${{ env.GUI_PROJECT }}" --configuration Release --framework net9.0 --no-restore
+          dotnet build "${{ env.GUI_PROJECT }}" --configuration Release --framework net48 --no-restore
 
       - name: Run shared pipeline tests
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~InstallCoordinatorTests"
@@ -54,16 +72,23 @@ jobs:
       - name: Run CLI integration test
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~CliInstallIntegrationTests"
 
-      - name: Run updater smoke tests
+      - name: Run updater service smoke tests
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~AutoUpdateServiceTests"
+
+      - name: Run headless updater client smoke tests
+        run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~AutoUpdateClientHeadlessTests|FullyQualifiedName~AutoUpdateServiceHeadlessTests|FullyQualifiedName~HeadlessBootstrapTests"
 
       - name: Run self-update smoke tests
         run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "FullyQualifiedName~SelfUpdateIntegrationTests"
 
-      - name: Run telemetry smoke tests
+      - name: Run telemetry regression tests
         run: |
-          dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "Name~ComputeSignature_SameInputs_ReturnsDeterministicLowercaseHex"
-          dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "Name~SaveThenLoad_PreservesKeyConfigurationFields"
+          dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "Name~TelemetryService"
+          dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "Name~TelemetryAuthenticator"
+          dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "Name~TelemetryConfiguration"
+
+      - name: Run archive regression tests
+        run: dotnet test "${{ env.TEST_PROJECT }}" --no-build --filter "Name~AutoExtractionAndCleanList"
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
@@ -87,15 +112,98 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_VERSION }}
 
-      - name: Authenticate NuGet source for GitHub Packages
-        run: dotnet nuget update source github-th3w1zard1 --username "${{ github.actor }}" --password "${{ secrets.GITHUB_TOKEN }}" --store-password-in-clear-text --configfile NuGet.config
+      - name: Restore security scan dependency surfaces
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p audit
+          dotnet restore "${{ env.GUI_PROJECT }}" -p:Configuration=Release -p:TargetFramework=net9.0
+          cp "${{ github.workspace }}/src/KOTORModSync.GUI/obj/project.assets.json" audit/gui-net9-project.assets.json
+          dotnet restore "${{ env.GUI_PROJECT }}" -p:Configuration=Release -p:TargetFramework=net48
+          cp "${{ github.workspace }}/src/KOTORModSync.GUI/obj/project.assets.json" audit/gui-net48-project.assets.json
+          dotnet restore "${{ env.TEST_PROJECT }}"
+          cp "${{ github.workspace }}/src/KOTORModSync.Tests/obj/project.assets.json" audit/tests-project.assets.json
 
-      - name: Restore Dependencies
-        run: dotnet restore "${{ env.TEST_PROJECT }}"
-
-      - name: Run Security Audit
-        run: dotnet list "${{ env.TEST_PROJECT }}" package --vulnerable --include-transitive
+      - name: Audit GUI and test dependency graphs
+        shell: bash
         continue-on-error: true
+        run: |
+          set -euo pipefail
+          dotnet list "${{ env.GUI_PROJECT }}" package --vulnerable --include-transitive
+          dotnet list "${{ env.TEST_PROJECT }}" package --vulnerable --include-transitive
+
+      - name: Fail on vulnerable Tmds.DBus.Protocol advisory
+        shell: bash
+        run: |
+          python <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          def parse_version(version: str):
+              normalized = version.split("-", 1)[0].split("+", 1)[0]
+              return tuple(int(part) for part in normalized.split("."))
+
+          def is_vulnerable(version: str) -> bool:
+              return parse_version(version) < (0, 21, 3)
+
+          checks = [
+              ("GUI net9 release", Path("audit/gui-net9-project.assets.json"), "net9.0"),
+              ("GUI net48 release", Path("audit/gui-net48-project.assets.json"), "net48"),
+              ("Tests", Path("audit/tests-project.assets.json"), "net9.0"),
+          ]
+
+          errors = []
+
+          for label, path, expected_framework in checks:
+              if not path.is_file() or path.stat().st_size == 0:
+                  errors.append(f"{label}: missing or empty audit assets file at {path}")
+                  continue
+
+              data = json.loads(path.read_text())
+              restored = data["project"]["restore"].get("originalTargetFrameworks") or list(data["project"]["restore"].get("frameworks", {}).keys())
+              if expected_framework not in restored:
+                  errors.append(f"{label}: expected restored framework {expected_framework}, got {restored}")
+
+              versions = sorted(
+                  {
+                      key.split("/", 1)[1]
+                      for key in data.get("libraries", {})
+                      if key.startswith("Tmds.DBus.Protocol/")
+                  }
+              )
+
+              has_free_desktop = any(
+                  key.startswith("Avalonia.FreeDesktop/")
+                  for key in data.get("libraries", {})
+              )
+              if has_free_desktop and not versions:
+                  errors.append(
+                      f"{label}: Avalonia.FreeDesktop is present but Tmds.DBus.Protocol is missing from restored assets"
+                  )
+
+              for version in versions:
+                  if is_vulnerable(version):
+                      errors.append(f"{label}: vulnerable Tmds.DBus.Protocol {version}")
+
+          if errors:
+              print("::error title=Vulnerable Tmds.DBus.Protocol detected::The known Avalonia FreeDesktop DBus advisory reappeared or the expected audited graph was not restored.")
+              for error in errors:
+                  print(error)
+              sys.exit(1)
+          PY
+
+      - name: Audit HoloPatcher sibling Avalonia graphs
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in \
+            src/HoloPatcher/HoloPatcher.csproj \
+            src/HoloPatcher.UI/HoloPatcher.UI/HoloPatcher.UI.csproj; do
+            echo "=== $project ==="
+            dotnet restore "$project" -p:Configuration=Release
+            dotnet list "$project" package --vulnerable --include-transitive
+          done
 
       - name: Check for Secrets in Code
         uses: trufflesecurity/trufflehog@v3.88.2

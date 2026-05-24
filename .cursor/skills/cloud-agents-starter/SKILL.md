@@ -7,6 +7,10 @@ description: Minimal runbook for Cloud agents - how to run, test, and configure 
 
 A minimal runbook for Cloud agents covering practical setup, execution, and testing. Organized by codebase area.
 
+**Knowledgebase:** [docs/knowledgebase/README.md](../../../docs/knowledgebase/README.md) — index, [core-cli-reference.md](../../../docs/knowledgebase/core-cli-reference.md), [agent-action-parity.md](../../../docs/knowledgebase/agent-action-parity.md).
+
+**Quick scripts:** `./scripts/agents/run_headless_tests.sh`, `./scripts/agents/cli_validate.sh` (see [scripts/agents/README.md](../../../scripts/agents/README.md)).
+
 ---
 
 ## 1. Initial Setup
@@ -75,10 +79,10 @@ dotnet run ... -- \
 
 ## 4. Core CLI (`src/KOTORModSync.Core`)
 
-**Common verbs:** `convert`, `merge`, `validate`, `install`, `set-nexus-api-key`, `cache-stats`, `cache-clear`, `cache-test`, `cache-seed`.
+**Common verbs:** `convert`, `merge`, `validate`, `install`, `set-nexus-api-key`, `install-python-deps`, `holopatcher`.
 
 ```bash
-dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj --framework net9.0 -- \
+dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj -f net9.0 -- \
   validate -i path/to/instructions.toml
 ```
 
@@ -86,6 +90,8 @@ dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj --framework 
 ```bash
 ./scripts/agents/install_best_effort.sh ./mod-builds/TOMLs/KOTOR1_Full.toml ./tmp/game ./tmp/mods
 ```
+
+See [core-cli-reference.md](../../../docs/knowledgebase/core-cli-reference.md) for flags.
 
 ---
 
@@ -96,7 +102,11 @@ dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj --framework 
 
 ### Standard Cloud / headless test run
 
-Excludes long-running and seeding tests, and distributed cache:
+```bash
+./scripts/agents/run_headless_tests.sh
+```
+
+Or explicitly:
 ```bash
 dotnet test src/KOTORModSync.Tests/KOTORModSync.Tests.csproj \
   --filter "FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding&FullyQualifiedName!~DistributedCache" \
@@ -244,7 +254,8 @@ When modifying auth, settings, or telemetry code, keep these invariants:
 |------|---------|
 | Init submodules | `git submodule update --init --recursive` |
 | Build solution | `dotnet build KOTORModSync.sln --configuration Debug` |
-| Run Core CLI | `dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj --framework net9.0 -- <verb>` |
+| Run Core CLI | `dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj -f net9.0 -- <verb>` |
+| Headless tests (wrapper) | `./scripts/agents/run_headless_tests.sh` |
 | Run standard tests | `dotnet test src/KOTORModSync.Tests/KOTORModSync.Tests.csproj --filter "FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding&FullyQualifiedName!~DistributedCache"` |
 | Run DistCache tests | `dotnet test src/KOTORModSync.Tests/KOTORModSync.Tests.csproj --filter "FullyQualifiedName~DistributedCache&FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding"` |
 | Release build (with telemetry) | `dotnet build -c Release /p:DefineConstants="OFFICIAL_BUILD"` |
@@ -257,7 +268,7 @@ When you discover new runbook steps or testing tricks:
 
 1. **Edit this file:** `.cursor/skills/cloud-agents-starter/SKILL.md`
 2. **Update the right section** with concrete, copy-pasteable commands.
-3. **Mirror changes** to `docs/local_desktop_agent_runbook.md` and related skills (`.cursor/skills/local_desktop_gui_testing/SKILL.md`, `.cursor/skills/full_build_install_validation/SKILL.md`).
+3. **Mirror changes** to `docs/knowledgebase/README.md`, `docs/local_desktop_agent_runbook.md`, and related skills.
 4. **If it's a hard rule for all tasks**, also add it to `.cursorrules`.
 5. **Commit** so future Cloud agent runs pick it up automatically.
 

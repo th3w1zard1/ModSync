@@ -29,26 +29,9 @@ namespace KOTORModSync
                     selectedCount: 0
                 );
 
-                // Register graceful shutdown handler for distributed cache engine
-                // CRITICAL: Ensures all shared resources stop and ports are released
-                AppDomain.CurrentDomain.ProcessExit += async (sender, eventArgs) =>
-                {
-                    try
-                    {
-                        await Core.Services.Download.DownloadCacheOptimizer.GracefulShutdownAsync().ConfigureAwait(false);
-                    }
-                    catch (Exception ex)
-                    {
-                        Core.Logger.LogError($"[Shutdown] Cache cleanup error: {ex.Message}");
-                    }
-                };
-
                 var startTime = System.Diagnostics.Stopwatch.StartNew();
                 _ = BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
                 startTime.Stop();
-
-                // Ensure distributed cache engine is shut down gracefully before final cleanup
-                Core.Services.Download.DownloadCacheOptimizer.GracefulShutdownAsync().GetAwaiter().GetResult();
 
                 // Record session end on exit
                 Core.Services.TelemetryService.Instance.RecordSessionEnd(
@@ -65,16 +48,6 @@ namespace KOTORModSync
                     completed: false
                 );
                 Core.Services.TelemetryService.Instance.Flush();
-
-                // Attempt graceful cache shutdown even on crash
-                try
-                {
-                    Core.Services.Download.DownloadCacheOptimizer.GracefulShutdownAsync().GetAwaiter().GetResult();
-                }
-                catch
-                {
-                    // Ignore errors during emergency shutdown
-                }
 
                 throw;
             }

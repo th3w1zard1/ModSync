@@ -59,7 +59,7 @@ namespace KOTORModSync.Core
         }
 
         [JetBrains.Annotations.NotNull]
-        public static string CurrentVersion => "2.0.0a1";
+        public static string CurrentVersion => "2.0.0a1"; // x-release-please-version
 
         public static class ValidTargetGames
         {
@@ -426,7 +426,7 @@ namespace KOTORModSync.Core
         }
         [CanBeNull] public string destinationPathFullName => DestinationPath?.FullName;
 
-        /// <summary>Maximum cache size in megabytes for distributed cache storage (default 10GB). Mutate via <see cref="maxCacheSizeMB"/>.</summary>
+        /// <summary>Maximum cache size in megabytes for download cache storage (default 10GB). Mutate via <see cref="maxCacheSizeMB"/>.</summary>
         public static long MaxCacheSizeMB { get; set; } = 10240;
         /// <summary>Instance accessor for <see cref="MaxCacheSizeMB"/>.</summary>
         public long maxCacheSizeMB

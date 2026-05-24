@@ -206,22 +206,21 @@ namespace KOTORModSync.Core.Services.FileSystem
                         IArchive arch = GetArchiveByExtension(archive.Extension, stream);
 
                         using (arch)
-                        using (IReader reader = arch.ExtractAllEntries())
                         {
-                            while (reader.MoveToNextEntry())
+                            foreach (IArchiveEntry entry in arch.Entries)
                             {
-                                if (reader.Entry.IsDirectory)
+                                if (entry.IsDirectory)
                                 {
                                     continue;
                                 }
 
                                 if (!PathHelper.TryGetZipSafeArchiveEntryExtractPath(
                                         extractRootDirectory,
-                                        reader.Entry.Key,
+                                        entry.Key,
                                         out string destinationItemPath,
                                         out string destinationDirectory))
                                 {
-                                    await Logger.LogWarningAsync($"Skipping archive entry with unsafe path: '{reader.Entry.Key}'").ConfigureAwait(false);
+                                    await Logger.LogWarningAsync($"Skipping archive entry with unsafe path: '{entry.Key}'").ConfigureAwait(false);
                                     continue;
                                 }
 
@@ -238,19 +237,24 @@ namespace KOTORModSync.Core.Services.FileSystem
                                     _ = Directory.CreateDirectory(destinationDirectory);
                                 }
 
-                                await Logger.LogVerboseAsync($"Extract '{reader.Entry.Key}' to '{destinationRelDirPath}'").ConfigureAwait(false);
+                                await Logger.LogVerboseAsync($"Extract '{entry.Key}' to '{destinationRelDirPath}'").ConfigureAwait(false);
 
                                 try
                                 {
-                                    IReader localReader = reader;
+                                    IArchiveEntry localEntry = entry;
                                     await Task.Run(() =>
                                     {
-                                        if (localReader.Cancelled)
+                                        using (Stream sourceStream = localEntry.OpenEntryStream())
+                                        using (FileStream destinationStream = new FileStream(destinationItemPath, FileMode.Create, FileAccess.Write, FileShare.None))
                                         {
-                                            return;
+                                            sourceStream.CopyTo(destinationStream);
                                         }
 
-                                        localReader.WriteEntryToDirectory(destinationDirectory, ArchiveHelper.DefaultExtractionOptions);
+                                        DateTime? lastModifiedTime = localEntry.LastModifiedTime;
+                                        if (lastModifiedTime.HasValue && lastModifiedTime.Value != default(DateTime))
+                                        {
+                                            File.SetLastWriteTime(destinationItemPath, lastModifiedTime.Value);
+                                        }
                                     }, token).ConfigureAwait(false);
 
                                     extracted.Add(destinationItemPath);
@@ -261,7 +265,7 @@ namespace KOTORModSync.Core.Services.FileSystem
                                 }
                                 catch (UnauthorizedAccessException)
                                 {
-                                    await Logger.LogWarningAsync($"Skipping file '{reader.Entry.Key}' due to lack of permissions.").ConfigureAwait(false);
+                                    await Logger.LogWarningAsync($"Skipping file '{entry.Key}' due to lack of permissions.").ConfigureAwait(false);
                                 }
                             }
                         }

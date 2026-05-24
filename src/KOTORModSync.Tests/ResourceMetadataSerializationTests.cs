@@ -23,12 +23,8 @@ namespace KOTORModSync.Tests
 			{
 				["hash123"] = new ResourceMetadata
 				{
-					ContentId = "abc123",
 					MetadataHash = "hash123",
-					PrimaryUrl = "https://example.com/file.zip",
 					FileSize = 1024,
-					SchemaVersion = 1,
-					TrustLevel = MappingTrustLevel.Verified
 				}
 			};
 
@@ -46,13 +42,9 @@ namespace KOTORModSync.Tests
 			{
 				["hash123"] = new ResourceMetadata
 				{
-					ContentId = "abc123",
 					MetadataHash = "hash123",
-					PrimaryUrl = "https://example.com/file.zip",
 					FileSize = 1024,
 					FirstSeen = DateTime.UtcNow,
-					SchemaVersion = 1,
-					TrustLevel = MappingTrustLevel.Verified
 				}
 			};
 
@@ -68,10 +60,7 @@ namespace KOTORModSync.Tests
 				Assert.That(deserialized, Has.Count.EqualTo(1), "Deserialized registry should contain exactly 1 entry");
 				Assert.That(deserialized.ContainsKey("hash123"), Is.True, "Deserialized registry should contain hash123 key");
 				Assert.That(deserialized["hash123"], Is.Not.Null, "Deserialized metadata should not be null");
-				Assert.That(deserialized["hash123"].ContentId, Is.Not.Null, "ContentId should not be null");
-				Assert.That(deserialized["hash123"].ContentId, Is.EqualTo("abc123"), "ContentId should match original");
-				Assert.That(deserialized["hash123"].PrimaryUrl, Is.Not.Null, "PrimaryUrl should not be null");
-				Assert.That(deserialized["hash123"].PrimaryUrl, Is.EqualTo("https://example.com/file.zip"), "PrimaryUrl should match original");
+				Assert.That(deserialized["hash123"].MetadataHash, Is.EqualTo("hash123"), "MetadataHash should match original");
 			});
 		}
 
@@ -81,9 +70,9 @@ namespace KOTORModSync.Tests
 			var registry = new Dictionary<string, ResourceMetadata>
 (StringComparer.Ordinal)
 			{
-				["hash1"] = new ResourceMetadata { ContentId = "id1", MetadataHash = "hash1" },
-				["hash2"] = new ResourceMetadata { ContentId = "id2", MetadataHash = "hash2" },
-				["hash3"] = new ResourceMetadata { ContentId = "id3", MetadataHash = "hash3" }
+				["hash1"] = new ResourceMetadata { MetadataHash = "hash1" },
+				["hash2"] = new ResourceMetadata { MetadataHash = "hash2" },
+				["hash3"] = new ResourceMetadata { MetadataHash = "hash3" }
 			};
 
 			var serialized = ModComponentSerializationService.SerializeResourceRegistry(registry);
@@ -148,11 +137,7 @@ namespace KOTORModSync.Tests
 			{
 				["hash1"] = new ResourceMetadata
 				{
-					ContentId = "id1",
 					MetadataHash = "hash1",
-					PrimaryUrl = "https://example.com/file.zip",
-					ContentHashSHA256 = null, // Null before download
-					PieceHashes = null
 				}
 			};
 
@@ -167,8 +152,6 @@ namespace KOTORModSync.Tests
 				Assert.That(deserialized, Is.Not.Null, "Deserialized registry should not be null");
 				Assert.That(deserialized.ContainsKey("hash1"), Is.True, "Deserialized registry should contain hash1");
 				Assert.That(deserialized["hash1"], Is.Not.Null, "Hash1 metadata should not be null");
-				Assert.That(deserialized["hash1"].ContentHashSHA256, Is.Null, "ContentHashSHA256 should remain null after round-trip");
-				Assert.That(deserialized["hash1"].PieceHashes, Is.Null, "PieceHashes should remain null after round-trip");
 			});
 		}
 
@@ -180,9 +163,7 @@ namespace KOTORModSync.Tests
 			{
 				["hash1"] = new ResourceMetadata
 				{
-					ContentId = "id1",
 					MetadataHash = "hash1",
-					PrimaryUrl = "https://example.com/file.zip",
 					Files = new Dictionary<string, bool?>(StringComparer.OrdinalIgnoreCase)
 					{
 						["file1.zip"] = true,
@@ -212,39 +193,6 @@ namespace KOTORModSync.Tests
 		}
 
 		[Test]
-		public void SerializeResourceRegistry_WithTrustLevels_PreservesTrust()
-		{
-			var registry = new Dictionary<string, ResourceMetadata>
-(StringComparer.Ordinal)
-			{
-				["hash1"] = new ResourceMetadata { ContentId = "id1", MetadataHash = "hash1", TrustLevel = MappingTrustLevel.Unverified },
-				["hash2"] = new ResourceMetadata { ContentId = "id2", MetadataHash = "hash2", TrustLevel = MappingTrustLevel.ObservedOnce },
-				["hash3"] = new ResourceMetadata { ContentId = "id3", MetadataHash = "hash3", TrustLevel = MappingTrustLevel.Verified }
-			};
-
-			var serialized = ModComponentSerializationService.SerializeResourceRegistry(registry);
-			var deserialized = ModComponentSerializationService.DeserializeResourceRegistry(serialized);
-
-			Assert.Multiple(() =>
-			{
-				Assert.That(registry, Is.Not.Null, "Registry should not be null");
-				Assert.That(registry.Count, Is.EqualTo(3), "Registry should contain exactly 3 entries");
-				Assert.That(serialized, Is.Not.Null, "Serialized dictionary should not be null");
-				Assert.That(deserialized, Is.Not.Null, "Deserialized registry should not be null");
-				Assert.That(deserialized, Has.Count.EqualTo(3), "Deserialized registry should contain exactly 3 entries");
-				Assert.That(deserialized.ContainsKey("hash1"), Is.True, "Deserialized registry should contain hash1");
-				Assert.That(deserialized.ContainsKey("hash2"), Is.True, "Deserialized registry should contain hash2");
-				Assert.That(deserialized.ContainsKey("hash3"), Is.True, "Deserialized registry should contain hash3");
-				Assert.That(deserialized["hash1"], Is.Not.Null, "Hash1 metadata should not be null");
-				Assert.That(deserialized["hash2"], Is.Not.Null, "Hash2 metadata should not be null");
-				Assert.That(deserialized["hash3"], Is.Not.Null, "Hash3 metadata should not be null");
-				Assert.That(deserialized["hash1"].TrustLevel, Is.EqualTo(MappingTrustLevel.Unverified), "Hash1 trust level should be Unverified");
-				Assert.That(deserialized["hash2"].TrustLevel, Is.EqualTo(MappingTrustLevel.ObservedOnce), "Hash2 trust level should be ObservedOnce");
-				Assert.That(deserialized["hash3"].TrustLevel, Is.EqualTo(MappingTrustLevel.Verified), "Hash3 trust level should be Verified");
-			});
-		}
-
-		[Test]
 		public void SerializeResourceRegistry_WithHandlerMetadata_PreservesMetadata()
 		{
 			var registry = new Dictionary<string, ResourceMetadata>
@@ -252,7 +200,6 @@ namespace KOTORModSync.Tests
 			{
 				["hash1"] = new ResourceMetadata
 				{
-					ContentId = "id1",
 					MetadataHash = "hash1",
 					HandlerMetadata = new Dictionary<string, object>(StringComparer.Ordinal)
 					{
@@ -287,17 +234,11 @@ namespace KOTORModSync.Tests
 		{
 			var original = new ResourceMetadata
 			{
-				ContentId = "abc123def456",
+				ContentKey = "key789",
 				MetadataHash = "hash789",
-				PrimaryUrl = "https://example.com/mod.zip",
 				FileSize = 2048,
-				ContentHashSHA256 = "sha256hash",
-				PieceLength = 65536,
-				PieceHashes = "abcdef123456",
 				FirstSeen = DateTime.UtcNow,
 				LastVerified = DateTime.UtcNow.AddHours(-1),
-				SchemaVersion = 1,
-				TrustLevel = MappingTrustLevel.Verified,
 				Files = new Dictionary<string, bool?>(StringComparer.OrdinalIgnoreCase) { ["test.zip"] = true },
 				HandlerMetadata = new Dictionary<string, object>(StringComparer.Ordinal) { ["key"] = "value" }
 			};
@@ -317,15 +258,8 @@ namespace KOTORModSync.Tests
 				Assert.That(deserialized, Is.Not.Null, "Deserialized registry should not be null");
 				Assert.That(deserialized.ContainsKey("hash789"), Is.True, "Deserialized registry should contain hash789");
 				Assert.That(result, Is.Not.Null, "Result metadata should not be null");
-				Assert.That(result.ContentId, Is.EqualTo(original.ContentId), "ContentId should match original");
 				Assert.That(result.MetadataHash, Is.EqualTo(original.MetadataHash), "MetadataHash should match original");
-				Assert.That(result.PrimaryUrl, Is.EqualTo(original.PrimaryUrl), "PrimaryUrl should match original");
 				Assert.That(result.FileSize, Is.EqualTo(original.FileSize), "FileSize should match original");
-				Assert.That(result.ContentHashSHA256, Is.EqualTo(original.ContentHashSHA256), "ContentHashSHA256 should match original");
-				Assert.That(result.PieceLength, Is.EqualTo(original.PieceLength), "PieceLength should match original");
-				Assert.That(result.PieceHashes, Is.EqualTo(original.PieceHashes), "PieceHashes should match original");
-				Assert.That(result.SchemaVersion, Is.EqualTo(original.SchemaVersion), "SchemaVersion should match original");
-				Assert.That(result.TrustLevel, Is.EqualTo(original.TrustLevel), "TrustLevel should match original");
 			});
 		}
 	}

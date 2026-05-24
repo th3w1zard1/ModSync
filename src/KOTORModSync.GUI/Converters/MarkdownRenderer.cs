@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Avalonia;
@@ -275,6 +276,132 @@ namespace KOTORModSync.Converters
             }
 
             return new SolidColorBrush(Color.FromRgb(0x00, 0x00, 0x00)); // Light theme default
+        }
+
+        /// <summary>
+        /// Converts markdown to plain text: strips link syntax (keeping link text), bold/italic markers,
+        /// heading prefixes, and warning block delimiters. Line breaks are normalized to <see cref="Environment.NewLine"/>.
+        /// </summary>
+        [NotNull]
+        public static string MarkdownToPlainText([CanBeNull] string markdownText)
+        {
+            if (string.IsNullOrWhiteSpace(markdownText))
+            {
+                return string.Empty;
+            }
+
+            try
+            {
+                string[] lines = markdownText.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+                var output = new StringBuilder();
+                bool inWarningBlock = false;
+
+                for (int i = 0; i < lines.Length; i++)
+                {
+                    string rawLine = lines[i];
+                    string lineTrimEnd = rawLine.TrimEnd();
+                    string lineTrim = lineTrimEnd.Trim();
+
+                    if (inWarningBlock)
+                    {
+                        if (string.Equals(lineTrim, ":::", StringComparison.Ordinal))
+                        {
+                            inWarningBlock = false;
+                            continue;
+                        }
+
+                        AppendPlainLine(output, StripInlineMarkdown(lineTrimEnd));
+                        continue;
+                    }
+
+                    if (lineTrim.StartsWith(":::warning", StringComparison.OrdinalIgnoreCase))
+                    {
+                        inWarningBlock = true;
+                        string titlePart = lineTrim.Length > ":::warning".Length
+                            ? lineTrim.Substring(":::warning".Length).Trim()
+                            : string.Empty;
+                        if (!string.IsNullOrEmpty(titlePart))
+                        {
+                            AppendPlainLine(output, StripInlineMarkdown(titlePart));
+                        }
+
+                        continue;
+                    }
+
+                    if (lineTrim.StartsWith("#", StringComparison.Ordinal))
+                    {
+                        int level = 0;
+                        while (level < lineTrim.Length && lineTrim[level] == '#')
+                        {
+                            level++;
+                        }
+
+                        string headingBody = lineTrim.Substring(level).Trim();
+                        if (!string.IsNullOrEmpty(headingBody))
+                        {
+                            AppendPlainLine(output, StripInlineMarkdown(headingBody));
+                        }
+
+                        continue;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(lineTrimEnd))
+                    {
+                        continue;
+                    }
+
+                    AppendPlainLine(output, StripInlineMarkdown(lineTrimEnd));
+                }
+
+                return output.ToString().TrimEnd();
+            }
+            catch (Exception)
+            {
+                return markdownText;
+            }
+        }
+
+        private static void AppendPlainLine(StringBuilder output, string line)
+        {
+            if (output.Length > 0)
+            {
+                output.Append(Environment.NewLine);
+            }
+
+            output.Append(line);
+        }
+
+        /// <summary>
+        /// Strips <c>[text](url)</c>, <c>**bold**</c>, <c>__bold__</c>, and single-<c>*</c>/<c>_</c> italic spans
+        /// (same subset as <see cref="ParseMarkdownInlines"/>).
+        /// </summary>
+        private static string StripInlineMarkdown(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+
+            string withLinks = Regex.Replace(
+                text,
+                @"\[([^\]]+)\]\(([^)]+)\)",
+                m => m.Groups[1].Value,
+                RegexOptions.Compiled,
+                TimeSpan.FromSeconds(5));
+
+            string noBold = Regex.Replace(
+                withLinks,
+                @"(\*\*|__)([^*_]+)\1",
+                m => m.Groups[2].Value,
+                RegexOptions.Compiled,
+                TimeSpan.FromSeconds(5));
+
+            return Regex.Replace(
+                noBold,
+                @"(\*|_)([^*_]+)\1",
+                m => m.Groups[2].Value,
+                RegexOptions.Compiled,
+                TimeSpan.FromSeconds(5));
         }
 
         [NotNull]

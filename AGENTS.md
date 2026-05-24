@@ -11,14 +11,25 @@ Use this repository's local-agent assets whenever a task touches:
 - full-build validation against `mod-builds`
 - any manual test that requires a real desktop session instead of pure headless tests
 
+For broad repo tasks, start with `.github/copilot-instructions.md` for the short Copilot/autopilot brief, then use this file as the routing layer into the deeper runbooks and skills.
+
+**Knowledgebase (canonical index):** [docs/knowledgebase/README.md](docs/knowledgebase/README.md) — agent-native audit, CLI reference, action parity, and links to runbooks/scripts.
+
 Start with:
 
+- `docs/knowledgebase/README.md`
 - `docs/local_desktop_agent_runbook.md`
 - `.cursor/skills/local_desktop_gui_testing/SKILL.md`
 - `.cursor/skills/full_build_install_validation/SKILL.md`
 
-## Project layout
+## Autonomous defaults
 
+- If the task touches `src/KOTORModSync.Core`, `src/KOTORModSync.Tests`, repo-root docs/config, or normal build/test/lint behavior, default to the headless .NET workflow. Do not stop to ask which project to inspect first when the file paths already answer it.
+- If the task touches `src/KOTORModSync.GUI`, the install wizard, `scripts/agents/`, or full-build validation against `mod-builds`, default to this file plus `docs/local_desktop_agent_runbook.md` and the relevant `.cursor/skills/*` guidance.
+- If the task touches `telemetry-auth/`, treat it as the Python/Docker sidecar with its own local docs and workflows rather than routing it through the Avalonia/.NET guidance in this file.
+- Only stop or ask when a real prerequisite is missing: no `./mod-builds` for full-build work, no desktop/X11 session for required GUI validation, missing credentials/secrets/manual external approval, or conflicting local changes that block a safe edit.
+
+## Project layout
 ```
 KOTORModSync.sln
 src/
@@ -40,6 +51,10 @@ mod-builds/                  # Clone here: github.com/th3w1zard1/mod-builds
 dotnet build KOTORModSync.sln
 ```
 
+## Releases
+
+GitHub Releases are **manual only**. Do not expect tags or releases from merging to `master`. See `docs/manual-release.md` for the dispatch workflow (Release Please → optional version PR; Build and Release with `create_github_release=true` when ready to publish).
+
 ## Cursor Cloud specific instructions
 
 Cloud agents run headless (no X11 desktop). The following applies:
@@ -52,9 +67,9 @@ Cloud agents run headless (no X11 desktop). The following applies:
 ### Running tests (Cloud / headless)
 
 ```bash
-# Run all non-long-running, non-seeding tests
+# Run all non-long-running tests
 dotnet test src/KOTORModSync.Tests/KOTORModSync.Tests.csproj \
-  --filter "FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding"
+  --filter "FullyQualifiedName!~LongRunning"
 ```
 
 Run a single named test with a 120-second timeout to classify duration:
@@ -62,7 +77,7 @@ Run a single named test with a 120-second timeout to classify duration:
 ```pwsh
 pwsh -Command '& {
   $proj = "src/KOTORModSync.Tests/KOTORModSync.Tests.csproj"
-  $args = "test {0} --filter ""FullyQualifiedName~<TestName>"" --list-tests" -f $proj
+  $args = "test {0} --filter ""FullyQualifiedName~<TestName>""" -f $proj
   $psi = New-Object System.Diagnostics.ProcessStartInfo
   $psi.FileName = "dotnet"
   $psi.Arguments = $args
@@ -93,14 +108,11 @@ pwsh -Command '& {
 
 | Suffix | Meaning | Duration |
 |---|---|---|
-| `GitHubRunnerSeeding` | GitHub Actions ONLY — continuous seeding ops | 5-6 hours |
-| `LongRunning` | Long local tests, NOT for GitHub runners | > 2 minutes |
+| `LongRunning` | Long local tests | > 2 minutes |
 | _(none)_ | Regular test | < 2 minutes |
 
 Rules:
-- NEVER use `GitHubRunnerSeeding` unless the test is exclusively for GitHub Actions runners.
-- NEVER combine `LongRunning` with "Seeding" in a test name.
-- GitHub workflow `.github/workflows/distributed-cache-tests.yml` filters on `FullyQualifiedName~GitHubRunnerSeeding`.
+- Tests taking >2 minutes should use `LongRunning` suffix.
 
 ## Verified local desktop baseline
 
@@ -256,15 +268,14 @@ KOTORModSync is a cross-platform multi-mod installer for Star Wars: KOTOR, built
 - .NET 9.0 SDK at `$HOME/.dotnet` (ensure `DOTNET_ROOT` and `PATH` include it)
 - PowerShell (`pwsh`) for running tests per `.cursorrules` conventions
 - X11 libraries for AvaloniaUI rendering (see README for list)
-- Git submodules: `src/AvRichTextBox` and `src/RtfDomParserAvalonia` are initialized; `vendor/HoloPatcher.NET` is unavailable (private/not-found repo) but not required for building or testing the main solution
+- Git submodules: `src/AvRichTextBox` and `src/RtfDomParserAvalonia` are initialized; `vendor/KPatcher` is available and not required for building or testing the main solution
 
 ### Build, Test, Lint, Run
 
 - **Build**: `dotnet build KOTORModSync.sln --configuration Debug` from repo root
 - **Run GUI**: `dotnet run --project src/KOTORModSync.GUI/KOTORModSync.csproj --configuration Debug --framework net9.0` (must specify `--framework net9.0` since Debug can multi-target)
 - **Lint**: `dotnet format KOTORModSync.sln --verify-no-changes` (pre-existing formatting diffs exist)
-- **Tests**: See `.cursorrules` for the required PowerShell-based test runner pattern. Quick non-long-running test run: `dotnet test src/KOTORModSync.Tests/KOTORModSync.Tests.csproj --filter "FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding&FullyQualifiedName!~DistributedCache" --configuration Debug`
-- **Distributed cache tests**: `dotnet test KOTORModSync.Tests/KOTORModSync.Tests.csproj --filter "FullyQualifiedName~DistributedCache&FullyQualifiedName!~LongRunning&FullyQualifiedName!~GitHubRunnerSeeding"` (run from `src/` dir or adjust path)
+- **Tests**: See `.cursorrules` for the required PowerShell-based test runner pattern. Quick non-long-running test run: `dotnet test src/KOTORModSync.Tests/KOTORModSync.Tests.csproj --filter "FullyQualifiedName!~LongRunning" --configuration Debug`
 
 ### Non-obvious gotchas
 
@@ -272,4 +283,4 @@ KOTORModSync is a cross-platform multi-mod installer for Star Wars: KOTOR, built
 - `CrossPlatformFileWatcherTests` fail in the cloud VM due to container filesystem inotify limitations; this is expected.
 - Some xUnit-based UI tests may fail headlessly depending on Avalonia headless support; these are pre-existing.
 - The NuGet config (`NuGet.config`) includes a GitHub Packages feed (`github-th3w1zard1`). Public packages restore without auth; if private packages are added, a GitHub PAT may be needed.
-- `vendor/HoloPatcher.NET` submodule references a repo that currently returns 404. The build succeeds without it (only used in optional PostBuild copy targets).
+- `vendor/KPatcher` contains the vendored patcher source. The build can proceed without it for most workflows, but it is used by optional PostBuild copy targets.

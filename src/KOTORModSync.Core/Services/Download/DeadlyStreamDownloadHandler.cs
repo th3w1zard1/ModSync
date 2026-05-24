@@ -20,7 +20,7 @@ namespace KOTORModSync.Core.Services.Download
     public sealed partial class DeadlyStreamDownloadHandler : IDownloadHandler
     {
         private readonly HttpClient _httpClient;
-        private const long MaxBytesPerSecond = 7 * 1024 * 1024;
+        private const long MaxBytesPerSecond = 7 * 1024 * 1024; // 7 MB/s (TODO: make 700 KB/s when releasing.)
 
 
         private readonly CookieContainer _cookieContainer;

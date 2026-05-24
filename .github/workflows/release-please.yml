@@ -1,10 +1,18 @@
+# Release Please: manual only — opens/updates a version-bump PR. Does NOT publish GitHub Releases.
+# GitHub Releases are created only via "Build and Release KOTORModSync" workflow_dispatch
+# with create_github_release=true.
+#
+# Requires repo Settings → Actions → General:
+# "Allow GitHub Actions to create and approve pull requests" when using this workflow.
 name: Release Please
 
 on:
-  push:
-    branches:
-      - main
-      - master
+  workflow_dispatch:
+    inputs:
+      create_release_pr:
+        description: "Open or refresh the Release Please version-bump pull request"
+        type: boolean
+        default: true
 
 permissions:
   contents: write
@@ -12,14 +20,12 @@ permissions:
 
 jobs:
   release-please:
+    if: inputs.create_release_pr
     runs-on: ubuntu-latest
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
       version: ${{ steps.release.outputs.version }}
-      major: ${{ steps.release.outputs.major }}
-      minor: ${{ steps.release.outputs.minor }}
-      patch: ${{ steps.release.outputs.patch }}
 
     steps:
       - name: Checkout Repository
@@ -27,18 +33,13 @@ jobs:
 
       - name: Run Release Please
         id: release
-        uses: google-github-actions/release-please-action@v4
+        uses: googleapis/release-please-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          skip-github-release: true
 
       - name: Output Release Info
         if: steps.release.outputs.releases_created == 'true'
         run: |
-          echo "🎉 Release created!"
-          echo "Releases: ${{ steps.release.outputs.releases_created }}"
-          if [ -n "${{ steps.release.outputs.tag_name }}" ]; then
-            echo "Tag: ${{ steps.release.outputs.tag_name }}"
-          fi
-          if [ -n "${{ steps.release.outputs['release--tag_name'] }}" ]; then
-            echo "Tag: ${{ steps.release.outputs['release--tag_name'] }}"
-          fi
+          echo "Release Please updated release PR (no GitHub Release was created)."
+          echo "Merge the PR when ready, then run Build and Release with create_github_release=true."

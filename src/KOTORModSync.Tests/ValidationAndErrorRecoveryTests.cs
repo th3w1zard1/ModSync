@@ -91,11 +91,11 @@ namespace KOTORModSync.Tests
         {
             // Create empty zip
             string emptyArchive = Path.Combine(_modDirectory, "empty.zip");
-            using (var archive = SharpCompress.Archives.Zip.ZipArchive.Create())
+            using (var archive = SharpCompress.Archives.Zip.ZipArchive.CreateArchive())
             {
                 using (var stream = File.OpenWrite(emptyArchive))
                 {
-                    archive.SaveTo(stream, new SharpCompress.Writers.WriterOptions(SharpCompress.Common.CompressionType.None));
+                    archive.SaveTo(stream, new SharpCompress.Writers.Zip.ZipWriterOptions(SharpCompress.Common.CompressionType.None));
                 }
             }
 
@@ -378,13 +378,13 @@ namespace KOTORModSync.Tests
         public async Task ValidateComponent_WithResourceRegistryMismatch_ReportsMismatch()
         {
             string archivePath = Path.Combine(_modDirectory, "mod.zip");
-            using (var archive = SharpCompress.Archives.Zip.ZipArchive.Create())
+            using (var archive = SharpCompress.Archives.Zip.ZipArchive.CreateArchive())
             {
                 archive.AddEntry("file1.txt", new MemoryStream(System.Text.Encoding.UTF8.GetBytes("content1")), true);
                 archive.AddEntry("file2.txt", new MemoryStream(System.Text.Encoding.UTF8.GetBytes("content2")), true);
                 using (var stream = File.OpenWrite(archivePath))
                 {
-                    archive.SaveTo(stream, new SharpCompress.Writers.WriterOptions(SharpCompress.Common.CompressionType.None));
+                    archive.SaveTo(stream, new SharpCompress.Writers.Zip.ZipWriterOptions(SharpCompress.Common.CompressionType.None));
                 }
             }
 
@@ -429,4 +429,3 @@ namespace KOTORModSync.Tests
         #endregion
     }
 }
-

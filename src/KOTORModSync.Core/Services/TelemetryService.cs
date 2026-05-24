@@ -44,7 +44,6 @@ namespace KOTORModSync.Core.Services
         private Counter<long> _cacheHitCounter;
         private Counter<long> _cacheMissCounter;
         private Counter<long> _cacheSizeCounter;
-        private Counter<long> _contentIdGeneratedCounter;
         private Counter<long> _integrityVerificationCounter;
         private Histogram<double> _cacheOperationDuration;
 
@@ -105,7 +104,6 @@ namespace KOTORModSync.Core.Services
                 _cacheHitCounter = _meter.CreateCounter<long>("kotormodsync.cache.hits", "hits", "Number of cache hits");
                 _cacheMissCounter = _meter.CreateCounter<long>("kotormodsync.cache.misses", "misses", "Number of cache misses");
                 _cacheSizeCounter = _meter.CreateCounter<long>("kotormodsync.cache.size", "bytes", "Total cache size in bytes");
-                _contentIdGeneratedCounter = _meter.CreateCounter<long>("kotormodsync.cache.contentid.generated", "ids", "Number of ContentIds generated");
                 _integrityVerificationCounter = _meter.CreateCounter<long>("kotormodsync.cache.integrity.verified", "verifications", "Number of integrity verifications");
                 _cacheOperationDuration = _meter.CreateHistogram<double>("kotormodsync.cache.operation.duration", "ms", "Duration of cache operations");
 
@@ -164,7 +162,7 @@ namespace KOTORModSync.Core.Services
 #else
                         meterProviderBuilder.AddPrometheusHttpListener(options =>
                         {
-                            options.UriPrefixes = new[] { $"http://localhost:{_config.PrometheusPort}/" };
+                            options.UriPrefixes = new[] { BuildPrometheusUriPrefix(_config.PrometheusPort) };
                         });
                         Logger.Log($"[Telemetry] Prometheus HTTP listener started on http://localhost:{_config.PrometheusPort}/metrics (LOCAL ONLY - for development/testing)");
                         Logger.Log("[Telemetry] Note: For authenticated remote telemetry, use OTLP exporter (enabled by default)");
@@ -642,29 +640,6 @@ namespace KOTORModSync.Core.Services
             }
         }
 
-        public void RecordContentIdGenerated(string provider, bool fromMetadata = true)
-        {
-            if (!IsEnabled || !_config.CollectUsageData)
-            {
-                return;
-            }
-
-            try
-            {
-                var tags = new Dictionary<string, object>(StringComparer.Ordinal)
-                {
-                    ["provider"] = provider ?? "unknown",
-                    ["source"] = fromMetadata ? "metadata" : "file",
-                };
-
-                _contentIdGeneratedCounter?.Add(1, CreateTagList("contentid.generated", tags));
-            }
-            catch (Exception ex)
-            {
-                Logger.LogException(ex, "[Telemetry] Failed to record ContentId generation");
-            }
-        }
-
         public void RecordIntegrityVerification(bool success, string verificationType = null)
         {
             if (!IsEnabled || !_config.CollectUsageData)
@@ -793,7 +768,9 @@ namespace KOTORModSync.Core.Services
             }
         }
 
-        private string GetAuthHeaders(string requestPath)
+        internal static string BuildPrometheusUriPrefix(int port) => $"http://localhost:{port}/";
+
+        internal string GetAuthHeaders(string requestPath)
         {
             if (_authenticator is null || !_authenticator.HasValidSecret())
             {

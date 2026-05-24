@@ -3,7 +3,7 @@ namespace KOTORModSync.Common
     // Matching PyKotor implementation at Libraries/PyKotor/src/pykotor/common/misc.py:250-285
     // Original: class Game(IntEnum):
     // Extended to support all BioWare engine games: Odyssey (KOTOR), Aurora (NWN), Eclipse (DA/ME)
-    // This enum is kept in Andastra.Parsing for backward compatibility with patcher tools (HoloPatcher.NET, HolocronToolset, NCSDecomp, KotorDiff)
+    // This enum is kept in Andastra.Parsing for backward compatibility with patcher tools (KPatcher, HolocronToolset, NCSDecomp, KotorDiff)
     /// <summary>
     /// Represents which BioWare engine game / platform variant.
     /// </summary>

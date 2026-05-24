@@ -308,7 +308,7 @@ namespace KOTORModSync.Tests
         private string CreateTestZip(string fileName, Dictionary<string, string> files)
         {
             string zipPath = Path.Combine(_workingDirectory.FullName, fileName);
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
                 foreach (var kvp in files)
                 {
@@ -316,7 +316,7 @@ namespace KOTORModSync.Tests
                 }
                 using (var stream = File.OpenWrite(zipPath))
                 {
-                    archive.SaveTo(stream, new WriterOptions(CompressionType.None));
+                    archive.SaveTo(stream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.None));
                 }
             }
             return zipPath;

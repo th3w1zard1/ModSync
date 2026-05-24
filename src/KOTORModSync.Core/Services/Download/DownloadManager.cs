@@ -408,12 +408,7 @@ namespace KOTORModSync.Core.Services.Download
                 DownloadResult result;
                 try
                 {
-                    result = await DownloadCacheOptimizer.TryOptimizedDownload(
-                        url,
-                        destinationDirectory,
-                        () => handler.DownloadAsync(url, destinationDirectory, internalProgressReporter, progressItem.TargetFilenames, combinedCancellationToken),
-                        internalProgressReporter,
-                        combinedCancellationToken).ConfigureAwait(false);
+                    result = await handler.DownloadAsync(url, destinationDirectory, internalProgressReporter, progressItem.TargetFilenames, combinedCancellationToken).ConfigureAwait(false);
                 }
                 catch (OperationCanceledException)
                 {

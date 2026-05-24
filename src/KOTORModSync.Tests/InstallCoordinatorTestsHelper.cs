@@ -11,10 +11,7 @@ using System.Threading.Tasks;
 
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
-using KOTORModSync.Core.Services;
-using KOTORModSync.Tests.TestHelpers;
-
-using LibGit2Sharp;
+using KOTORModSync.Core.Services.Checkpoints;
 
 namespace KOTORModSync.Tests
 {
@@ -34,11 +31,8 @@ namespace KOTORModSync.Tests
                 return;
             }
 
-            // Clear session to dispose any Git repositories
+            // Clear persisted checkpoint/session state before filesystem cleanup.
             InstallCoordinator.ClearSessionForTests(directory);
-
-            // Dispose any Git repositories explicitly
-            DisposeGitRepositories(directory.FullName);
 
             // Force garbage collection to help release file handles
             GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true);
@@ -82,55 +76,6 @@ namespace KOTORModSync.Tests
                     System.Threading.Thread.Sleep(delayMs);
                 }
             }
-
-            // If we still can't delete, log a warning but don't fail the test
-            try
-            {
-                System.Diagnostics.Debug.WriteLine($"Warning: Could not delete test directory after {maxRetries} attempts: {directory.FullName}");
-            }
-            catch
-            {
-                // Ignore logging errors
-            }
-        }
-
-        /// <summary>
-        /// Disposes any Git repositories in the directory to release file handles.
-        /// </summary>
-        private static void DisposeGitRepositories(string directoryPath)
-        {
-            try
-            {
-                string checkpointDir = Path.Combine(directoryPath, ModComponent.CheckpointFolderName);
-                if (!Directory.Exists(checkpointDir))
-                {
-                    return;
-                }
-
-                string gitDir = Path.Combine(checkpointDir, ".git");
-                if (!Directory.Exists(gitDir))
-                {
-                    return;
-                }
-
-                // Try to dispose any open Repository instances
-                // LibGit2Sharp repositories should be disposed to release file handles
-                try
-                {
-                    using (var repo = new LibGit2Sharp.Repository(gitDir))
-                    {
-                        // Repository is disposed when leaving using block
-                    }
-                }
-                catch
-                {
-                    // Repository may not be valid or already disposed - ignore
-                }
-            }
-            catch
-            {
-                // Ignore errors during disposal attempt
-            }
         }
 
         /// <summary>
@@ -140,13 +85,7 @@ namespace KOTORModSync.Tests
         {
             try
             {
-                string checkpointDir = Path.Combine(directoryPath, ModComponent.CheckpointFolderName);
-                if (!Directory.Exists(checkpointDir))
-                {
-                    return;
-                }
-
-                string gitDir = Path.Combine(checkpointDir, ".git");
+                string gitDir = CheckpointPaths.GetGitDirectory(directoryPath);
                 if (!Directory.Exists(gitDir))
                 {
                     return;

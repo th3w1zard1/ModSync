@@ -159,7 +159,7 @@ namespace HoloPatcher.UI.Update
         private static HttpClient CreateHttpClient()
         {
             var client = new HttpClient();
-            client.DefaultRequestHeaders.UserAgent.ParseAdd("HoloPatcher.NET AutoUpdater");
+            client.DefaultRequestHeaders.UserAgent.ParseAdd("KPatcher AutoUpdater");
             client.Timeout = TimeSpan.FromSeconds(30);
             return client;
         }

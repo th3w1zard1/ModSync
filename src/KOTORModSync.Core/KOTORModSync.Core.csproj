@@ -15,8 +15,6 @@
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <_NC1>rent</_NC1>
-    <_NC2>Mon</_NC2>
   </PropertyGroup>
 
 
@@ -63,7 +61,6 @@
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
     <Copyright>2025 th3w1zard1</Copyright>
     <Title>KOTORModSync</Title>
-    <_NC3>oTor</_NC3>
   </PropertyGroup>
 
   <ItemGroup>
@@ -83,7 +80,7 @@
     <PackageReference Include="YamlDotNet" Version="16.2.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="ini-parser-netstandard" Version="2.5.2" />
-    <PackageReference Include="SharpCompress" Version="0.36.0" />
+    <PackageReference Include="SharpCompress" Version="0.48.1" />
     <PackageReference Include="SevenZip" Version="19.0.0" />
     <PackageReference Include="Squid-Box.SevenZipSharp" Version="1.6.1.23" />
     <PackageReference Include="AngleSharp" Version="1.1.2" />
@@ -92,16 +89,15 @@
     <PackageReference Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageReference Include="MegaApiClient" Version="1.10.5" />
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="OpenTelemetry" Version="1.7.0" />
-    <PackageReference Include="OpenTelemetry.Api" Version="1.7.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.7.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.7.0" />
-    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.7.0-rc.1" />
-    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.7.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Api" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.15.3" />
+    <PackageReference Include="OpenTelemetry.Exporter.Prometheus.HttpListener" Version="1.15.3-beta.1" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.15.3" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="CommandLineParser" Version="2.9.1" />
     <PackageReference Include="Octodiff" Version="1.2.33" />
-    <PackageReference Include="$(_NC2)$(_NC3)$(_NC1)" Version="3.0.2" PrivateAssets="all" />
     <PackageReference Include="NLog" Version="5.3.4" />
     <PackageReference Include="NLog.Config" Version="4.7.15">
       <ExcludeAssets>contentFiles</ExcludeAssets>

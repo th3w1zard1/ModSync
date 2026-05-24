@@ -12,6 +12,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using KOTORModSync.Core.Utility;
+
 namespace KOTORModSync.Services
 {
     public sealed class AutoUpdatePackage
@@ -56,17 +58,19 @@ namespace KOTORModSync.Services
             string scriptDirectory = Path.Combine(Path.GetTempPath(), "kotormodsync_update_scripts");
             Directory.CreateDirectory(scriptDirectory);
 
+            int processId = CurrentProcessId;
             string scriptPath = Path.Combine(
                 scriptDirectory,
                 IsWindows()
-                    ? $"update_{Environment.ProcessId}.ps1"
-                    : $"update_{Environment.ProcessId}.sh");
+                    ? $"update_{processId}.ps1"
+                    : $"update_{processId}.sh");
 
             string scriptContent = IsWindows()
-                ? BuildWindowsScript(payloadRoot, targetDirectory, currentProcessPath, Environment.ProcessId)
-                : BuildUnixScript(payloadRoot, targetDirectory, currentProcessPath, Environment.ProcessId);
+                ? BuildWindowsScript(payloadRoot, targetDirectory, currentProcessPath, processId)
+                : BuildUnixScript(payloadRoot, targetDirectory, currentProcessPath, processId);
 
-            await File.WriteAllTextAsync(scriptPath, scriptContent, cancellationToken).ConfigureAwait(false);
+            await NetFrameworkCompatibility.WriteAllTextAsync(scriptPath, scriptContent, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
 
             if (!IsWindows())
             {
@@ -106,7 +110,14 @@ namespace KOTORModSync.Services
             if (lowerPath.EndsWith(".zip", StringComparison.Ordinal))
             {
                 await Task.Run(
-                    () => ZipFile.ExtractToDirectory(archivePath, extractionRoot, overwriteFiles: true),
+                    () =>
+                    {
+#if NET5_0_OR_GREATER
+                        ZipFile.ExtractToDirectory(archivePath, extractionRoot, overwriteFiles: true);
+#else
+                        ZipFile.ExtractToDirectory(archivePath, extractionRoot);
+#endif
+                    },
                     cancellationToken).ConfigureAwait(false);
             }
             else if (lowerPath.EndsWith(".tar.gz", StringComparison.Ordinal) || lowerPath.EndsWith(".tgz", StringComparison.Ordinal))
@@ -248,7 +259,23 @@ rm -f ""$0""
 
         private static string EscapePowerShellPath(string value)
         {
+#if NETCOREAPP
             return value.Replace("'", "''", StringComparison.Ordinal);
+#else
+            return value.Replace("'", "''");
+#endif
+        }
+
+        private static int CurrentProcessId
+        {
+            get
+            {
+#if NET5_0_OR_GREATER
+                return Environment.ProcessId;
+#else
+                return Process.GetCurrentProcess().Id;
+#endif
+            }
         }
 
         private static bool IsWindows()

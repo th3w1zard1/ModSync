@@ -63,7 +63,7 @@ namespace HoloPatcher.UI.Views
 
                 MsBox.Avalonia.Base.IMsBox<MsBox.Avalonia.Enums.ButtonResult> messageBox = MsBox.Avalonia.MessageBoxManager.GetMessageBoxStandard(
                     "ALPHA VERSION WARNING",
-                    $"⚠️ WARNING: This is an ALPHA version ({Core.VersionLabel}) of HoloPatcher.NET\n\n" +
+                    $"⚠️ WARNING: This is an ALPHA version ({Core.VersionLabel}) of KPatcher\n\n" +
                     "This version is for testing and demonstration purposes only.\n" +
                     "It is NOT intended for production use.\n\n" +
                     "Features may be incomplete, unstable, or contain bugs.\n" +

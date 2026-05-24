@@ -14,6 +14,7 @@ using KOTORModSync.Core.FileSystemUtils;
 using KOTORModSync.Core.Utility;
 
 using SharpCompress.Archives;
+using SharpCompress.Readers;
 
 namespace KOTORModSync.Core.TSLPatcher
 {
@@ -75,7 +76,7 @@ namespace KOTORModSync.Core.TSLPatcher
 
             try
             {
-                using (IArchive archive = ArchiveFactory.Open(archiveStream))
+                using (IArchive archive = ArchiveFactory.OpenArchive(archiveStream, new ReaderOptions()))
                 {
                     return TraverseDirectories(archive.Entries);
                 }

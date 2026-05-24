@@ -15,10 +15,10 @@
     <Authors>th3w1zard1</Authors>
     <Company>OldRepublicDevs</Company>
     <Product>HoloPatcher.UI</Product>
-    <Description>Avalonia UI components for HoloPatcher.NET, providing a graphical interface for installing and managing KOTOR mods.</Description>
+    <Description>Avalonia UI components for KPatcher, providing a graphical interface for installing and managing KOTOR mods.</Description>
     <PackageTags>kotor;tsl;patcher;mod;gui;avalonia;holopatcher;ui</PackageTags>
-    <PackageProjectUrl>https://github.com/th3w1zard1/HoloPatcher.NET</PackageProjectUrl>
-    <RepositoryUrl>https://github.com/th3w1zard1/HoloPatcher.NET</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/th3w1zard1/KPatcher</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/th3w1zard1/KPatcher</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <PackageLicenseExpression>BSL-1.1</PackageLicenseExpression>
     <GeneratePackageOnBuild Condition="'$(Configuration)' == 'Release'">true</GeneratePackageOnBuild>

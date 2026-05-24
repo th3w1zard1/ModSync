@@ -6,15 +6,35 @@
       "package-name": "KOTORModSync",
       "bump-minor-pre-major": true,
       "bump-patch-for-minor-pre-major": true,
+      "skip-github-release": true,
       "extra-files": [
         {
           "type": "generic",
-          "path": "KOTORModSync.Core/MainConfig.cs",
+          "path": "src/KOTORModSync.Core/MainConfig.cs",
           "glob": false
         },
         {
-          "type": "plist",
+          "type": "xml",
           "path": "Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleShortVersionString']/following-sibling::string[1]",
+          "glob": false
+        },
+        {
+          "type": "xml",
+          "path": "Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleVersion']/following-sibling::string[1]",
+          "glob": false
+        },
+        {
+          "type": "xml",
+          "path": "src/KOTORModSync.GUI/Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleShortVersionString']/following-sibling::string[1]",
+          "glob": false
+        },
+        {
+          "type": "xml",
+          "path": "src/KOTORModSync.GUI/Info.plist",
+          "xpath": "//key[normalize-space(text())='CFBundleVersion']/following-sibling::string[1]",
           "glob": false
         }
       ],
@@ -23,7 +43,7 @@
         {"type": "fix", "section": "Bug Fixes"},
         {"type": "perf", "section": "Performance Improvements"},
         {"type": "revert", "section": "Reverts"},
-        {"type": "docs", "section": "Documentation"},
+        {"type": "docs", "section": "Documentation", "hidden": true},
         {"type": "style", "section": "Styles", "hidden": true},
         {"type": "chore", "section": "Miscellaneous Chores", "hidden": true},
         {"type": "refactor", "section": "Code Refactoring", "hidden": true},

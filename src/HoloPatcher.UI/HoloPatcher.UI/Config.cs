@@ -19,26 +19,26 @@ namespace HoloPatcher.UI
             ["currentVersion"] = "2.0.0a1",
             ["holopatcherLatestVersion"] = "1.5.2",
             ["holopatcherLatestBetaVersion"] = "1.7.0b1",
-            ["updateInfoLink"] = "https://api.github.com/repos/th3w1zard1/HoloPatcher.NET/contents/src/HoloPatcher/Config.cs",
-            ["updateBetaInfoLink"] = "https://api.github.com/repos/th3w1zard1/HoloPatcher.NET/contents/src/HoloPatcher/Config.cs?ref=bleeding-edge",
+            ["updateInfoLink"] = "https://api.github.com/repos/th3w1zard1/KPatcher/contents/src/KPatcher.UI/Config.cs",
+            ["updateBetaInfoLink"] = "https://api.github.com/repos/th3w1zard1/KPatcher/contents/src/KPatcher.UI/Config.cs?ref=bleeding-edge",
             ["holopatcherDownloadLink"] = "https://deadlystream.com/files/file/1982-holocron-holopatcher",
-            ["holopatcherBetaDownloadLink"] = "https://github.com/th3w1zard1/HoloPatcher.NET/releases/tag/v1.70-patcher-beta1",
+            ["holopatcherBetaDownloadLink"] = "https://github.com/th3w1zard1/KPatcher/releases/tag/v1.70-patcher-beta1",
             ["holopatcherDirectLinks"] = new Dictionary<string, Dictionary<string, List<string>>>
             {
                 ["Darwin"] = new Dictionary<string, List<string>>
                 {
                     ["32bit"] = new List<string>(),
-                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/HoloPatcher.NET/releases/download/{tag}/HoloPatcher_Mac.zip" }
+                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/HoloPatcher_Mac.zip" }
                 },
                 ["Linux"] = new Dictionary<string, List<string>>
                 {
                     ["32bit"] = new List<string>(),
-                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/HoloPatcher.NET/releases/download/{tag}/HoloPatcher_Linux.zip" }
+                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/HoloPatcher_Linux.zip" }
                 },
                 ["Windows"] = new Dictionary<string, List<string>>
                 {
-                    ["32bit"] = new List<string> { "https://github.com/th3w1zard1/HoloPatcher.NET/releases/download/{tag}/HoloPatcher_Windows.zip" },
-                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/HoloPatcher.NET/releases/download/{tag}/HoloPatcher_Windows.zip" }
+                    ["32bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/HoloPatcher_Windows.zip" },
+                    ["64bit"] = new List<string> { "https://github.com/th3w1zard1/KPatcher/releases/download/{tag}/HoloPatcher_Windows.zip" }
                 }
             },
             ["holopatcherLatestNotes"] = "",

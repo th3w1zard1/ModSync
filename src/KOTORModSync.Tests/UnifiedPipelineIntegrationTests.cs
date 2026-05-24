@@ -291,12 +291,12 @@ progress: null,
 
         #region Helper Methods
 
-        private string CreateTestArchive(string fileName, Action<ZipArchive> populateArchive)
+        private string CreateTestArchive(string fileName, Action<SharpCompress.Archives.IWritableArchive<SharpCompress.Writers.Zip.ZipWriterOptions>> populateArchive)
         {
             System.Diagnostics.Debug.Assert(!(_downloadDirectory is null), "Download directory is null");
             string archivePath = Path.Combine(_downloadDirectory, fileName);
 
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
                 populateArchive(archive);
                 archive.SaveTo(archivePath, CompressionType.Deflate);
@@ -305,7 +305,7 @@ progress: null,
             return archivePath;
         }
 
-        private static void AddTextFileToArchive(ZipArchive archive, string path, string content)
+        private static void AddTextFileToArchive(SharpCompress.Archives.IWritableArchive<SharpCompress.Writers.Zip.ZipWriterOptions> archive, string path, string content)
         {
             var memoryStream = new MemoryStream(System.Text.Encoding.UTF8.GetBytes(content));
             archive.AddEntry(path, memoryStream, closeStream: true);

@@ -118,14 +118,16 @@
   <ItemGroup>
     <ProjectCapability Include="Avalonia" />
     <TrimmerRootAssembly Include="Avalonia.Themes.Fluent" />
-    <PackageReference Include="Avalonia" Version="11.3.4" />
-    <PackageReference Include="Avalonia.Desktop" Version="11.3.4" />
-    <PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.4" />
+    <PackageReference Include="Avalonia" Version="11.3.16" />
+    <PackageReference Include="Avalonia.Desktop" Version="11.3.16" />
+    <PackageReference Include="Avalonia.LinuxFramebuffer" Version="11.3.16" />
+    <!-- Latest stable 11.x ItemsRepeater; verified against Avalonia 11.3.16 restore graph -->
     <PackageReference Include="Avalonia.Controls.ItemsRepeater" Version="11.1.5" />
-    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.4" />
-    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.4" />
+    <!-- Latest published Avalonia.ReactiveUI patch (no 11.3.16 package on NuGet) -->
+    <PackageReference Include="Avalonia.ReactiveUI" Version="11.3.9" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="11.3.16" />
     <PackageReference Condition="'$(Configuration)' == 'Debug'" Include="Avalonia.Diagnostics"
-      Version="11.3.4" />
+      Version="11.3.16" />
     <PackageReference Include="Dotnet.Bundle" Version="*" />
   </ItemGroup>
   <ItemGroup>
@@ -168,20 +170,20 @@
 
   <PropertyGroup>
     <LegacyHoloPatcherBinDir>$(SolutionDir)vendor$(DirectorySeparatorChar)bin$(DirectorySeparatorChar)</LegacyHoloPatcherBinDir>
-    <VendorHoloPatcherProject>$(SolutionDir)vendor$(DirectorySeparatorChar)HoloPatcher.NET$(DirectorySeparatorChar)src$(DirectorySeparatorChar)HoloPatcher$(DirectorySeparatorChar)HoloPatcher.csproj</VendorHoloPatcherProject>
-    <VendorHoloPatcherAssetsFile>$(SolutionDir)vendor$(DirectorySeparatorChar)HoloPatcher.NET$(DirectorySeparatorChar)src$(DirectorySeparatorChar)HoloPatcher$(DirectorySeparatorChar)obj$(DirectorySeparatorChar)project.assets.json</VendorHoloPatcherAssetsFile>
-    <VendorHoloPatcherOutputDir>$(SolutionDir)vendor$(DirectorySeparatorChar)HoloPatcher.NET$(DirectorySeparatorChar)src$(DirectorySeparatorChar)HoloPatcher$(DirectorySeparatorChar)bin$(DirectorySeparatorChar)$(Configuration)$(DirectorySeparatorChar)$(TargetFramework)$(DirectorySeparatorChar)</VendorHoloPatcherOutputDir>
+    <VendorHoloPatcherProject>$(SolutionDir)vendor$(DirectorySeparatorChar)KPatcher$(DirectorySeparatorChar)src$(DirectorySeparatorChar)KPatcher.UI$(DirectorySeparatorChar)KPatcher.UI.csproj</VendorHoloPatcherProject>
+    <VendorHoloPatcherAssetsFile>$(SolutionDir)vendor$(DirectorySeparatorChar)KPatcher$(DirectorySeparatorChar)src$(DirectorySeparatorChar)KPatcher.UI$(DirectorySeparatorChar)obj$(DirectorySeparatorChar)project.assets.json</VendorHoloPatcherAssetsFile>
+    <VendorHoloPatcherOutputDir>$(SolutionDir)vendor$(DirectorySeparatorChar)KPatcher$(DirectorySeparatorChar)src$(DirectorySeparatorChar)KPatcher.UI$(DirectorySeparatorChar)bin$(DirectorySeparatorChar)$(Configuration)$(DirectorySeparatorChar)$(TargetFramework)$(DirectorySeparatorChar)</VendorHoloPatcherOutputDir>
     <MacLegacyHoloPatcherSource>$(LegacyHoloPatcherBinDir)HoloPatcher.app$(DirectorySeparatorChar)Contents$(DirectorySeparatorChar)MacOS$(DirectorySeparatorChar)HoloPatcher</MacLegacyHoloPatcherSource>
-    <MacVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)HoloPatcher</MacVendorHoloPatcherSource>
+    <MacVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)KPatcher</MacVendorHoloPatcherSource>
     <LinuxLegacyHoloPatcherSource>$(LegacyHoloPatcherBinDir)HoloPatcher_linux</LinuxLegacyHoloPatcherSource>
-    <LinuxVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)HoloPatcher</LinuxVendorHoloPatcherSource>
+    <LinuxVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)KPatcher</LinuxVendorHoloPatcherSource>
     <WindowsLegacyHoloPatcherSource>$(LegacyHoloPatcherBinDir)HoloPatcher.exe</WindowsLegacyHoloPatcherSource>
-    <WindowsVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)HoloPatcher.exe</WindowsVendorHoloPatcherSource>
+    <WindowsVendorHoloPatcherSource>$(VendorHoloPatcherOutputDir)KPatcher.exe</WindowsVendorHoloPatcherSource>
   </PropertyGroup>
 
   <Target Name="BuildVendorHoloPatcher" BeforeTargets="PostBuild"
     Condition="'$(DesignTimeBuild)' != 'true' AND Exists('$(VendorHoloPatcherProject)') AND Exists('$(VendorHoloPatcherAssetsFile)') AND !Exists('$(WindowsVendorHoloPatcherSource)') AND !Exists('$(MacVendorHoloPatcherSource)') AND !Exists('$(LinuxVendorHoloPatcherSource)')">
-    <Message Importance="High" Text="Building vendor HoloPatcher from $(VendorHoloPatcherProject) for $(Configuration)|$(TargetFramework)..." />
+    <Message Importance="High" Text="Building vendor KPatcher from $(VendorHoloPatcherProject) for $(Configuration)|$(TargetFramework)..." />
     <MSBuild Projects="$(VendorHoloPatcherProject)"
       Targets="Build"
       Properties="Configuration=$(Configuration);TargetFramework=$(TargetFramework)"

@@ -1,23 +1,27 @@
 name: Build and Release KOTORModSync
 
+# Manual-only release pipeline. Artifacts are always built; GitHub Releases are created
+# only when workflow_dispatch input create_github_release is true.
 on:
-  release:
-    types: [published, prereleased, released, created]
   workflow_dispatch:
     inputs:
       version:
-        description: "Version to build (leave empty to use MainConfig.cs version)"
+        description: "Release tag (e.g. v2.0.0a2). Leave empty to use MainConfig.cs version."
         required: false
         default: ""
-  workflow_run:
-    workflows: ["Release Please"]
-    types:
-      - completed
+      create_github_release:
+        description: "Create a GitHub Release and upload build artifacts"
+        type: boolean
+        default: false
+      update_appcast:
+        description: "Update appcast.xml on master and attach to the GitHub Release (requires create_github_release)"
+        type: boolean
+        default: false
 
 env:
-  DOTNET_VERSION: "8.0.x"
-  PROJECT_FILE: "KOTORModSync.GUI/KOTORModSync.csproj"
-  DOTNET_VERSION_SHORT: "net8.0"  # Specify net8.0 once here, so it's incredibly easy to change to another version globally.
+  DOTNET_VERSION: "9.0.x"
+  PROJECT_FILE: "src/KOTORModSync.GUI/KOTORModSync.csproj"
+  DOTNET_VERSION_SHORT: "net9.0"  # Specify net9.0 once here, so it's incredibly easy to change to another version globally.
   DOTNET_FRAMEWORK_VERSION_SHORT: "net48"  # Specify net48 once here, so it's incredibly easy to change to another version globally.
 
 jobs:
@@ -36,7 +40,7 @@ jobs:
         id: extract
         shell: pwsh
         run: |
-          $mainConfigPath = "KOTORModSync.Core/MainConfig.cs"
+          $mainConfigPath = "src/KOTORModSync.Core/MainConfig.cs"
           $content = Get-Content $mainConfigPath -Raw
 
           if ($content -match 'CurrentVersion\s*=>\s*"([^"]+)"') {
@@ -54,17 +58,9 @@ jobs:
         run: |
           CODE_VERSION="${{ steps.extract.outputs.code_version }}"
 
-          if [ "${{ github.event_name }}" = "release" ]; then
-            VERSION="${{ github.event.release.tag_name }}"
-            echo "Using GitHub release tag: $VERSION"
-          elif [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            if [ -n "${{ github.event.inputs.version }}" ]; then
-              VERSION="${{ github.event.inputs.version }}"
-              echo "Using workflow dispatch version: $VERSION"
-            else
-              VERSION="v${CODE_VERSION}"
-              echo "Using MainConfig.cs version: $VERSION"
-            fi
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            echo "Using workflow dispatch version: $VERSION"
           else
             VERSION="v${CODE_VERSION}"
             echo "Using MainConfig.cs version: $VERSION"
@@ -76,22 +72,8 @@ jobs:
       - name: Check if Should Build
         id: check
         run: |
-          EVENT_NAME="${{ github.event_name }}"
-          if [ "$EVENT_NAME" = "release" ] || [ "$EVENT_NAME" = "workflow_dispatch" ]; then
-            echo "should_build=true" >> $GITHUB_OUTPUT
-          elif [ "$EVENT_NAME" = "workflow_run" ]; then
-            if [ "${{ github.event.workflow_run.conclusion }}" = "success" ]; then
-              echo "Triggered by successful workflow_run (e.g., Release Please)."
-              echo "should_build=true" >> $GITHUB_OUTPUT
-            else
-              echo "Workflow run conclusion is not success (got ${{ github.event.workflow_run.conclusion }})."
-              echo "should_build=false" >> $GITHUB_OUTPUT
-            fi
-          elif [ "$EVENT_NAME" = "pull_request" ]; then
-            echo "should_build=false" >> $GITHUB_OUTPUT
-          else
-            echo "should_build=false" >> $GITHUB_OUTPUT
-          fi
+          echo "should_build=true" >> $GITHUB_OUTPUT
+          echo "Manual workflow_dispatch — building release artifacts."
 
   publish-multi-platform:
     name: Publish ${{ matrix.rid }}
@@ -177,7 +159,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.framework == 'DOTNET_FRAMEWORK_VERSION_SHORT'
         uses: microsoft/setup-msbuild@v2
 
-      - name: Setup .NET 8 SDK
+      - name: Setup .NET 9 SDK
         if: matrix.framework == 'DOTNET_VERSION_SHORT'
         uses: actions/setup-dotnet@v5
         with:
@@ -190,7 +172,7 @@ jobs:
         run: |
           Write-Host "🔐 Injecting telemetry signing secret..."
 
-          $secretFile = "KOTORModSync.Core/Services/EmbeddedSecrets.cs"
+          $secretFile = "src/KOTORModSync.Core/Services/EmbeddedSecrets.cs"
           $dir = Split-Path -Parent $secretFile
           if (-not (Test-Path $dir)) {
             New-Item -ItemType Directory -Path $dir -Force | Out-Null
@@ -218,9 +200,9 @@ jobs:
 
       - name: Restore Dependencies (Windows - MSBuild for .NET Framework 4.8)
         if: runner.os == 'Windows' && matrix.framework == 'DOTNET_FRAMEWORK_VERSION_SHORT'
-        run: msbuild KOTORModSync.sln /t:Restore /p:TargetFramework=${{ matrix.framework }} /p:Configuration=Release
+        run: msbuild KOTORModSync.sln /t:Restore /p:TargetFramework=${{ matrix.framework == 'DOTNET_FRAMEWORK_VERSION_SHORT' && env.DOTNET_FRAMEWORK_VERSION_SHORT || matrix.framework }} /p:Configuration=Release
 
-      - name: Restore Dependencies (dotnet CLI for .NET 8.0)
+      - name: Restore Dependencies (dotnet CLI for .NET 9.0)
         if: matrix.framework == 'DOTNET_VERSION_SHORT'
         run: dotnet restore KOTORModSync.sln /p:TargetFramework=${{ matrix.framework == 'DOTNET_VERSION_SHORT' && env.DOTNET_VERSION_SHORT || matrix.framework }} /p:Configuration=Release
 
@@ -243,11 +225,11 @@ jobs:
             /p:PublishDir="$PWD/publish/${{ matrix.rid }}/"
           Write-Host "✅ Published ${{ matrix.rid }}"
 
-      - name: Publish ${{ matrix.rid }} (dotnet CLI for .NET 8.0)
+      - name: Publish ${{ matrix.rid }} (dotnet CLI for .NET 9.0)
         if: matrix.framework == 'DOTNET_VERSION_SHORT'
         shell: pwsh
         run: |
-          Write-Host "🔨 Publishing ${{ matrix.rid }} using dotnet CLI (.NET 8)..."
+          Write-Host "🔨 Publishing ${{ matrix.rid }} using dotnet CLI (.NET 9)..."
           dotnet publish ${{ env.PROJECT_FILE }} `
             -c Release `
             --framework ${{ matrix.framework == 'DOTNET_VERSION_SHORT' && env.DOTNET_VERSION_SHORT || matrix.framework }} `
@@ -343,7 +325,7 @@ jobs:
           compression-level: 0
 
       - name: Upload to GitHub Release
-        if: github.event_name == 'release'
+        if: github.event_name == 'workflow_dispatch' && inputs.create_github_release
         uses: softprops/action-gh-release@v2
         with:
           files: KOTORModSync-${{ needs.determine-version.outputs.version }}-${{ matrix.rid }}.zip
@@ -355,8 +337,11 @@ jobs:
   generate-appcast:
     name: Generate AppCast
     needs: [determine-version, publish-multi-platform]
-    # Run even if some builds failed (but not if all were cancelled/skipped)
-    if: needs.determine-version.outputs.should_build == 'true' && !cancelled()
+    if: >-
+      needs.determine-version.outputs.should_build == 'true'
+      && !cancelled()
+      && github.event_name == 'workflow_dispatch'
+      && inputs.create_github_release
     runs-on: ubuntu-latest
 
     steps:
@@ -510,36 +495,8 @@ jobs:
           echo "✅ AppCast updated"
           cat appcast.xml
 
-      - name: Check if Release Exists
-        id: check_release
-        if: github.event_name == 'workflow_run'
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          version="${{ needs.determine-version.outputs.version }}"
-          echo "🔍 Checking if release exists for version: $version"
-
-          # Check if release exists using GitHub API
-          response=$(curl -s -w "\n%{http_code}" \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer $GITHUB_TOKEN" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            "https://api.github.com/repos/${{ github.repository }}/releases/tags/$version")
-
-          http_code=$(echo "$response" | tail -n1)
-          body=$(echo "$response" | sed '$d')
-
-          if [ "$http_code" = "200" ]; then
-            echo "✅ Release exists for version $version"
-            echo "release_exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "❌ Release does not exist for version $version (HTTP $http_code)"
-            echo "release_exists=false" >> $GITHUB_OUTPUT
-          fi
-
       - name: Commit and Push AppCast
-        if: github.event_name == 'release' || (github.event_name == 'workflow_run' && steps.check_release.outputs.release_exists == 'true')
+        if: github.event_name == 'workflow_dispatch' && inputs.create_github_release && inputs.update_appcast
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -560,7 +517,7 @@ jobs:
           fi
 
       - name: Upload AppCast to Release
-        if: github.event_name == 'release' || (github.event_name == 'workflow_run' && steps.check_release.outputs.release_exists == 'true')
+        if: github.event_name == 'workflow_dispatch' && inputs.create_github_release && inputs.update_appcast
         uses: softprops/action-gh-release@v2
         with:
           files: appcast.xml

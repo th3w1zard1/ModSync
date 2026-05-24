@@ -2165,8 +2165,6 @@ namespace KOTORModSync.Dialogs
             return new ResourceMetadata
             {
                 ContentKey = source.ContentKey,
-                ContentId = source.ContentId,
-                ContentHashSHA256 = source.ContentHashSHA256,
                 MetadataHash = source.MetadataHash,
                 HandlerMetadata = source.HandlerMetadata != null
                     ? new Dictionary<string, object>(source.HandlerMetadata, StringComparer.Ordinal)
@@ -2175,11 +2173,8 @@ namespace KOTORModSync.Dialogs
                     ? new Dictionary<string, bool?>(source.Files, StringComparer.OrdinalIgnoreCase)
                     : new Dictionary<string, bool?>(StringComparer.OrdinalIgnoreCase),
                 FileSize = source.FileSize,
-                PieceLength = source.PieceLength,
-                PieceHashes = source.PieceHashes,
                 FirstSeen = source.FirstSeen,
                 LastVerified = source.LastVerified,
-                TrustLevel = source.TrustLevel,
             };
         }
 

@@ -60,7 +60,7 @@ namespace KOTORModSync.Tests
         {
             Debug.Assert(_testDirectory != null);
             string archivePath = Path.Combine(_testDirectory, archiveName);
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
 
                 var exeStream = new MemoryStream();
@@ -68,7 +68,7 @@ namespace KOTORModSync.Tests
                 exeWriter.Write(new byte[] { 0x4D, 0x5A });
                 exeWriter.Flush();
                 exeStream.Position = 0;
-                archive.AddEntry("TSLPatcher.exe", exeStream);
+                archive.AddEntry("TSLPatcher.exe", exeStream, closeStream: true);
 
                 var changesStream = new MemoryStream();
                 var changesWriter = new StreamWriter(changesStream);
@@ -76,11 +76,11 @@ namespace KOTORModSync.Tests
                 changesWriter.WriteLine("Version=1.0");
                 changesWriter.Flush();
                 changesStream.Position = 0;
-                archive.AddEntry("tslpatchdata/changes.ini", changesStream);
+                archive.AddEntry("tslpatchdata/changes.ini", changesStream, closeStream: true);
 
                 using (FileStream fileStream = File.Create(archivePath))
                 {
-                    archive.SaveTo(fileStream, new WriterOptions(CompressionType.Deflate));
+                    archive.SaveTo(fileStream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.Deflate));
                 }
             }
 
@@ -91,7 +91,7 @@ namespace KOTORModSync.Tests
         {
             Debug.Assert(_testDirectory != null);
             string archivePath = Path.Combine(_testDirectory, archiveName);
-            using (var archive = ZipArchive.Create())
+            using (var archive = ZipArchive.CreateArchive())
             {
                 foreach (string fileName in fileNames)
                 {
@@ -100,12 +100,12 @@ namespace KOTORModSync.Tests
                     writer.WriteLine($"Test content for {fileName}");
                     writer.Flush();
                     memStream.Position = 0;
-                    archive.AddEntry(fileName, memStream);
+                    archive.AddEntry(fileName, memStream, closeStream: true);
                 }
 
                 using (FileStream fileStream = File.Create(archivePath))
                 {
-                    archive.SaveTo(fileStream, new WriterOptions(CompressionType.Deflate));
+                    archive.SaveTo(fileStream, new SharpCompress.Writers.Zip.ZipWriterOptions(CompressionType.Deflate));
                 }
             }
         }

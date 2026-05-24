@@ -156,14 +156,6 @@ namespace KOTORModSync.Core.Services
                         }
 
                         // Also copy other useful metadata from cache
-                        if (string.IsNullOrEmpty(existingMetadata.ContentId) && !string.IsNullOrEmpty(cachedMetadata.ContentId))
-                        {
-                            existingMetadata.ContentId = cachedMetadata.ContentId;
-                        }
-                        if (string.IsNullOrEmpty(existingMetadata.ContentHashSHA256) && !string.IsNullOrEmpty(cachedMetadata.ContentHashSHA256))
-                        {
-                            existingMetadata.ContentHashSHA256 = cachedMetadata.ContentHashSHA256;
-                        }
                         if (string.IsNullOrEmpty(existingMetadata.MetadataHash) && !string.IsNullOrEmpty(cachedMetadata.MetadataHash))
                         {
                             existingMetadata.MetadataHash = cachedMetadata.MetadataHash;
@@ -1524,7 +1516,6 @@ namespace KOTORModSync.Core.Services
                                 Files = new Dictionary<string, bool?>(StringComparer.OrdinalIgnoreCase), // Empty - files will be discovered during download
                                 HandlerMetadata = new Dictionary<string, object>(StringComparer.Ordinal),
                                 FileSize = 0,
-                                TrustLevel = MappingTrustLevel.Unverified,
                                 FirstSeen = DateTime.UtcNow,
                             };
 
@@ -1714,7 +1705,6 @@ namespace KOTORModSync.Core.Services
                             Files = new Dictionary<string, bool?>(filenames, StringComparer.Ordinal),
                             HandlerMetadata = new Dictionary<string, object>(StringComparer.Ordinal),
                             FileSize = 0,
-                            TrustLevel = MappingTrustLevel.Unverified,
                             FirstSeen = DateTime.UtcNow,
                         };
 
@@ -5638,29 +5628,7 @@ namespace KOTORModSync.Core.Services
                     ["HandlerMetadata"] = kvp.Value.HandlerMetadata,
                     ["Files"] = serializedFiles,
                     ["FileSize"] = kvp.Value.FileSize,
-                    ["TrustLevel"] = kvp.Value.TrustLevel.ToString(),
                 };
-
-                // Only serialize post-download fields if present
-                if (kvp.Value.ContentId != null)
-                {
-                    metaDict["ContentId"] = kvp.Value.ContentId;
-                }
-
-                if (kvp.Value.ContentHashSHA256 != null)
-                {
-                    metaDict["ContentHashSHA256"] = kvp.Value.ContentHashSHA256;
-                }
-
-                if (kvp.Value.PieceLength > 0)
-                {
-                    metaDict["PieceLength"] = kvp.Value.PieceLength;
-                }
-
-                if (kvp.Value.PieceHashes != null)
-                {
-                    metaDict["PieceHashes"] = kvp.Value.PieceHashes;
-                }
 
                 if (kvp.Value.FirstSeen.HasValue)
                 {
@@ -5728,12 +5696,8 @@ namespace KOTORModSync.Core.Services
                         var meta = new ResourceMetadata
                         {
                             ContentKey = GetValueOrDefault<string>(metaDict, "ContentKey"),
-                            ContentId = GetValueOrDefault<string>(metaDict, "ContentId"),
-                            ContentHashSHA256 = GetValueOrDefault<string>(metaDict, "ContentHashSHA256"),
                             MetadataHash = GetValueOrDefault<string>(metaDict, "MetadataHash"),
                             FileSize = GetValueOrDefault<long>(metaDict, "FileSize"),
-                            PieceLength = GetValueOrDefault<int>(metaDict, "PieceLength"),
-                            PieceHashes = GetValueOrDefault<string>(metaDict, "PieceHashes"),
                         };
 
                         Dictionary<string, object> handlerMetadata =
@@ -5743,11 +5707,6 @@ namespace KOTORModSync.Core.Services
                         Dictionary<string, bool?> filesDictionary =
                             ConvertToStringBoolNullableDictionary(GetValueOrDefault<object>(metaDict, "Files"));
                         meta.Files = filesDictionary ?? new Dictionary<string, bool?>(StringComparer.Ordinal);
-
-                        if (Enum.TryParse(GetValueOrDefault<string>(metaDict, "TrustLevel"), out MappingTrustLevel trustLevel))
-                        {
-                            meta.TrustLevel = trustLevel;
-                        }
 
                         if (DateTime.TryParse(GetValueOrDefault<string>(metaDict, "FirstSeen"), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime firstSeen))
                         {
@@ -5824,12 +5783,8 @@ namespace KOTORModSync.Core.Services
                         var meta = new ResourceMetadata
                         {
                             ContentKey = GetValueOrDefault<string>(metaDict, "ContentKey"),
-                            ContentId = GetValueOrDefault<string>(metaDict, "ContentId"),
-                            ContentHashSHA256 = GetValueOrDefault<string>(metaDict, "ContentHashSHA256"),
                             MetadataHash = GetValueOrDefault<string>(metaDict, "MetadataHash"),
                             FileSize = GetValueOrDefault<long>(metaDict, "FileSize"),
-                            PieceLength = GetValueOrDefault<int>(metaDict, "PieceLength"),
-                            PieceHashes = GetValueOrDefault<string>(metaDict, "PieceHashes"),
                         };
 
                         Dictionary<string, object> handlerMetadata =
@@ -5839,11 +5794,6 @@ namespace KOTORModSync.Core.Services
                         Dictionary<string, bool?> filesDictionary =
                             ConvertToStringBoolNullableDictionary(GetValueOrDefault<object>(metaDict, "Files"));
                         meta.Files = filesDictionary ?? new Dictionary<string, bool?>(StringComparer.OrdinalIgnoreCase);
-
-                        if (Enum.TryParse(GetValueOrDefault<string>(metaDict, "TrustLevel"), out MappingTrustLevel trustLevel))
-                        {
-                            meta.TrustLevel = trustLevel;
-                        }
 
                         if (DateTime.TryParse(GetValueOrDefault<string>(metaDict, "FirstSeen"), System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out DateTime firstSeen))
                         {

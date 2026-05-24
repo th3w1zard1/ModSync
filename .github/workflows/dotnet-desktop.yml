@@ -64,7 +64,7 @@ jobs:
     - name: Install .NET Core
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: 8.0.x
+        dotnet-version: 9.0.x
 
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
@@ -109,5 +109,4 @@ jobs:
         path: |
           TestResults/summary_${{ steps.generate-date.outputs.date }}.xml
           TestResults/test_results_${{ steps.generate-date.outputs.date }}.xml
-
 

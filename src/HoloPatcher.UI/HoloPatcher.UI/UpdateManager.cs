@@ -24,12 +24,12 @@ namespace HoloPatcher.UI
         /// <summary>
         /// Gets or sets the appcast URL for stable releases.
         /// </summary>
-        public string AppcastUrl { get; set; } = "https://github.com/th3w1zard1/HoloPatcher.NET/releases/latest/download/appcast.xml";
+        public string AppcastUrl { get; set; } = "https://github.com/th3w1zard1/KPatcher/releases/latest/download/appcast.xml";
 
         /// <summary>
         /// Gets or sets the appcast URL for beta/pre-release channel.
         /// </summary>
-        public string BetaAppcastUrl { get; set; } = "https://github.com/th3w1zard1/HoloPatcher.NET/releases/download/bleeding-edge/appcast-beta.xml";
+        public string BetaAppcastUrl { get; set; } = "https://github.com/th3w1zard1/KPatcher/releases/download/bleeding-edge/appcast-beta.xml";
 
         /// <summary>
         /// Gets or sets whether to use the beta channel.
