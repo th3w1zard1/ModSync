@@ -48,6 +48,10 @@ mod-builds/                  # Clone here: github.com/th3w1zard1/mod-builds
 dotnet build KOTORModSync.sln
 ```
 
+## Releases
+
+GitHub Releases are **manual only**. Do not expect tags or releases from merging to `master`. See `docs/manual-release.md` for the dispatch workflow (Release Please → optional version PR; Build and Release with `create_github_release=true` when ready to publish).
+
 ## Cursor Cloud specific instructions
 
 Cloud agents run headless (no X11 desktop). The following applies:
