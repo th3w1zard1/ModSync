@@ -59,7 +59,7 @@ namespace KOTORModSync.Core
         }
 
         [JetBrains.Annotations.NotNull]
-        public static string CurrentVersion => "2.1.1"; // x-release-please-version
+        public static string CurrentVersion => "2.1.2"; // x-release-please-version
 
         public static class ValidTargetGames
         {

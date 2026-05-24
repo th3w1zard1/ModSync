@@ -1,5 +1,12 @@
 # Changelog
 
+## [2.1.2](https://github.com/th3w1zard1/ModSync/compare/KOTORModSync-v2.1.1...KOTORModSync-v2.1.2) (2026-05-24)
+
+
+### Documentation
+
+* **plan:** mark release 2.1.1 shipped after PR [#83](https://github.com/th3w1zard1/ModSync/issues/83) ([f7bf14e](https://github.com/th3w1zard1/ModSync/commit/f7bf14eac6b5a1d131403cd3721b5e88c8ee32af))
+
 ## [2.1.1](https://github.com/th3w1zard1/ModSync/compare/KOTORModSync-v2.1.0...KOTORModSync-v2.1.1) (2026-05-24)
 
 
