@@ -53,9 +53,9 @@ See <https://pastebin.com/7gML3zCJ> for a quick explanation of those fields. See
 
 KOTORModSync is a cross-platform 32-bit and 64-bit .NET application. It is compatible with the following operating systems:
 
-- **Windows 7 and 8:** Compatible if running **.NET Framework 4.8.0** or **higher**. The NET8 version is NOT supported.
-- **Windows 10 and 11:** Compatible with both the **.NET Framework 4.8.0** *and* the **NET8** builds.
-- **Linux and Mac:** Compatible with the **NET8** x64 builds - choose one of the two that match your operating system.
+- **Windows 7 and 8:** Compatible if running **.NET Framework 4.8.0** or higher. Modern self-contained .NET 9 builds are not the intended path on these legacy systems.
+- **Windows 10 and 11:** Compatible with both the legacy **.NET Framework 4.8.0** build and the modern self-contained **.NET 9** builds.
+- **Linux and Mac:** Compatible with the self-contained **.NET 9** x64 builds that match your operating system.
 Users do not need to download any additional runtimes: everything is self-contained within the application. Additionally, **.NET Framework 4.8.0** is preinstalled on Windows 7 and 8 or at least provided by Windows Updates.
 
 ### Linux/Mac
@@ -74,7 +74,7 @@ If you run into problems with the Linux or Mac builds, please contact me and I'l
 
 I'm honestly not sure what all you need, I was able to build and run it on both vs2019 and vs2022. From what I understand, the minimum build requirements are:
 
-- **NET8 or .NET Framework 4.8.0 targeting platform and build tools.**
+- **.NET 9 SDK** for the modern cross-platform build, or **.NET Framework 4.8.0** targeting platform/build tools for the legacy Windows publish path.
 - **.NET Standard Development Kit.**
 
 ### Vendor dependencies
@@ -93,7 +93,7 @@ The canonical KPatcher source now lives under `vendor/KPatcher`. The legacy loca
 
 Package restore sources are defined in `NuGet.config` at the repository root. This includes `nuget.org` and the GitHub Packages feed for `th3w1zard1`, which is the intended remote source for package-based HoloPatcher integration.
 
-All you need to do is build KOTORModSync.GUI. This should build the program into ./KOTORModSync.GUI/bin directory. Or run the command `dotnet build` then `dotnet run` inside KOTORModSync.GUI folder.
+All you need to do is build `src/KOTORModSync.GUI/KOTORModSync.csproj`. This builds the app into `src/KOTORModSync.GUI/bin`. From the repo root, use `dotnet build KOTORModSync.sln --configuration Debug`, or run `dotnet build` / `dotnet run --framework net9.0` inside `src/KOTORModSync.GUI`.
 You may alternatively run my publish scripts in the solution directory if you like.
 
 ### KOTORModSync.GUI

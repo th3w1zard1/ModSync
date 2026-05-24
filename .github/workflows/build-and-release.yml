@@ -15,9 +15,9 @@ on:
       - completed
 
 env:
-  DOTNET_VERSION: "8.0.x"
+  DOTNET_VERSION: "9.0.x"
   PROJECT_FILE: "src/KOTORModSync.GUI/KOTORModSync.csproj"
-  DOTNET_VERSION_SHORT: "net8.0"  # Specify net8.0 once here, so it's incredibly easy to change to another version globally.
+  DOTNET_VERSION_SHORT: "net9.0"  # Specify net9.0 once here, so it's incredibly easy to change to another version globally.
   DOTNET_FRAMEWORK_VERSION_SHORT: "net48"  # Specify net48 once here, so it's incredibly easy to change to another version globally.
 
 jobs:
@@ -177,7 +177,7 @@ jobs:
         if: runner.os == 'Windows' && matrix.framework == 'DOTNET_FRAMEWORK_VERSION_SHORT'
         uses: microsoft/setup-msbuild@v2
 
-      - name: Setup .NET 8 SDK
+      - name: Setup .NET 9 SDK
         if: matrix.framework == 'DOTNET_VERSION_SHORT'
         uses: actions/setup-dotnet@v5
         with:
@@ -218,9 +218,9 @@ jobs:
 
       - name: Restore Dependencies (Windows - MSBuild for .NET Framework 4.8)
         if: runner.os == 'Windows' && matrix.framework == 'DOTNET_FRAMEWORK_VERSION_SHORT'
-        run: msbuild KOTORModSync.sln /t:Restore /p:TargetFramework=${{ matrix.framework }} /p:Configuration=Release
+        run: msbuild KOTORModSync.sln /t:Restore /p:TargetFramework=${{ matrix.framework == 'DOTNET_FRAMEWORK_VERSION_SHORT' && env.DOTNET_FRAMEWORK_VERSION_SHORT || matrix.framework }} /p:Configuration=Release
 
-      - name: Restore Dependencies (dotnet CLI for .NET 8.0)
+      - name: Restore Dependencies (dotnet CLI for .NET 9.0)
         if: matrix.framework == 'DOTNET_VERSION_SHORT'
         run: dotnet restore KOTORModSync.sln /p:TargetFramework=${{ matrix.framework == 'DOTNET_VERSION_SHORT' && env.DOTNET_VERSION_SHORT || matrix.framework }} /p:Configuration=Release
 
@@ -243,11 +243,11 @@ jobs:
             /p:PublishDir="$PWD/publish/${{ matrix.rid }}/"
           Write-Host "✅ Published ${{ matrix.rid }}"
 
-      - name: Publish ${{ matrix.rid }} (dotnet CLI for .NET 8.0)
+      - name: Publish ${{ matrix.rid }} (dotnet CLI for .NET 9.0)
         if: matrix.framework == 'DOTNET_VERSION_SHORT'
         shell: pwsh
         run: |
-          Write-Host "🔨 Publishing ${{ matrix.rid }} using dotnet CLI (.NET 8)..."
+          Write-Host "🔨 Publishing ${{ matrix.rid }} using dotnet CLI (.NET 9)..."
           dotnet publish ${{ env.PROJECT_FILE }} `
             -c Release `
             --framework ${{ matrix.framework == 'DOTNET_VERSION_SHORT' && env.DOTNET_VERSION_SHORT || matrix.framework }} `
