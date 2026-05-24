@@ -956,113 +956,120 @@ Exception Type: {ex.GetType().FullName}";
             }
 
             var coordinator = new InstallCoordinator();
-            DirectoryInfo destination = MainConfig.DestinationPath
-                                        ?? throw new InvalidOperationException("DestinationPath must be set before installing.");
-            ResumeResult resume = await coordinator.InitializeAsync(allComponents, destination, cancellationToken).ConfigureAwait(false);
-            var orderedComponents = resume.OrderedComponents.Where(component => component.IsSelected).ToList();
-            int total = orderedComponents.Count;
-            ModComponent.InstallExitCode exitCode = ModComponent.InstallExitCode.Success;
-            bool skippedMissingSources = false;
-            bool continuedAfterModFailure = false;
-
-            for (int index = 0; index < orderedComponents.Count; index++)
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                ModComponent component = orderedComponents[index];
+                DirectoryInfo destination = MainConfig.DestinationPath
+                                            ?? throw new InvalidOperationException("DestinationPath must be set before installing.");
+                ResumeResult resume = await coordinator.InitializeAsync(allComponents, destination, cancellationToken).ConfigureAwait(false);
+                var orderedComponents = resume.OrderedComponents.Where(component => component.IsSelected).ToList();
+                int total = orderedComponents.Count;
+                ModComponent.InstallExitCode exitCode = ModComponent.InstallExitCode.Success;
+                bool skippedMissingSources = false;
+                bool continuedAfterModFailure = false;
 
-                progressCallback?.Invoke(index, total, component.Name);
-
-                switch (component.InstallState)
+                for (int index = 0; index < orderedComponents.Count; index++)
                 {
-                    case ModComponent.ComponentInstallState.Completed:
-                        await Logger.LogAsync($"Skipping '{component.Name}' (already completed).").ConfigureAwait(false);
-                        coordinator.CheckpointManager.UpdateComponentState(component);
-                        await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
-                        continue;
-                    case ModComponent.ComponentInstallState.Skipped:
-                    case ModComponent.ComponentInstallState.Blocked:
-                        await Logger.LogAsync($"Skipping '{component.Name}' (blocked by dependency).").ConfigureAwait(false);
-                        coordinator.CheckpointManager.UpdateComponentState(component);
-                        await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
-                        continue;
-                }
+                    cancellationToken.ThrowIfCancellationRequested();
+                    ModComponent component = orderedComponents[index];
 
-                await Logger.LogAsync($"Start install of '{component.Name}'...").ConfigureAwait(false);
-                exitCode = await component.InstallAsync(allComponents, cancellationToken).ConfigureAwait(false);
-                coordinator.CheckpointManager.UpdateComponentState(component);
+                    progressCallback?.Invoke(index, total, component.Name);
 
-                if (exitCode == ModComponent.InstallExitCode.Success)
-                {
-                    await Logger.LogAsync($"Install of '{component.Name}' succeeded.").ConfigureAwait(false);
-
-                    // Create checkpoint after successful installation
-                    try
+                    switch (component.InstallState)
                     {
-                        CheckpointInfo checkpoint = await coordinator.CheckpointService.CreateCheckpointAsync(
-                            component,
-                            index + 1,
-                            total,
-                            cancellationToken
+                        case ModComponent.ComponentInstallState.Completed:
+                            await Logger.LogAsync($"Skipping '{component.Name}' (already completed).").ConfigureAwait(false);
+                            coordinator.CheckpointManager.UpdateComponentState(component);
+                            await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
+                            continue;
+                        case ModComponent.ComponentInstallState.Skipped:
+                        case ModComponent.ComponentInstallState.Blocked:
+                            await Logger.LogAsync($"Skipping '{component.Name}' (blocked by dependency).").ConfigureAwait(false);
+                            coordinator.CheckpointManager.UpdateComponentState(component);
+                            await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
+                            continue;
+                    }
+
+                    await Logger.LogAsync($"Start install of '{component.Name}'...").ConfigureAwait(false);
+                    exitCode = await component.InstallAsync(allComponents, cancellationToken).ConfigureAwait(false);
+                    coordinator.CheckpointManager.UpdateComponentState(component);
+
+                    if (exitCode == ModComponent.InstallExitCode.Success)
+                    {
+                        await Logger.LogAsync($"Install of '{component.Name}' succeeded.").ConfigureAwait(false);
+
+                        // Create checkpoint after successful installation
+                        try
+                        {
+                            CheckpointInfo checkpoint = await coordinator.CheckpointService.CreateCheckpointAsync(
+                                component,
+                                index + 1,
+                                total,
+                                cancellationToken
+                            ).ConfigureAwait(false);
+
+                            coordinator.CheckpointManager.State.ComponentCheckpoints[component.Guid] = checkpoint.CommitId;
+                            await Logger.LogAsync($"✓ Checkpoint created: {checkpoint.ShortCommitId}").ConfigureAwait(false);
+                        }
+                        catch (Exception ex)
+                        {
+                            await Logger.LogWarningAsync($"Failed to create checkpoint for '{component.Name}': {ex.Message}").ConfigureAwait(false);
+                        }
+
+                        await coordinator.CheckpointManager.PromoteSnapshotAsync(destination, cancellationToken).ConfigureAwait(false);
+                    }
+                    else if (exitCode == ModComponent.InstallExitCode.MissingSourceFiles && MainConfig.ContinueInstallOnMissingSources)
+                    {
+                        skippedMissingSources = true;
+                        await Logger.LogWarningAsync(
+                            $"Skipping '{component.Name}' — mod file(s) not in workspace (download or copy archives, then retry this mod)."
                         ).ConfigureAwait(false);
-
-                        coordinator.CheckpointManager.State.ComponentCheckpoints[component.Guid] = checkpoint.CommitId;
-                        await Logger.LogAsync($"✓ Checkpoint created: {checkpoint.ShortCommitId}").ConfigureAwait(false);
+                        coordinator.CheckpointManager.UpdateComponentState(component);
+                        await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
                     }
-                    catch (Exception ex)
+                    else if (MainConfig.ContinueInstallOnModFailure
+                             && exitCode != ModComponent.InstallExitCode.DependencyViolation
+                             && exitCode != ModComponent.InstallExitCode.UserCancelledInstall)
                     {
-                        await Logger.LogWarningAsync($"Failed to create checkpoint for '{component.Name}': {ex.Message}").ConfigureAwait(false);
+                        continuedAfterModFailure = true;
+                        await Logger.LogWarningAsync(
+                            $"Install of '{component.Name}' failed ({exitCode}); continuing with remaining mods (--continue-on-mod-failure)."
+                        ).ConfigureAwait(false);
+                        coordinator.CheckpointManager.UpdateComponentState(component);
+                        await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
                     }
-
-                    await coordinator.CheckpointManager.PromoteSnapshotAsync(destination, cancellationToken).ConfigureAwait(false);
-                }
-                else if (exitCode == ModComponent.InstallExitCode.MissingSourceFiles && MainConfig.ContinueInstallOnMissingSources)
-                {
-                    skippedMissingSources = true;
-                    await Logger.LogWarningAsync(
-                        $"Skipping '{component.Name}' — mod file(s) not in workspace (download or copy archives, then retry this mod)."
-                    ).ConfigureAwait(false);
-                    coordinator.CheckpointManager.UpdateComponentState(component);
-                    await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
-                }
-                else if (MainConfig.ContinueInstallOnModFailure
-                         && exitCode != ModComponent.InstallExitCode.DependencyViolation
-                         && exitCode != ModComponent.InstallExitCode.UserCancelledInstall)
-                {
-                    continuedAfterModFailure = true;
-                    await Logger.LogWarningAsync(
-                        $"Install of '{component.Name}' failed ({exitCode}); continuing with remaining mods (--continue-on-mod-failure)."
-                    ).ConfigureAwait(false);
-                    coordinator.CheckpointManager.UpdateComponentState(component);
-                    await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
-                }
-                else
-                {
-                    await Logger.LogErrorAsync($"Install of '{component.Name}' failed with exit code {exitCode}").ConfigureAwait(false);
-                    InstallCoordinator.MarkBlockedDescendants(orderedComponents, component.Guid);
-                    foreach (ModComponent blocked in orderedComponents.Where(c => c.InstallState == ModComponent.ComponentInstallState.Blocked))
+                    else
                     {
-                        coordinator.CheckpointManager.UpdateComponentState(blocked);
+                        await Logger.LogErrorAsync($"Install of '{component.Name}' failed with exit code {exitCode}").ConfigureAwait(false);
+                        InstallCoordinator.MarkBlockedDescendants(orderedComponents, component.Guid);
+                        foreach (ModComponent blocked in orderedComponents.Where(c => c.InstallState == ModComponent.ComponentInstallState.Blocked))
+                        {
+                            coordinator.CheckpointManager.UpdateComponentState(blocked);
+                        }
+                        await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
+                        break;
                     }
+
                     await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
-                    break;
                 }
 
-                await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
-            }
+                if (continuedAfterModFailure)
+                {
+                    return ModComponent.InstallExitCode.CompletedWithFailures;
+                }
 
-            if (continuedAfterModFailure)
+                if (skippedMissingSources &&
+                    (exitCode == ModComponent.InstallExitCode.Success ||
+                     exitCode == ModComponent.InstallExitCode.MissingSourceFiles))
+                {
+                    return ModComponent.InstallExitCode.MissingSourceFiles;
+                }
+
+                return exitCode;
+            }
+            finally
             {
-                return ModComponent.InstallExitCode.CompletedWithFailures;
+                coordinator.Dispose();
             }
-
-            if (skippedMissingSources &&
-                (exitCode == ModComponent.InstallExitCode.Success ||
-                 exitCode == ModComponent.InstallExitCode.MissingSourceFiles))
-            {
-                return ModComponent.InstallExitCode.MissingSourceFiles;
-            }
-
-            return exitCode;
         }
 
         public static Task<ModComponent.InstallExitCode> InstallAllSelectedComponentsAsync(

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using KOTORModSync.Core;
 using KOTORModSync.Core.Installation;
 using KOTORModSync.Core.Services;
+using KOTORModSync.Core.Services.Checkpoints;
 
 using NUnit.Framework;
 
@@ -47,7 +48,7 @@ namespace KOTORModSync.Tests
         public void GitCheckpointService_Dispose_ReleasesFileHandles()
         {
             // Arrange
-            string checkpointDir = Path.Combine(_workingDirectory.FullName, ModComponent.CheckpointFolderName);
+            string checkpointDir = CheckpointPaths.GetRoot(_workingDirectory.FullName);
             Directory.CreateDirectory(checkpointDir);
 
             // Act
@@ -66,7 +67,7 @@ namespace KOTORModSync.Tests
         public void GitCheckpointService_MultipleInstances_AllDisposed()
         {
             // Arrange
-            string checkpointDir = Path.Combine(_workingDirectory.FullName, ModComponent.CheckpointFolderName);
+            string checkpointDir = CheckpointPaths.GetRoot(_workingDirectory.FullName);
             Directory.CreateDirectory(checkpointDir);
 
             // Act
@@ -88,13 +89,6 @@ namespace KOTORModSync.Tests
         [Test]
         public void InstallCoordinator_ClearSessionForTests_HandlesGitLocks()
         {
-            // Arrange
-            var component = new ModComponent
-            {
-                Guid = Guid.NewGuid(),
-                Name = "Test Mod",
-            };
-
             // Create a checkpoint service to simulate Git repository creation
             using (var service = new GitCheckpointService(_workingDirectory.FullName))
             {
@@ -110,7 +104,7 @@ namespace KOTORModSync.Tests
         public void TestDirectoryCleanup_WithGitRepository_CanDelete()
         {
             // Arrange
-            string checkpointDir = Path.Combine(_workingDirectory.FullName, ModComponent.CheckpointFolderName);
+            string checkpointDir = CheckpointPaths.GetRoot(_workingDirectory.FullName);
             Directory.CreateDirectory(checkpointDir);
 
             using (var service = new GitCheckpointService(_workingDirectory.FullName))
@@ -118,16 +112,33 @@ namespace KOTORModSync.Tests
                 _ = service.InitializeAsync().Result;
             }
 
-            // Act & Assert
-            Assert.DoesNotThrow(() => InstallCoordinatorTestsHelper.CleanupTestDirectory(_workingDirectory),
-                "Test directory cleanup should succeed even with Git repository");
+            string workingDirectoryPath = _workingDirectory.FullName;
+            Exception cleanupException = null;
+            try
+            {
+                InstallCoordinatorTestsHelper.CleanupTestDirectory(_workingDirectory);
+            }
+            catch (Exception ex)
+            {
+                cleanupException = ex;
+            }
+            finally
+            {
+                _workingDirectory = null;
+            }
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(cleanupException, Is.Null, "Test directory cleanup should succeed even with Git repository.");
+                Assert.That(Directory.Exists(workingDirectoryPath), Is.False, "Cleanup helper should remove the working directory.");
+            });
         }
 
         [Test]
         public void TestDirectoryCleanup_RetryLogic_HandlesTransientLocks()
         {
             // Arrange
-            string checkpointDir = Path.Combine(_workingDirectory.FullName, ModComponent.CheckpointFolderName);
+            string checkpointDir = CheckpointPaths.GetRoot(_workingDirectory.FullName);
             Directory.CreateDirectory(checkpointDir);
 
             using (var service = new GitCheckpointService(_workingDirectory.FullName))
@@ -135,16 +146,33 @@ namespace KOTORModSync.Tests
                 _ = service.InitializeAsync().Result;
             }
 
-            // Act & Assert - Retry logic should handle transient file locks
-            Assert.DoesNotThrow(() => InstallCoordinatorTestsHelper.CleanupTestDirectory(_workingDirectory),
-                "Retry logic should handle transient file locks");
+            string workingDirectoryPath = _workingDirectory.FullName;
+            Exception cleanupException = null;
+            try
+            {
+                InstallCoordinatorTestsHelper.CleanupTestDirectory(_workingDirectory);
+            }
+            catch (Exception ex)
+            {
+                cleanupException = ex;
+            }
+            finally
+            {
+                _workingDirectory = null;
+            }
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(cleanupException, Is.Null, "Retry logic should handle transient file locks.");
+                Assert.That(Directory.Exists(workingDirectoryPath), Is.False, "Cleanup helper should remove the working directory after retries.");
+            });
         }
 
         [Test]
         public void GitRepository_Dispose_ReleasesAllFileHandles()
         {
             // Arrange
-            string checkpointDir = Path.Combine(_workingDirectory.FullName, ModComponent.CheckpointFolderName);
+            string checkpointDir = CheckpointPaths.GetRoot(_workingDirectory.FullName);
             Directory.CreateDirectory(checkpointDir);
 
             // Act
@@ -172,7 +200,7 @@ namespace KOTORModSync.Tests
             // Assert - All file handles should be released
             Assert.DoesNotThrow(() =>
             {
-                string gitDir = Path.Combine(checkpointDir, ".git");
+                string gitDir = CheckpointPaths.GetGitDirectory(_workingDirectory.FullName);
                 if (Directory.Exists(gitDir))
                 {
                     // Try to delete Git directory - should succeed after disposal
@@ -182,4 +210,3 @@ namespace KOTORModSync.Tests
         }
     }
 }
-

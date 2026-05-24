@@ -38,6 +38,9 @@ namespace KOTORModSync.Core.Services.Checkpoints
         public static string GetCheckpointsRoot(string gameDirectory) =>
             Path.Combine(GetRoot(gameDirectory), CheckpointsDirectoryName);
 
+        public static string GetGitDirectory(string gameDirectory) =>
+            Path.Combine(GetCheckpointsRoot(gameDirectory), ".git");
+
         public static string GetSessionsDirectory(string gameDirectory) =>
             Path.Combine(GetCheckpointsRoot(gameDirectory), SessionsDirectoryName);
 
@@ -408,4 +411,3 @@ namespace KOTORModSync.Core.Services.Checkpoints
         }
     }
 }
-

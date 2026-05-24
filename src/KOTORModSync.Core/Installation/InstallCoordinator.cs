@@ -15,8 +15,14 @@ using KOTORModSync.Core.Services.Checkpoints;
 
 namespace KOTORModSync.Core.Installation
 {
-    public sealed class InstallCoordinator
+    public sealed class InstallCoordinator : IDisposable
     {
+        private static readonly object s_checkpointServicesLock = new object();
+        private static readonly Dictionary<string, List<Services.GitCheckpointService>> s_checkpointServicesByDirectory =
+            new Dictionary<string, List<Services.GitCheckpointService>>(StringComparer.OrdinalIgnoreCase);
+
+        private string _checkpointServiceDirectory;
+
         public InstallCoordinator()
         {
             CheckpointManager = new CheckpointManager();
@@ -30,14 +36,26 @@ namespace KOTORModSync.Core.Installation
             await CheckpointManager.InitializeAsync(components, destinationPath).ConfigureAwait(false);
             await CheckpointManager.EnsureSnapshotAsync(destinationPath, cancellationToken).ConfigureAwait(false);
 
+            ReleaseCheckpointService();
+
             // Initialize Git-based checkpoint system
             CheckpointService = new Services.GitCheckpointService(destinationPath.FullName);
-            string baselineCommitId = await CheckpointService.InitializeAsync(cancellationToken).ConfigureAwait(false);
-            CheckpointManager.State.BaselineCheckpointId = baselineCommitId;
+            _checkpointServiceDirectory = NormalizeDirectoryKey(destinationPath.FullName);
+            RegisterCheckpointService(_checkpointServiceDirectory, CheckpointService);
+            try
+            {
+                string baselineCommitId = await CheckpointService.InitializeAsync(cancellationToken).ConfigureAwait(false);
+                CheckpointManager.State.BaselineCheckpointId = baselineCommitId;
 
-            await CheckpointManager.SaveAsync().ConfigureAwait(false);
-            List<ModComponent> ordered = GetOrderedInstallList(components);
-            return new ResumeResult(CheckpointManager.State.SessionId, ordered);
+                await CheckpointManager.SaveAsync().ConfigureAwait(false);
+                List<ModComponent> ordered = GetOrderedInstallList(components);
+                return new ResumeResult(CheckpointManager.State.SessionId, ordered);
+            }
+            catch
+            {
+                ReleaseCheckpointService();
+                throw;
+            }
         }
 
         public static List<ModComponent> GetOrderedInstallList([NotNull][ItemNotNull] IList<ModComponent> components)
@@ -222,6 +240,7 @@ namespace KOTORModSync.Core.Installation
 
             try
             {
+                DisposeCheckpointServicesForDirectory(directoryInfo.FullName);
                 Directory.Delete(sessionFolder, recursive: true);
             }
             catch (IOException ex)
@@ -232,6 +251,85 @@ namespace KOTORModSync.Core.Installation
             {
                 Logger.LogException(ex, $"Failed to delete install session folder '{sessionFolder}' due to insufficient permissions during test cleanup.");
             }
+        }
+
+        public void Dispose()
+        {
+            ReleaseCheckpointService();
+        }
+
+        private void ReleaseCheckpointService()
+        {
+            if (CheckpointService is null)
+            {
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(_checkpointServiceDirectory))
+            {
+                UnregisterCheckpointService(_checkpointServiceDirectory, CheckpointService);
+            }
+
+            CheckpointService.Dispose();
+            CheckpointService = null;
+            _checkpointServiceDirectory = null;
+        }
+
+        private static void RegisterCheckpointService(string directoryKey, Services.GitCheckpointService checkpointService)
+        {
+            lock (s_checkpointServicesLock)
+            {
+                if (!s_checkpointServicesByDirectory.TryGetValue(directoryKey, out List<Services.GitCheckpointService> services))
+                {
+                    services = new List<Services.GitCheckpointService>();
+                    s_checkpointServicesByDirectory[directoryKey] = services;
+                }
+
+                services.Add(checkpointService);
+            }
+        }
+
+        private static void UnregisterCheckpointService(string directoryKey, Services.GitCheckpointService checkpointService)
+        {
+            lock (s_checkpointServicesLock)
+            {
+                if (!s_checkpointServicesByDirectory.TryGetValue(directoryKey, out List<Services.GitCheckpointService> services))
+                {
+                    return;
+                }
+
+                _ = services.Remove(checkpointService);
+                if (services.Count == 0)
+                {
+                    _ = s_checkpointServicesByDirectory.Remove(directoryKey);
+                }
+            }
+        }
+
+        private static void DisposeCheckpointServicesForDirectory(string directoryPath)
+        {
+            string directoryKey = NormalizeDirectoryKey(directoryPath);
+            List<Services.GitCheckpointService> services;
+            lock (s_checkpointServicesLock)
+            {
+                if (!s_checkpointServicesByDirectory.TryGetValue(directoryKey, out services))
+                {
+                    return;
+                }
+
+                _ = s_checkpointServicesByDirectory.Remove(directoryKey);
+            }
+
+            foreach (Services.GitCheckpointService checkpointService in services)
+            {
+                checkpointService.Dispose();
+            }
+        }
+
+        private static string NormalizeDirectoryKey(string directoryPath)
+        {
+            return Path.GetFullPath(directoryPath)
+                .TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
         }
 
     }
