@@ -337,8 +337,11 @@ jobs:
   generate-appcast:
     name: Generate AppCast
     needs: [determine-version, publish-multi-platform]
-    # Run even if some builds failed (but not if all were cancelled/skipped)
-    if: needs.determine-version.outputs.should_build == 'true' && !cancelled()
+    if: >-
+      needs.determine-version.outputs.should_build == 'true'
+      && !cancelled()
+      && github.event_name == 'workflow_dispatch'
+      && inputs.create_github_release
     runs-on: ubuntu-latest
 
     steps:
