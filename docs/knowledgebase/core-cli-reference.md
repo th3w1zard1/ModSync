@@ -129,6 +129,10 @@ dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj -f net9.0 --
 
 Agent wrapper: `./scripts/agents/cli_full_build_pipeline.sh --game k1 --game-dir ./tmp/kotor_template --source-dir ./tmp/mod_downloads --dry-run-only`
 
+Pipeline flags: `--export-all-formats` (TOML + JSON + YAML + XML), `--auto-generate-local` (fill missing instructions from archives in `--source-dir`), `--install` (best-effort headless install after merge; pair with `--dry-run-only` or `--dry-run` first).
+
+Canonical markdown paths: `mod-builds/content/k1/full.md`, `mod-builds/content/k2/full.md` (not `KOTOR1_FULL.md` at repo root).
+
 `--use-existing-order` is required when existing TOML carries instructions and incoming markdown is metadata-only; otherwise `prefer-existing-instructions` cannot preserve install steps.
 
 ---

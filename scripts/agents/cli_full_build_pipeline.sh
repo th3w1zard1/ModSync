@@ -11,6 +11,8 @@ dry_run=false
 dry_run_only=false
 auto_generate_local=false
 validate_only=false
+export_all_formats=false
+install=false
 
 usage() {
   cat <<'EOF'
@@ -28,6 +30,8 @@ Options:
   --dry-run              Run validate --dry-run after merge (needs game + source dirs)
   --dry-run-only         Run validate --dry-run-only (skip archive checks; VFS only)
   --auto-generate-local  Fill missing instructions from archives in --source-dir during merge
+  --export-all-formats   Write merged set as TOML, JSON, YAML, and XML
+  --install              Best-effort install after merge (requires game + source dirs; use with --dry-run-only first)
   --validate-only        Skip merge; validate --input only (uses --output or default merged path)
   -h, --help             Show this help
 
@@ -72,6 +76,14 @@ while [[ $# -gt 0 ]]; do
       ;;
     --auto-generate-local)
       auto_generate_local=true
+      shift
+      ;;
+    --export-all-formats)
+      export_all_formats=true
+      shift
+      ;;
+    --install)
+      install=true
       shift
       ;;
     --validate-only)
@@ -156,6 +168,14 @@ if [[ "$validate_only" != true ]]; then
     echo "Exporting merged set as ${export_format} -> $export_path"
     run_core convert --input "$output_path" -f "$export_format" -o "$export_path"
   fi
+
+  if [[ "$export_all_formats" == true ]]; then
+    for fmt in json yaml xml; do
+      export_path="${output_path%.*}.${fmt}"
+      echo "Exporting merged set as ${fmt} -> $export_path"
+      run_core convert --input "$output_path" -f "$fmt" -o "$export_path"
+    done
+  fi
 fi
 
 if [[ "$dry_run" == true || "$dry_run_only" == true ]]; then
@@ -179,7 +199,24 @@ if [[ "$dry_run" == true || "$dry_run_only" == true ]]; then
   else
     validate_args+=(--dry-run)
   fi
-  exec "$repo_root/scripts/agents/cli_validate.sh" "${validate_args[@]}"
+  "$repo_root/scripts/agents/cli_validate.sh" "${validate_args[@]}"
+fi
+
+if [[ "$install" == true ]]; then
+  if [[ -z "$game_dir" || -z "$source_dir" ]]; then
+    echo "error: --install requires --game-dir and --source-dir" >&2
+    exit 1
+  fi
+  # shellcheck source=common.sh
+  source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
+  ensure_core_resources_symlink "$repo_root"
+  if [[ -x "$repo_root/scripts/agents/ensure_linux_holopatcher.sh" ]]; then
+    "$repo_root/scripts/agents/ensure_linux_holopatcher.sh" || true
+  fi
+  echo "Running best-effort install from merged instruction file..."
+  exec dotnet run --project "$repo_root/src/KOTORModSync.Core/KOTORModSync.Core.csproj" -f net9.0 -- \
+    install -i "$output_path" -g "$game_dir" -s "$source_dir" \
+    -d --concurrent --best-effort --skip-validation --download-timeout-hours 72
 fi
 
 echo "Merged instruction file: $output_path"

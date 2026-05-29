@@ -16,7 +16,7 @@
 | `launch_gui_desktop.sh` | Build and launch Avalonia with preload args `[UI]` |
 | `install_best_effort.sh` | Headless full-list install: `-d`, `--best-effort`, **`--skip-validation`** (see [cli-selection-semantics.md](../../docs/knowledgebase/cli-selection-semantics.md)) |
 | `cli_validate.sh` | Wrapper around Core `validate` verb; `--full`, `--use-file-selection`, `--dry-run`, `--dry-run-only`; links HoloPatcher via `common.sh` |
-| `cli_full_build_pipeline.sh` | Merge mod-builds `full.md` + `KOTOR*_Full.toml`, optional format export, `--auto-generate-local`, validate `--dry-run` / `--dry-run-only` |
+| `cli_full_build_pipeline.sh` | Merge mod-builds `full.md` + `KOTOR*_Full.toml`, export formats, `--auto-generate-local`, `--dry-run` / `--dry-run-only`, optional `--install` |
 | `common.sh` | `ensure_core_resources_symlink` helper (sourced by other scripts) |
 | `run_headless_tests.sh` | `dotnet test` excluding `LongRunning` |
 | `mcp_filesystem.sh` | MCP filesystem server scoped to repo |
@@ -81,6 +81,21 @@ Requires `./mod-builds` clone. Merges canonical TOML instructions with markdown 
 ```
 
 With an empty mod workspace, `--dry-run` fails archive checks; use `--dry-run-only` for VFS-only validation (as in the example above).
+
+Export all four formats and chain install (after downloads are present):
+
+```bash
+./scripts/agents/cli_full_build_pipeline.sh \
+  --game k1 \
+  --game-dir ./tmp/kotor_template \
+  --source-dir ./tmp/mod_downloads \
+  --export-all-formats \
+  --auto-generate-local \
+  --dry-run-only \
+  --install
+```
+
+`--install` uses the same best-effort flags as `install_best_effort.sh` (`--skip-validation`, `--best-effort`). Run `--dry-run-only` first on empty workspaces; use full `--dry-run` once archives exist.
 
 ### Desktop GUI (full-build style)
 

@@ -1,7 +1,7 @@
 ---
 title: Auto-instruction generation and accurate dry-run pipeline
 type: docs
-status: active
+status: completed
 date: 2026-05-29
 ---
 
