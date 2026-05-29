@@ -107,6 +107,24 @@ Convert format, autogenerate links, download, or merge (with `-m`).
 
 Dedicated merge of two instruction sets (`-e` and `-n` required). Supports the same merge/download/select flags as `convert --merge`.
 
+**Mod-builds two-source pipeline** (TOML = machine instructions, markdown = human metadata):
+
+```bash
+dotnet run --project src/KOTORModSync.Core/KOTORModSync.Core.csproj -f net9.0 -- \
+  merge \
+  --existing ./mod-builds/TOMLs/KOTOR1_Full.toml \
+  --incoming ./mod-builds/content/k1/full.md \
+  --use-existing-order \
+  --prefer-existing-instructions \
+  --prefer-existing-options \
+  --prefer-existing-modlinks \
+  -f toml -o ./tmp/KOTOR1_Full_merged.toml
+```
+
+Agent wrapper: `./scripts/agents/cli_full_build_pipeline.sh --game k1 --game-dir ./tmp/kotor_template --source-dir ./tmp/mod_downloads --dry-run`
+
+`--use-existing-order` is required when existing TOML carries instructions and incoming markdown is metadata-only; otherwise `prefer-existing-instructions` cannot preserve install steps.
+
 ---
 
 ### `set-nexus-api-key`

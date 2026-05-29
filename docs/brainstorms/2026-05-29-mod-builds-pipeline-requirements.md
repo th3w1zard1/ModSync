@@ -2,7 +2,7 @@
 
 **Date:** 2026-05-29  
 **Status:** active  
-**Related plan:** `docs/plans/2026-05-29-017-full-build-roundtrip-dryrun-plan.md`
+**Related plans:** `docs/plans/2026-05-29-017-full-build-roundtrip-dryrun-plan.md`, `docs/plans/2026-05-29-018-mod-builds-markdown-merge-pipeline-plan.md`
 
 ## Outcome
 
@@ -14,14 +14,16 @@ Agents and CI can load canonical KOTOR full builds from `mod-builds`, round-trip
 2. Core `validate --dry-run` runs `DryRunValidator` when `--game-dir` and `--source-dir` are provided.
 3. `scripts/agents/cli_validate.sh` forwards `--dry-run`.
 4. Automated tests cover synthetic and full-build round-trips including XML.
+5. Markdown `full.md` deserializes; merged with TOML via `--use-existing-order` + `--prefer-existing-instructions` preserves instruction parity (189 K1 / 145 K2).
+6. `scripts/agents/cli_full_build_pipeline.sh` merges sources and can invoke validate `--dry-run`.
 
 ## Scope boundaries
 
 **In scope:** Core serialization, CLI dry-run wiring, tests, agent script, KB docs.
 
-**Out of scope:** Fixing markdown/TOML semantic parity (186 vs 189 K1 components); unrelated GUI wizard work; full LongRunning install with all mod archives on CI.
+**Out of scope:** Unrelated GUI wizard work; full LongRunning install with all mod archives on CI.
 
-**Deferred:** Auto-instruction generation from markdown-only sources; full install gate with real downloads.
+**Deferred:** Auto-instruction generation from archives in CI; full install gate with real downloads; markdown-only install without TOML merge.
 
 ## Canonical sources
 
@@ -32,7 +34,7 @@ Agents and CI can load canonical KOTOR full builds from `mod-builds`, round-trip
 | KOTOR1 full TOML | `mod-builds/TOMLs/KOTOR1_Full.toml` |
 | KOTOR2 full TOML | `mod-builds/TOMLs/KOTOR2_Full.toml` |
 
-Machine instructions and GUIDs live in TOML; markdown carries human metadata. Lossless install fidelity uses **TOML as the instruction source** for validate/dry-run/install (not markdown-only import).
+Machine instructions and GUIDs live in TOML; markdown carries human metadata. **Two-source merge** (TOML existing + markdown incoming, `--use-existing-order`) is required for lossless instruction fidelity; markdown-only import is metadata-only.
 
 ## Assumptions
 
