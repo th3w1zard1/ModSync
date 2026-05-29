@@ -1,0 +1,33 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://addons/kotor_holocron/editors/gff_editor.gd" id="1"]
+
+[node name="GffEditor" type="VBoxContainer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Toolbar" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SaveButton" type="Button" parent="Toolbar"]
+layout_mode = 2
+text = "Save"
+
+[node name="StatusLabel" type="Label" parent="Toolbar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ready"
+
+[node name="JsonEdit" type="TextEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+syntax_highlighter = null
+
+[connection signal="pressed" from="Toolbar/SaveButton" to="." method="_on_save_pressed"]
+[connection signal="text_changed" from="JsonEdit" to="." method="_on_text_changed"]

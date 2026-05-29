@@ -424,6 +424,7 @@ test-release/
 
 # Local agent / audit artifacts (not part of the product)
 tmp/
+tools/godot-holocron/.godot/
 test-results/
 .compound-engineering/
 agentdecompile_projects/

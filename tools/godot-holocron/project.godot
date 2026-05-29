@@ -1,0 +1,19 @@
+; Engine configuration file.
+; Godot 4.x project for the KOTOR Holocron editor plugin (editor-only tooling).
+
+config_version=5
+
+[application]
+
+config/name="KOTOR Holocron Editor"
+config/description="Godot editor plugin for KOTOR resource editing via PyKotor bridge."
+run/main_scene=""
+config/features=PackedStringArray("4.3")
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/kotor_holocron/plugin.cfg")
+
+[dotnet]
+
+project/assembly_name="KOTORHolocronEditor"
