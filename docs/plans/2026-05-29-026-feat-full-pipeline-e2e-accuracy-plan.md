@@ -23,7 +23,7 @@ Serialization, markdown merge, and DryRunValidator tests pass locally, but the C
 - R3. Markdown alias filenames (`KOTOR1_FULL.md`, `KOTOR2_FULL.md`) deserialize to the same component counts as canonical `content/k*/full.md`.
 - R4. Harden `ValidationPipelineParityTests` for missing-archive validate (exit 1) and install restriction auto-deselect.
 - R5. Smoke `scripts/agents/cli_full_build_pipeline.sh --export-all-formats --dry-run-only` for k1 and k2.
-- R6. Document deferred: `FullBuildInstallLongRunning` (requires all mod archives).
+- R6. `FullBuildInstallLongRunningTests` — merged full builds run CLI `install --best-effort --skip-validation` on template dirs (exit 0; skips missing archives and unsatisfied dependencies). Archive-complete install: `cli_full_build_pipeline.sh --install` or `install_best_effort.sh` locally.
 
 ## Scope Boundaries
 

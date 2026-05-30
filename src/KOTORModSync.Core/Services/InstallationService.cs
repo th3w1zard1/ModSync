@@ -966,6 +966,7 @@ Exception Type: {ex.GetType().FullName}";
                 ModComponent.InstallExitCode exitCode = ModComponent.InstallExitCode.Success;
                 bool skippedMissingSources = false;
                 bool continuedAfterModFailure = false;
+                bool skippedDependencyViolations = false;
 
                 for (int index = 0; index < orderedComponents.Count; index++)
                 {
@@ -1026,8 +1027,21 @@ Exception Type: {ex.GetType().FullName}";
                         coordinator.CheckpointManager.UpdateComponentState(component);
                         await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
                     }
+                    else if (exitCode == ModComponent.InstallExitCode.DependencyViolation
+                             && MainConfig.ContinueInstallOnModFailure)
+                    {
+                        skippedDependencyViolations = true;
+                        await Logger.LogWarningAsync(
+                            $"Skipping '{component.Name}' — dependency or restriction not satisfied (unsatisfied dependency, missing prerequisite mod, or conflicting selection)."
+                        ).ConfigureAwait(false);
+                        InstallCoordinator.MarkBlockedDescendants(orderedComponents, component.Guid);
+                        foreach (ModComponent blocked in orderedComponents.Where(c => c.InstallState == ModComponent.ComponentInstallState.Blocked))
+                        {
+                            coordinator.CheckpointManager.UpdateComponentState(blocked);
+                        }
+                        await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
+                    }
                     else if (MainConfig.ContinueInstallOnModFailure
-                             && exitCode != ModComponent.InstallExitCode.DependencyViolation
                              && exitCode != ModComponent.InstallExitCode.UserCancelledInstall)
                     {
                         continuedAfterModFailure = true;
@@ -1052,7 +1066,7 @@ Exception Type: {ex.GetType().FullName}";
                     await coordinator.CheckpointManager.SaveAsync().ConfigureAwait(false);
                 }
 
-                if (continuedAfterModFailure)
+                if (continuedAfterModFailure || skippedDependencyViolations)
                 {
                     return ModComponent.InstallExitCode.CompletedWithFailures;
                 }
