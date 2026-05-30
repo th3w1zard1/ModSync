@@ -480,37 +480,39 @@ namespace KOTORModSync.Core.Services.FileSystem
                 return false;
             }
 
+            string normalizedPath = NormalizePath(path);
+
             lock (_lockObject)
             {
-                if (_removedFiles.Contains(path))
+                if (_removedFiles.Contains(normalizedPath))
                 {
                     return false;
                 }
 
-                if (_virtualFiles.Contains(path))
+                if (_virtualFiles.Contains(normalizedPath))
                 {
                     return true;
                 }
             }
 
-            bool onDisk = File.Exists(path);
+            bool onDisk = File.Exists(normalizedPath);
             if (onDisk)
             {
                 lock (_lockObject)
                 {
-                    if (!_removedFiles.Contains(path))
+                    if (!_removedFiles.Contains(normalizedPath))
                     {
-                        _virtualFiles.Add(path);
+                        _virtualFiles.Add(normalizedPath);
 
-                        string directory = Path.GetDirectoryName(path);
+                        string directory = Path.GetDirectoryName(normalizedPath);
                         if (!string.IsNullOrEmpty(directory))
                         {
-                            _virtualDirectories.Add(directory);
+                            _virtualDirectories.Add(NormalizePath(directory));
                         }
 
-                        if (IsArchiveFile(path) && !_archiveContents.ContainsKey(path) && !_archiveOriginalPaths.ContainsKey(path))
+                        if (IsArchiveFile(normalizedPath) && !_archiveContents.ContainsKey(normalizedPath) && !_archiveOriginalPaths.ContainsKey(normalizedPath))
                         {
-                            _archiveOriginalPaths[path] = path;
+                            _archiveOriginalPaths[normalizedPath] = normalizedPath;
                         }
                     }
                 }
@@ -548,14 +550,17 @@ namespace KOTORModSync.Core.Services.FileSystem
 
         public Task CopyFileAsync(string sourcePath, string destinationPath, bool overwrite)
         {
-            if (!FileExists(sourcePath))
+            string normalizedSource = NormalizePath(sourcePath);
+            string normalizedDestination = NormalizePath(destinationPath);
+
+            if (!FileExists(normalizedSource))
             {
                 AddIssue(ValidationSeverity.Error, "CopyFile",
                     $"Source file does not exist: {sourcePath}", sourcePath);
                 return Task.CompletedTask;
             }
 
-            if (FileExists(destinationPath) && !overwrite)
+            if (FileExists(normalizedDestination) && !overwrite)
             {
                 AddIssue(ValidationSeverity.Warning, "CopyFile",
                     $"Destination file already exists and overwrite is false: {destinationPath}", destinationPath);
@@ -564,36 +569,36 @@ namespace KOTORModSync.Core.Services.FileSystem
 
             lock (_lockObject)
             {
-                _ = _virtualFiles.Add(destinationPath);
-                _ = _removedFiles.Remove(destinationPath);
+                _ = _virtualFiles.Add(normalizedDestination);
+                _ = _removedFiles.Remove(normalizedDestination);
 
                 // Copy file content if it exists
-                if (_fileContents.TryGetValue(sourcePath, out string fileContent))
+                if (_fileContents.TryGetValue(normalizedSource, out string fileContent))
                 {
-                    _fileContents[destinationPath] = fileContent;
+                    _fileContents[normalizedDestination] = fileContent;
                 }
 
-                if (IsArchiveFile(sourcePath))
+                if (IsArchiveFile(normalizedSource))
                 {
-                    if (_archiveContents.TryGetValue(sourcePath, out HashSet<string> archiveContents))
+                    if (_archiveContents.TryGetValue(normalizedSource, out HashSet<string> archiveContents))
                     {
-                        _archiveContents[destinationPath] = new HashSet<string>(archiveContents, StringComparer.OrdinalIgnoreCase);
+                        _archiveContents[normalizedDestination] = new HashSet<string>(archiveContents, StringComparer.OrdinalIgnoreCase);
                     }
 
-                    if (_archiveOriginalPaths.TryGetValue(sourcePath, out string originalPath))
+                    if (_archiveOriginalPaths.TryGetValue(normalizedSource, out string originalPath))
                     {
-                        _archiveOriginalPaths[destinationPath] = originalPath;
+                        _archiveOriginalPaths[normalizedDestination] = originalPath;
                     }
                     else
                     {
-                        _archiveOriginalPaths[destinationPath] = sourcePath;
+                        _archiveOriginalPaths[normalizedDestination] = normalizedSource;
                     }
                 }
 
-                string parentDir = Path.GetDirectoryName(destinationPath);
+                string parentDir = Path.GetDirectoryName(normalizedDestination);
                 if (!string.IsNullOrEmpty(parentDir) && !DirectoryExists(parentDir))
                 {
-                    _ = _virtualDirectories.Add(parentDir);
+                    _ = _virtualDirectories.Add(NormalizePath(parentDir));
                 }
             }
 
@@ -847,15 +852,16 @@ namespace KOTORModSync.Core.Services.FileSystem
 
         public Task WriteFileAsync(string path, string contents)
         {
+            string normalizedPath = NormalizePath(path);
             lock (_lockObject)
             {
-                _virtualFiles.Add(path);
-                _fileContents[path] = contents ?? string.Empty;
+                _virtualFiles.Add(normalizedPath);
+                _fileContents[normalizedPath] = contents ?? string.Empty;
 
-                string directory = GetDirectoryName(path);
+                string directory = GetDirectoryName(normalizedPath);
                 if (!string.IsNullOrEmpty(directory))
                 {
-                    _ = _virtualDirectories.Add(directory);
+                    _ = _virtualDirectories.Add(NormalizePath(directory));
                 }
             }
 
@@ -929,7 +935,8 @@ namespace KOTORModSync.Core.Services.FileSystem
                         continue;
                     }
 
-                    fullPath = fullPath.Replace('/', Path.DirectorySeparatorChar).Replace("\\\\", "\\");
+                    fullPath = NormalizePath(fullPath);
+                    parentDir = NormalizePath(parentDir);
 
                     _ = _virtualFiles.Add(fullPath);
                     _ = _removedFiles.Remove(fullPath);
@@ -1096,6 +1103,30 @@ namespace KOTORModSync.Core.Services.FileSystem
             lock (_lockObject)
             {
                 return new List<ValidationIssue>(_issues);
+            }
+        }
+
+        public int ValidationIssueCount
+        {
+            get
+            {
+                lock (_lockObject)
+                {
+                    return _issues.Count;
+                }
+            }
+        }
+
+        public void RemoveValidationIssuesFrom(int startIndex)
+        {
+            lock (_lockObject)
+            {
+                if (startIndex < 0 || startIndex >= _issues.Count)
+                {
+                    return;
+                }
+
+                _issues.RemoveRange(startIndex, _issues.Count - startIndex);
             }
         }
     }
