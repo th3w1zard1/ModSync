@@ -380,6 +380,21 @@ namespace KOTORModSync.Core.Services.Validation
             }
         }
 
+        private static void AppendNewValidationIssues(
+            [NotNull] VirtualFileSystemProvider vfs,
+            int issueStartIndex,
+            [NotNull] ModComponent component,
+            [NotNull] DryRunValidationResult result)
+        {
+            IReadOnlyList<ValidationIssue> allIssues = vfs.ValidationIssues;
+            for (int i = issueStartIndex; i < allIssues.Count; i++)
+            {
+                ValidationIssue issue = allIssues[i];
+                issue.AffectedComponent = component;
+                result.Issues.Add(issue);
+            }
+        }
+
         private static string ResolvePlaceholderPath(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -479,15 +494,15 @@ namespace KOTORModSync.Core.Services.Validation
                 }
 
                 // Execute each component in order using ExecuteInstructionsAsync
-
                 foreach (ModComponent component in selectedComponents)
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
+                    int issueStartIndex = vfs.ValidationIssueCount;
+
                     try
                     {
-                        // Execute instructions using the component's built-in method with VFS
-                        await component.ExecuteInstructionsAsync(
+                        ModComponent.InstallExitCode exitCode = await component.ExecuteInstructionsAsync(
                             component.Instructions,
                             selectedComponents,
                             cancellationToken,
@@ -495,12 +510,40 @@ namespace KOTORModSync.Core.Services.Validation
                             skipDependencyCheck: false
                         ).ConfigureAwait(false);
 
-                        // Collect any validation issues from VFS
-                        foreach (ValidationIssue issue in vfs.ValidationIssues)
+                        if (exitCode == ModComponent.InstallExitCode.MissingSourceFiles)
                         {
-                            issue.AffectedComponent = component;
-                            result.Issues.Add(issue);
+                            vfs.RemoveValidationIssuesFrom(issueStartIndex);
+                            result.Issues.Add(new ValidationIssue
+                            {
+                                Severity = ValidationSeverity.Warning,
+                                Category = "DryRunSkipped",
+                                Message =
+                                    $"Skipped '{component.Name}' during dry-run: source archives or files are not available.",
+                                AffectedComponent = component,
+                            });
+                            continue;
                         }
+
+                        if (exitCode == ModComponent.InstallExitCode.DependencyViolation)
+                        {
+                            vfs.RemoveValidationIssuesFrom(issueStartIndex);
+                            continue;
+                        }
+
+                        if (exitCode != ModComponent.InstallExitCode.Success)
+                        {
+                            AppendNewValidationIssues(vfs, issueStartIndex, component, result);
+                            result.Issues.Add(new ValidationIssue
+                            {
+                                Severity = ValidationSeverity.Error,
+                                Category = "DryRun",
+                                Message = $"Dry-run failed for '{component.Name}' with exit code {exitCode}.",
+                                AffectedComponent = component,
+                            });
+                            continue;
+                        }
+
+                        AppendNewValidationIssues(vfs, issueStartIndex, component, result);
                     }
                     catch (OperationCanceledException)
                     {
@@ -508,6 +551,7 @@ namespace KOTORModSync.Core.Services.Validation
                     }
                     catch (Exception ex)
                     {
+                        vfs.RemoveValidationIssuesFrom(issueStartIndex);
                         result.Issues.Add(new ValidationIssue
                         {
                             Severity = ValidationSeverity.Error,

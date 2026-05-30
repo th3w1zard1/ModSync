@@ -310,6 +310,42 @@ namespace KOTORModSync.Core
                 Logger.LogVerbose($"[Instruction.SetRealPaths] After ReplaceCustomVariables on source: [{string.Join(", ", processedSource)}]");
                 Logger.LogVerbose($"[Instruction.SetRealPaths] Calling EnumerateFilesWithWildcards with processed paths...");
                 newSourcePaths = PathHelper.EnumerateFilesWithWildcards(processedSource, _fileSystemProvider);
+                if (skipExistenceCheck)
+                {
+                    foreach (string processedPath in processedSource)
+                    {
+                        if (string.IsNullOrWhiteSpace(processedPath)
+                            || NetFrameworkCompatibility.Contains(processedPath, '*', StringComparison.Ordinal)
+                            || NetFrameworkCompatibility.Contains(processedPath, '?', StringComparison.Ordinal))
+                        {
+                            continue;
+                        }
+
+                        string literalPath = PathHelper.FixPathFormatting(processedPath);
+                        try
+                        {
+                            literalPath = Path.GetFullPath(literalPath);
+                        }
+                        catch (IOException)
+                        {
+                            // Keep formatted path when full path cannot be resolved.
+                        }
+
+                        if (newSourcePaths is null)
+                        {
+                            newSourcePaths = new List<string>();
+                        }
+
+                        bool literalAlreadyListed = MainConfig.CaseInsensitivePathing
+                            ? newSourcePaths.Exists(p => string.Equals(p, literalPath, StringComparison.OrdinalIgnoreCase))
+                            : newSourcePaths.Contains(literalPath);
+                        if (!literalAlreadyListed)
+                        {
+                            newSourcePaths.Add(literalPath);
+                        }
+                    }
+                }
+
                 Logger.LogVerbose($"[Instruction.SetRealPaths] After EnumerateFilesWithWildcards: Found {newSourcePaths?.Count ?? 0} files");
                 if (!skipExistenceCheck)
                 {
@@ -1230,9 +1266,23 @@ namespace KOTORModSync.Core
                         throw new DirectoryNotFoundException($"The directory '{t}' could not be located on the disk.");
                     }
 
-                    if (_fileSystemProvider is Services.FileSystem.VirtualFileSystemProvider)
+                    if (_fileSystemProvider is Services.FileSystem.VirtualFileSystemProvider vfsProvider)
                     {
-                        await Logger.LogAsync($"[Simulation] Skipping TSLPatcher execution for simulation mode").ConfigureAwait(false);
+                        string kotorDirectory = MainConfig.DestinationPath?.FullName;
+                        if (string.IsNullOrWhiteSpace(kotorDirectory))
+                        {
+                            await Logger.LogAsync("[Simulation] Skipping TSLPatcher VFS simulation: no KOTOR directory configured.")
+                                .ConfigureAwait(false);
+                            continue;
+                        }
+
+                        await TslPatcherVfsSimulator.SimulateInstallAsync(
+                            vfsProvider,
+                            tslPatcherDirectory.FullName,
+                            kotorDirectory
+                        ).ConfigureAwait(false);
+                        await Logger.LogAsync("[Simulation] Applied TSLPatcher VFS simulation from changes.ini")
+                            .ConfigureAwait(false);
                         continue;
                     }
 

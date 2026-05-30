@@ -644,6 +644,15 @@ namespace KOTORModSync.Core.FileSystemUtils
                 try
                 {
                     string formattedPath = FixPathFormatting(path);
+                    try
+                    {
+                        formattedPath = Path.GetFullPath(formattedPath);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.LogVerbose($"[PathHelper] Could not get full path for '{formattedPath}': {ex.Message}");
+                    }
+
                     Logger.LogVerbose($"[PathHelper] EnumerateFilesWithWildcards: path={path}, formatted={formattedPath}");
 
                     if (!ContainsWildcards(formattedPath))
